@@ -1,0 +1,51 @@
+package com.cherrypick.backend.global.exception.handler;
+
+import com.cherrypick.backend.global.exception.BaseException;
+import com.cherrypick.backend.global.exception.dto.response.ErrorResponseDTO;
+import com.cherrypick.backend.global.util.SlackNotifier;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+
+import static org.springframework.http.ResponseEntity.status;
+
+@Slf4j
+@RestControllerAdvice
+@RequiredArgsConstructor
+public class GlobalExceptionHandler {
+
+    private final SlackNotifier slackNotifier;
+
+    // BaseException 핸들링 (ErrorCode 발생)
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<ErrorResponseDTO> handleBaseException(BaseException ex, HttpServletRequest request) {
+        String fullPath = request.getMethod() + " " + request.getRequestURI();
+
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(ex.getErrorCode(), fullPath);
+        return status(ex.getErrorCode().getStatus()).body(errorResponse);
+    }
+
+    // 예상치 못한 RuntimeException 핸들링 (500 에러)
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponseDTO> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
+        String fullPath = request.getMethod() + " " + request.getRequestURI(); // HTTP 메소드 포함한 경로
+
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
+                500,
+                "Internal Server Error",
+                ex.getMessage(),
+                fullPath,
+                LocalDateTime.now()
+        );
+
+        // Slack 알림 전송
+        slackNotifier.sendErrorLog(ex, request);
+
+        return ResponseEntity.status(500).body(errorResponse);
+    }
+}
