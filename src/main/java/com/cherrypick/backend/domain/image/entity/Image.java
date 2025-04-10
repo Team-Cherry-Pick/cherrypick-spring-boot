@@ -17,7 +17,7 @@ public class Image {
 
     private Long refId;
 
-    private int index;
+    private int imageIndex;
 
     private boolean isTemp;
 }
