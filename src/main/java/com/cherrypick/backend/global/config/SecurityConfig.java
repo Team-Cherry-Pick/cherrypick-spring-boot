@@ -1,10 +1,9 @@
 package com.cherrypick.backend.global.config;
 
-import com.cherrypick.backend.domain.user.service.OAuth2Service;
+import com.cherrypick.backend.domain.user.oauth.OAuth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
