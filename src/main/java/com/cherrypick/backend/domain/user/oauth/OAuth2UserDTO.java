@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Builder
-public record UserLoginDTO(
+public record OAuth2UserDTO(
         Long userId,
         String oauthId,
         String nickname,
@@ -20,8 +20,8 @@ public record UserLoginDTO(
 {
 
     // 엔티티로부터 DTO를 만든다.
-    public static UserLoginDTO from(User user) {
-        return UserLoginDTO.builder()
+    public static OAuth2UserDTO from(User user) {
+        return OAuth2UserDTO.builder()
                 .userId(user.getUserId())
                 .oauthId(user.getOauthId())
                 .nickname(user.getNickname())

@@ -37,7 +37,7 @@ public class OAuth2Service extends DefaultOAuth2UserService
             loginUser = user.get();
         }
         else{
-            // 신규 유저 만들기
+            // 신규 유저 만들기, 추후 로그인 방법이 늘어나면 ENUM으로 처리하는 것도 고려.
             if(provider.equals("kakao")) loginUser = User.fromKakao(oauth2User);
             else throw new BaseException(UserErrorCode.UNDEFINED_OAUTH_PROVIDER);
 
@@ -55,7 +55,7 @@ public class OAuth2Service extends DefaultOAuth2UserService
         }
 
         // dto로 변환해 반환.
-        return UserLoginDTO.from(loginUser);
+        return OAuth2UserDTO.from(loginUser);
     }
 
     @Override

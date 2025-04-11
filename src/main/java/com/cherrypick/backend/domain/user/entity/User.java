@@ -14,6 +14,10 @@ import java.util.Optional;
 @Setter @RequiredArgsConstructor @ToString
 public class User {
 
+    /// 확장 가능성
+    /// 유저 등급제 ,로그인 매서드 , 선호 해시태그/카테고리
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -29,6 +33,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    // 카카오 로그인 OAuth2User를 엔티티로 변환
     public static User fromKakao(OAuth2User oauth2User) {
 
         var userAttr = oauth2User.getAttributes();
