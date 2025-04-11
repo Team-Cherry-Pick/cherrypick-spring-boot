@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service @RequiredArgsConstructor @Slf4j
@@ -21,7 +22,7 @@ public class OAuth2Service extends DefaultOAuth2UserService
     private final UserRepository userRepository;
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+            public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         var oauth2User = super.loadUser(userRequest);
         String provider = userRequest.getClientRegistration().getRegistrationId(); // kakao 등
@@ -40,6 +41,15 @@ public class OAuth2Service extends DefaultOAuth2UserService
             if(provider.equals("kakao")) loginUser = User.fromKakao(oauth2User);
             else throw new BaseException(UserErrorCode.UNDEFINED_OAUTH_PROVIDER);
 
+            // 닉네임 만들기, 존재하는 닉네임이라면 다시 만들어줌.
+            String newNickName = null;
+            do{
+                newNickName = loginUser.getNickname() + getRandomAdjective();
+            }
+            while(userRepository.findUserByNickname(newNickName).isPresent());
+
+            loginUser.setNickname(newNickName);
+
             // 신규 유저 저장
             userRepository.save(loginUser);
         }
@@ -55,10 +65,12 @@ public class OAuth2Service extends DefaultOAuth2UserService
     }
 
 
-    public String generateRandomNickname()
+    public String getRandomAdjective()
     {
+        var adjectiveList = List.of("멋있는 ", "대단한 ", "알뜰한 ", "네모난 ", "귀여운 ", "깜찍한 ", "듬직한 ", "깔롱한 ", "늠름한 ", "살뜰한 ", "짜릿한 ", "행복한 ", "소중한 ");
+        int randomAdj = (int) Math.round(Math.random() * adjectiveList.size());
 
-        return "랜덤 닉네임";
+        return adjectiveList.get(randomAdj);
     }
 
 
