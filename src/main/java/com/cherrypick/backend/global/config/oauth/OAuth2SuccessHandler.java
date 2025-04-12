@@ -1,6 +1,7 @@
 package com.cherrypick.backend.global.config.oauth;
 
 import com.cherrypick.backend.global.util.JWTUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,6 +21,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JWTUtil jwtUtil;
     @Value("${spring.userInfoUrl}")
     String userInfoUpdateURL;
+    private final ObjectMapper objectMapper;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -39,7 +41,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .redirectURL(redirectUrl)
                 .build();
 
-        response.getWriter().write(String.valueOf(responseDTO.toJson()));
+        response.getWriter().write(objectMapper.writeValueAsString(responseDTO));
 
     }
 
