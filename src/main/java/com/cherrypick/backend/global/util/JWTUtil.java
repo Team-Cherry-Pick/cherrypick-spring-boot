@@ -2,6 +2,8 @@ package com.cherrypick.backend.global.util;
 
 
 import com.cherrypick.backend.domain.user.entity.Role;
+import com.cherrypick.backend.global.config.oauth.OAuth2UserDTO;
+import com.cherrypick.backend.global.config.oauth.UserDetailDTO;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,9 +25,9 @@ public class JWTUtil
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
-    public String getUserId(String token) {
+    public Long getUserId(String token) {
 
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", String.class);
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
     }
 
     public String getRole(String token) {
@@ -42,6 +44,15 @@ public class JWTUtil
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
+
+    public UserDetailDTO getUserDetailDTO(String accessToken) {
+        return UserDetailDTO.builder()
+                .userId(getUserId(accessToken))
+                .nickname(getNickname(accessToken))
+                .role(Role.valueOf(getRole(accessToken)))
+                .build();
+    }
+
 
     public String createAccessToken(Long userId, Role role, String nickname) {
 
