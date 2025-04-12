@@ -1,49 +1,47 @@
 package com.cherrypick.backend.global.config.oauth;
 
-import com.cherrypick.backend.global.util.JWTProvider;
-import jakarta.servlet.FilterChain;
+import com.cherrypick.backend.global.util.JWTUtil;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mapping.SimpleAssociationHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Base64;
 
 @Component @Slf4j @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final JWTProvider jwtProvider;
+    private final JWTUtil jwtUtil;
+    @Value("${spring.userInfoUrl}")
+    String userInfoUpdateURL;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2UserDTO userInfo = (OAuth2UserDTO) authentication.getPrincipal();
-        log.info(authentication.getDetails().toString());
-        String jwtToken = jwtProvider.createJwt(userInfo.userId(), userInfo.role(), userInfo.nickname());
 
-        String redirectUrl = request.getRequestURI();
-        log.info(redirectUrl);
+        String redirectUrl = new String(Base64.getUrlDecoder().decode(request.getParameter("state")));
+        if(userInfo.isNewUser()) redirectUrl = userInfoUpdateURL;
 
-        response.addCookie(createCookie(jwtToken));
-        
-    }
+        String accessToken = "Bearer " + jwtUtil.createAccessToken(userInfo.userId(), userInfo.role(), userInfo.nickname());
+        String refreshToken = null;
 
-    public Cookie createCookie(String jwtToken)
-    {
-        var cookie = new Cookie("Authorization", jwtToken);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(3600);
-        //cookie.setSecure(true); https에서만 작동하도록 하는 코드. CI/CD에서는
+        var responseDTO = OAuth2LoginSuccessResponseDTO.builder()
+                .userId(userInfo.userId())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .isNewUser(userInfo.isNewUser())
+                .redirectURL(redirectUrl)
+                .build();
 
-        return cookie;
+        response.getWriter().write(String.valueOf(responseDTO.toJson()));
 
     }
+
 
 }

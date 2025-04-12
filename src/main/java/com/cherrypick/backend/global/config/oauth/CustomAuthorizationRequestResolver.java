@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,15 +36,15 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
     private OAuth2AuthorizationRequest customize(OAuth2AuthorizationRequest authRequest, HttpServletRequest request) {
         if (authRequest == null) return null;
 
-        String redirect = request.getParameter("redirect");
-        if (redirect != null) {
-            Map<String, Object> additionalParams = new HashMap<>(authRequest.getAdditionalParameters());
-            additionalParams.put("redirect", redirect);
+        // redirect : 유저가 이전에 방문했던 페이지. 로그인 성공 시 해당 URL 로 리다이렉트
+        // url을 Base64로 인코딩하여 state에 붙여줌.
+        String redirect = Base64.getUrlEncoder().encodeToString(request.getParameter("redirect").getBytes());
 
+        // state 값에 저장해 보내줌.
+        if (redirect != null)
             return OAuth2AuthorizationRequest.from(authRequest)
                     .state(redirect)
                     .build();
-        }
 
         return authRequest;
     }
