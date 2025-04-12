@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.user.oauth;
+package com.cherrypick.backend.global.config.oauth;
 
 import com.cherrypick.backend.domain.user.entity.Role;
 import com.cherrypick.backend.domain.user.entity.User;
@@ -15,17 +15,19 @@ public record OAuth2UserDTO(
         Long userId,
         String oauthId,
         String nickname,
-        Role role
+        Role role,
+        boolean isNewUser
 ) implements OAuth2User
 {
 
     // 엔티티로부터 DTO를 만든다.
-    public static OAuth2UserDTO from(User user) {
+    public static OAuth2UserDTO from(User user, boolean isNewUser) {
         return OAuth2UserDTO.builder()
                 .userId(user.getUserId())
                 .oauthId(user.getOauthId())
                 .nickname(user.getNickname())
                 .role(user.getRole())
+                .isNewUser(isNewUser)
                 .build();
     }
 
