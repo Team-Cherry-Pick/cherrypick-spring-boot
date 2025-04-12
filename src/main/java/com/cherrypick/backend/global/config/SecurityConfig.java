@@ -1,6 +1,9 @@
 package com.cherrypick.backend.global.config;
 
-import com.cherrypick.backend.domain.user.oauth.OAuth2Service;
+import com.cherrypick.backend.global.config.oauth.CustomAuthorizationRequestResolver;
+import com.cherrypick.backend.global.config.oauth.OAuth2Service;
+import com.cherrypick.backend.global.config.oauth.OAuth2SuccessHandler;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,24 +14,22 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final OAuth2Service oauth2Service;
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-    
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-    
-        return configuration.getAuthenticationManager();
-    }
+    private final OAuth2SuccessHandler oauth2SuccessHandler;
+    private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
 
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -46,13 +47,13 @@ public class SecurityConfig {
         // oauth2
 	    http
                 .oauth2Login((oauth2) -> oauth2
-                                .loginPage("/login")
-                                .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(oauth2Service))
-                                .defaultSuccessUrl("/")
-                        );
-                                
-                
+                        .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(customAuthorizationRequestResolver))
+                        .loginPage("/login")
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                        .userService(oauth2Service))
+                        .successHandler(oauth2SuccessHandler)
+                );
+
         // 로그아웃 경로
         http
                 .logout( logout -> logout
