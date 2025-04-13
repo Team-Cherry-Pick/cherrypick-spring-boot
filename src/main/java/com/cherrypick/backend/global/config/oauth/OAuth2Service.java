@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.user.oauth;
+package com.cherrypick.backend.global.config.oauth;
 
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
@@ -35,6 +35,7 @@ public class OAuth2Service extends DefaultOAuth2UserService
         if(user.isPresent()){
             // 저장된 유저 불러오기
             loginUser = user.get();
+            return OAuth2UserDTO.from(loginUser, false);
         }
         else{
             // 신규 유저 만들기, 추후 로그인 방법이 늘어나면 ENUM으로 처리하는 것도 고려.
@@ -52,10 +53,9 @@ public class OAuth2Service extends DefaultOAuth2UserService
 
             // 신규 유저 저장
             userRepository.save(loginUser);
+            return OAuth2UserDTO.from(loginUser, true);
         }
 
-        // dto로 변환해 반환.
-        return OAuth2UserDTO.from(loginUser);
     }
 
     @Override
