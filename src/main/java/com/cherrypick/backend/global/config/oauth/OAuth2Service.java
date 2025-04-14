@@ -22,7 +22,7 @@ public class OAuth2Service extends DefaultOAuth2UserService
     private final UserRepository userRepository;
 
     @Override
-            public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         var oauth2User = super.loadUser(userRequest);
         String provider = userRequest.getClientRegistration().getRegistrationId(); // kakao 등
@@ -39,17 +39,12 @@ public class OAuth2Service extends DefaultOAuth2UserService
         }
         else{
             // 신규 유저 만들기, 추후 로그인 방법이 늘어나면 ENUM으로 처리하는 것도 고려.
+            // oauth2.0 응답에서 데이터를 추출한다.
             if(provider.equals("kakao")) loginUser = User.fromKakao(oauth2User);
             else throw new BaseException(UserErrorCode.UNDEFINED_OAUTH_PROVIDER);
 
-            // 닉네임 만들기, 존재하는 닉네임이라면 다시 만들어줌.
-            String newNickName = null;
-            do{
-                newNickName = loginUser.getNickname() + getRandomAdjective();
-            }
-            while(userRepository.findUserByNickname(newNickName).isPresent());
-
-            loginUser.setNickname(newNickName);
+            // 닉네임 달아주기
+            loginUser.setNickname(getRandomNickname(loginUser.getNickname()));
 
             // 신규 유저 저장
             userRepository.save(loginUser);
@@ -65,12 +60,19 @@ public class OAuth2Service extends DefaultOAuth2UserService
     }
 
 
-    public String getRandomAdjective()
+    public String getRandomNickname(String originalNickname)
     {
         var adjectiveList = List.of("멋있는 ", "대단한 ", "알뜰한 ", "네모난 ", "귀여운 ", "깜찍한 ", "듬직한 ", "깔롱한 ", "늠름한 ", "살뜰한 ", "짜릿한 ", "행복한 ", "소중한 ");
         int randomAdj = (int) Math.round(Math.random() * adjectiveList.size());
 
-        return adjectiveList.get(randomAdj);
+        // 닉네임 만들기, 존재하는 닉네임이라면 다시 만들어줌.
+        String newNickName = null;
+        do{
+            newNickName = adjectiveList.get(randomAdj) + originalNickname;
+        }
+        while(userRepository.findUserByNickname(newNickName).isPresent());
+
+        return newNickName;
     }
 
 

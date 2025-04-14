@@ -1,11 +1,9 @@
 package com.cherrypick.backend.global.config;
 
-import com.cherrypick.backend.global.config.oauth.CustomAuthorizationRequestResolver;
-import com.cherrypick.backend.global.config.oauth.JWTFilter;
-import com.cherrypick.backend.global.config.oauth.OAuth2Service;
-import com.cherrypick.backend.global.config.oauth.OAuth2SuccessHandler;
+import com.cherrypick.backend.global.config.oauth.*;
 import com.cherrypick.backend.global.util.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import kotlin.io.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +19,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -39,6 +38,7 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oauth2SuccessHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
     private final JWTUtil jwtUtil;
+    private final FilterChainExceptionHandler filterChainExceptionHandler;
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
 
@@ -48,8 +48,12 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/api/user/test/jwt-filter").authenticated()
                         .requestMatchers("/").permitAll()
-                        .anyRequest().permitAll());
+                        .anyRequest().permitAll())
+                        .exceptionHandling(ex -> ex.authenticationEntryPoint(filterChainExceptionHandler));
+
+
 
         //csrf disable
         http
