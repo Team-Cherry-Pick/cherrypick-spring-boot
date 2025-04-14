@@ -1,5 +1,6 @@
 package com.cherrypick.backend.domain.image.entity;
 
+import com.cherrypick.backend.domain.image.enums.ImageType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,8 @@ public class Image {
     private Long imageId;
 
     private String imageUrl;
+
+    private ImageType imageType;
 
     private Long refId;
 
