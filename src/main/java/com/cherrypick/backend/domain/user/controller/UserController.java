@@ -93,7 +93,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/test/jwt-filter")
-    public String jwtFilter(@RequestHeader(value = "Authorization", required = false) String Authorization) {
+    public String jwtFilter(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String Authorization) {
 
         log.info(Authorization);
         var userDetail = jwtUtil.getUserDetailDTO(Authorization);
