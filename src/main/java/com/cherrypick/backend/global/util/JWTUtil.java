@@ -46,6 +46,10 @@ public class JWTUtil
     }
 
     public UserDetailDTO getUserDetailDTO(String accessToken) {
+
+        log.info(accessToken);
+        accessToken = accessToken.replace("Bearer ", "");
+
         return UserDetailDTO.builder()
                 .userId(getUserId(accessToken))
                 .nickname(getNickname(accessToken))
