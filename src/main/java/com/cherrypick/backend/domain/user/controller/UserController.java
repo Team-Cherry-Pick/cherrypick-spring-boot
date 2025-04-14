@@ -89,7 +89,7 @@ public class UserController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "JWT 토큰 검증 성공"),
-            @ApiResponse(responseCode = "404", description = "찾을 수 없는 유저입니다. userId를 다시 한번 확인해주세요."),
+            @ApiResponse(responseCode = "401", description = "인증하지 않으면 스프링 시큐리티 FilterChain에서 걸립니다."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/test/jwt-filter")
