@@ -42,19 +42,29 @@ public class JWTUtil
 
     public Boolean isExpired(String token) {
 
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+        try{
+            return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+        } catch (Exception e) {
+            return true;
+        }
+
     }
 
     public UserDetailDTO getUserDetailDTO(String accessToken) {
 
         log.info(accessToken);
-        accessToken = accessToken.replace("Bearer ", "");
+        accessToken = removeBearer(accessToken);
 
         return UserDetailDTO.builder()
                 .userId(getUserId(accessToken))
                 .nickname(getNickname(accessToken))
                 .role(Role.valueOf(getRole(accessToken)))
                 .build();
+    }
+
+    public String removeBearer(String token)
+    {
+        return token.replace("Bearer ", "");
     }
 
 

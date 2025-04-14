@@ -101,4 +101,10 @@ public class UserController {
         return "JWT Authorized : " + userDetail.userId() + " " + userDetail.nickname() + " " + userDetail.role().toString();
     }
 
+    @GetMapping("/test")
+    public String test() {
+
+        return "SUCCESS";
+    }
+
 }
