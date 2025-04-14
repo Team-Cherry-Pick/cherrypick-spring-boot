@@ -43,8 +43,11 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
 
-        // Slack 알림 전송
-        slackNotifier.sendErrorLog(ex, request);
+        // 8080 포트에서 실행 중일 때 슬랙 알림을 보내지 않음
+        int port = request.getServerPort();
+        if (port != 8080) {
+            slackNotifier.sendErrorLog(ex, request);  // 슬랙 알림 전송
+        }
 
         return ResponseEntity.status(500).body(errorResponse);
     }
