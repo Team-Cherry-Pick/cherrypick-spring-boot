@@ -1,4 +1,4 @@
-package com.cherrypick.backend.global.config.oauth;
+package com.cherrypick.backend.domain.oauth2.dto;
 
 import com.cherrypick.backend.domain.user.entity.Role;
 import com.cherrypick.backend.domain.user.entity.User;

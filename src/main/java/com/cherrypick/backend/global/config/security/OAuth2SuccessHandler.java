@@ -1,5 +1,7 @@
-package com.cherrypick.backend.global.config.oauth;
+package com.cherrypick.backend.global.config.security;
 
+import com.cherrypick.backend.domain.oauth2.dto.OAuth2LoginSuccessResponseDTO;
+import com.cherrypick.backend.domain.oauth2.dto.OAuth2UserDTO;
 import com.cherrypick.backend.global.util.JWTUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;

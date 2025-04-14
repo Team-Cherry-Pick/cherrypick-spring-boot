@@ -1,5 +1,6 @@
-package com.cherrypick.backend.global.config.oauth;
+package com.cherrypick.backend.domain.oauth2.service;
 
+import com.cherrypick.backend.domain.oauth2.dto.OAuth2UserDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;

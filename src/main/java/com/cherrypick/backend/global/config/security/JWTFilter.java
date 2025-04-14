@@ -1,4 +1,4 @@
-package com.cherrypick.backend.global.config.oauth;
+package com.cherrypick.backend.global.config.security;
 
 import com.cherrypick.backend.global.util.JWTUtil;
 import jakarta.servlet.FilterChain;

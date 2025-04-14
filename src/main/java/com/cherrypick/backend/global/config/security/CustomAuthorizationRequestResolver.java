@@ -1,4 +1,4 @@
-package com.cherrypick.backend.global.config.oauth;
+package com.cherrypick.backend.global.config.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +9,6 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component @Slf4j
 public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRequestResolver {

@@ -2,8 +2,7 @@ package com.cherrypick.backend.global.util;
 
 
 import com.cherrypick.backend.domain.user.entity.Role;
-import com.cherrypick.backend.global.config.oauth.OAuth2UserDTO;
-import com.cherrypick.backend.global.config.oauth.UserDetailDTO;
+import com.cherrypick.backend.domain.user.dto.UserDetailDTO;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,6 +1,5 @@
 package com.cherrypick.backend.domain.user.controller;
 
-import com.cherrypick.backend.domain.user.entity.Role;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -8,15 +7,12 @@ import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.stereotype.Controller;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController @Tag(name = "User", description = "유저 로직을 다룹니다.")
@@ -26,6 +22,7 @@ public class UserController {
 
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     String HTML = """
                 <!DOCTYPE html>
@@ -102,9 +99,9 @@ public class UserController {
     }
 
     @GetMapping("/test")
-    public String test() {
+    public long test() {
 
-        return "SUCCESS";
+        return redisTemplate.keys("*").stream().peek(System.out::println).count();
     }
 
 }
