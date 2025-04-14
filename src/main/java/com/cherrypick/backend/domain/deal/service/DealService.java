@@ -179,7 +179,72 @@ public class DealService {
         );
     }
 
-    // 게시물 수정
+    // 게시글 수정
+    @Transactional
+    public DealResponseDTOs.Update updateDeal(DealUpdateRequestDTO dto) {
+
+        Deal deal = dealRepository.findById(dto.dealId())
+                .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
+
+        if (dto.title() != null) {
+            deal.setTitle(dto.title());
+        }
+
+        if (dto.categoryId() != null) {
+            Category category = categoryRepository.findById(dto.categoryId())
+                    .orElseThrow(() -> new BaseException(DealErrorCode.CATEGORY_NOT_FOUND));
+            deal.setCategoryId(category);
+        }
+
+        if (dto.originalUrl() != null) {
+            deal.setOriginalUrl(dto.originalUrl());
+        }
+
+        Store store = null;
+        if (dto.storeId() != null) {
+            store = storeRepository.findById(dto.storeId())
+                    .orElseThrow(() -> new BaseException(DealErrorCode.STORE_NOT_FOUND));
+            deal.setStoreId(store);
+            deal.setStoreName(null); // storeId 있으면 storeName은 무시
+        } else if (dto.storeName() != null) {
+            deal.setStoreId(null);
+            deal.setStoreName(dto.storeName());
+        }
+
+        if (dto.price() != null) {
+            deal.setPrice(dto.price());
+        }
+
+        if (dto.shipping() != null) {
+            deal.setShipping(dto.shipping());
+        }
+
+        if (dto.content() != null) {
+            deal.setContent(dto.content());
+        }
+
+        if (dto.discountIds() != null) {
+            List<Discount> foundDiscounts = discountRepository.findAllById(dto.discountIds());
+            if (foundDiscounts.size() != dto.discountIds().size()) {
+                throw new BaseException(DealErrorCode.DISCOUNT_NOT_FOUND);
+            }
+            deal.setDiscounts(foundDiscounts);
+        }
+
+        if (dto.discountNames() != null) {
+            String discountName = String.join(", ", dto.discountNames());
+            deal.setDiscountName(discountName);
+        }
+
+        if (dto.isSoldOut()) {
+            deal.setSoldOut(true); // dto.isSoldOut()이 true일 경우
+        } else {
+            deal.setSoldOut(false); // dto.isSoldOut()이 false일 경우
+        }
+
+
+        return new DealResponseDTOs.Update(deal.getDealId(), "핫딜 게시글 수정 성공");
+    }
 
 
     // 인포 태그 생성 메소드

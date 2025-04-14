@@ -67,6 +67,8 @@ public class Deal {
     private String storeName;
     private String discountName;
 
+    private boolean isDelete;
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;

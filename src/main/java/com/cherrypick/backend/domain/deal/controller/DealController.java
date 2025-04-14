@@ -1,6 +1,7 @@
 package com.cherrypick.backend.domain.deal.controller;
 
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
+import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.service.DealService;
@@ -31,4 +32,13 @@ public class DealController {
         DealDetailResponseDTO response = dealService.getDealDetail(dealId);
         return ResponseEntity.ok(response);
     }
+
+    // 게시물 수정
+    @PatchMapping()
+    public ResponseEntity<DealResponseDTOs.Update> updateDeal(
+            @RequestBody DealUpdateRequestDTO dto,
+            @RequestParam(value = "version", defaultValue = "v1") String version) {
+        return ResponseEntity.ok(dealService.updateDeal(dto));
+    }
+
 }
