@@ -6,11 +6,10 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
 @Embeddable
-public class Price {
+public record Price(
+        @Enumerated(EnumType.STRING)
+        PriceType priceType,
+        double regularPrice,
+        double discountedPrice
+) {}
 
-    @Enumerated(EnumType.STRING)
-    private PriceType priceType;
-
-    private double regularPrice;
-    private double discountedPrice;
-}
