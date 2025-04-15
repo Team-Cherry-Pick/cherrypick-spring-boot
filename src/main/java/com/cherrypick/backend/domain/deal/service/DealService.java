@@ -4,11 +4,16 @@ import com.cherrypick.backend.domain.category.repository.CategoryRepository;
 import com.cherrypick.backend.domain.category.entity.Category;
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
+import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
+import com.cherrypick.backend.domain.deal.dto.response.DealSearchResponseDTO;
 import com.cherrypick.backend.domain.deal.entity.Deal;
+import com.cherrypick.backend.domain.deal.enums.PriceType;
 import com.cherrypick.backend.domain.deal.enums.ShippingType;
+import com.cherrypick.backend.domain.deal.enums.SortType;
+import com.cherrypick.backend.domain.deal.enums.TimeRangeType;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.discount.entity.Discount;
 import com.cherrypick.backend.domain.discount.repository.DiscountRepository;
@@ -24,11 +29,11 @@ import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,6 +111,83 @@ public class DealService {
         return new DealResponseDTOs.Create(saved.getDealId(), "핫딜 게시글 생성 성공");
     }
 
+    // 게시글 전체조회 (검색)
+    @Transactional
+    public List<DealSearchResponseDTO> searchDeals(DealSearchRequestDTO request) {
+        // 시간 범위 필터
+        LocalDateTime startDate = resolveStartDate(request.getTimeRange());
+        LocalDateTime endDate = LocalDateTime.now();
+
+        // 가격 필터
+        Double minPrice = request.getPriceFilter() != null ? request.getPriceFilter().minPrice() : null;
+        Double maxPrice = request.getPriceFilter() != null ? request.getPriceFilter().maxPrice() : null;
+        PriceType priceType = request.getPriceFilter() != null
+                ? request.getPriceFilter().priceType()
+                : null;
+
+        // 기본 필터
+        boolean viewSoldOut = request.getFilters() != null && request.getFilters().viewSoldOut();
+        boolean freeShipping = request.getFilters() != null && request.getFilters().freeShipping();
+        boolean variousPrice = request.isVariousPrice();
+
+        // 할인, 스토어
+        List<Long> discountIds = (request.getDiscountIds() == null || request.getDiscountIds().isEmpty())
+                ? null : request.getDiscountIds();
+        List<Long> storeIds = (request.getStoreIds() == null || request.getStoreIds().isEmpty())
+                ? null : request.getStoreIds();
+
+        // 가격 정렬 여부 판단
+        boolean sortPriceHigh = request.getSortType() == SortType.PRICE_HIGH;
+        boolean sortPriceLow = request.getSortType() == SortType.PRICE_LOW;
+
+        // DB 조회 + 가격 정렬 (쿼리에서 처리)
+        List<Deal> deals = dealRepository.searchDeals(
+                request.getCategoryId(),
+                request.getKeyword(),
+                viewSoldOut,
+                freeShipping,
+                startDate,
+                endDate,
+                minPrice,
+                maxPrice,
+                priceType,
+                variousPrice,
+                discountIds,
+                storeIds,
+                sortPriceHigh,
+                sortPriceLow
+        );
+
+        // 저가순, 고가순을 제외한 정렬
+        if (!sortPriceHigh && !sortPriceLow) {
+            deals = sortDeals(deals, request.getSortType());
+        }
+
+        // 응답 매핑
+        return deals.stream().map(deal -> {
+            // 조회수는 증가 없이 조회만
+            String key = "deal:view:" + deal.getDealId();
+            Object redisVal = redisTemplate.opsForValue().get(key);
+            long viewCount = redisVal == null ? 0L : ((Number) redisVal).longValue();
+
+            long likeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
+            long commentCount = commentRepository.countByDealId_DealIdAndIsDeleteFalse(deal.getDealId());
+
+            return new DealSearchResponseDTO(
+                    deal.getDealId(),
+                    null, // TODO: 이미지 처리
+                    deal.getTitle(),
+                    deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
+                    getInfoTags(deal),
+                    deal.getPrice(),
+                    deal.getCreatedAt().toString(),
+                    (int) likeCount,
+                    (int) commentCount,
+                    deal.isSoldOut()
+            );
+        }).toList();
+    }
+
     // 게시글 상세조회
     @Transactional
     public DealDetailResponseDTO getDealDetail(Long dealId) {
@@ -155,6 +237,12 @@ public class DealService {
         // 인포 태그 생성
         List<String> infoTags = getInfoTags(deal);
 
+        // 조회수 증가
+        String viewKey = "deal:view:" + deal.getDealId();
+        redisTemplate.opsForValue().increment(viewKey, 1);
+        Object redisVal = redisTemplate.opsForValue().get(viewKey);
+        long totalViews = redisVal == null ? 0L : ((Number) redisVal).longValue();
+
         // 매트릭스 조회 (조회수, 좋아요 수, 싫어요 수, 댓글 수)
         long[] metrics = getDealMetrics(deal);
 
@@ -169,7 +257,7 @@ public class DealService {
                 deal.getShipping(), // TODO: 한화 int 처리
                 deal.getPrice(), // TODO: 한화 int 처리
                 deal.getContent(),
-                (int) metrics[0], // totalViews
+                (int) totalViews,
                 (int) metrics[1], // likeCount
                 (int) metrics[2], // dislikeCount
                 (int) metrics[3], // commentCount
@@ -277,27 +365,16 @@ public class DealService {
         return new DealResponseDTOs.Delete("핫딜 게시글 삭제 성공");
     }
 
-    // 핫딜 투표, 조회수, 댓글수 조회
+    // 핫딜 투표, 댓글수 조회
     private long[] getDealMetrics(Deal deal) {
-        // 좋아요, 싫어요 수 조회
         long likeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
         long dislikeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.FALSE);
-
-        // 댓글 수 조회
         long commentCount = commentRepository.countByDealId_DealIdAndIsDeleteFalse(deal.getDealId());
 
-        // 조회수 처리
-        String dealViewKey = "deal:view:" + deal.getDealId();
-        redisTemplate.opsForValue().increment(dealViewKey, 1);
-
-        Object redisViewValue = redisTemplate.opsForValue().get(dealViewKey);
-        long totalViews = redisViewValue == null ? 0L : ((Number) redisViewValue).longValue();
-
-        return new long[]{(int) totalViews, (int) likeCount, (int) dislikeCount, (int) commentCount};
+        return new long[]{likeCount, dislikeCount, commentCount};
     }
 
     // 인포 태그 생성 메소드
-    @NotNull
     private static List<String> getInfoTags(Deal deal) {
         List<String> infoTags = new ArrayList<>();
 
@@ -323,4 +400,66 @@ public class DealService {
         return infoTags;
     }
 
+    // 정렬 함수
+    private List<Deal> sortDeals(List<Deal> deals, SortType sortType) {
+        if (sortType == null) return deals;
+
+        return switch (sortType) {
+            case VIEWS -> deals.stream()
+                    .sorted((d1, d2) -> Long.compare(getViewCount(d2), getViewCount(d1)))
+                    .toList();
+
+            case VOTES -> deals.stream()
+                    .sorted((d1, d2) -> Long.compare(getVoteScore(d2), getVoteScore(d1)))
+                    .toList();
+
+            case LATEST -> deals.stream()
+                    .sorted((d1, d2) -> d2.getCreatedAt().compareTo(d1.getCreatedAt()))
+                    .toList();
+
+            case DISCOUNT_RATE -> deals.stream()
+                    .sorted((d1, d2) -> Double.compare(
+                            getDiscountRate(d2),
+                            getDiscountRate(d1)))
+                    .toList();
+
+            default -> deals;
+        };
+    }
+
+    // 정렬 보조 함수
+    private long getViewCount(Deal deal) {
+        String key = "deal:view:" + deal.getDealId();
+        Object val = redisTemplate.opsForValue().get(key);
+        return val == null ? 0L : ((Number) val).longValue();
+    }
+
+    private long getVoteScore(Deal deal) {
+        long like = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
+        long dislike = voteRepository.countByDealIdAndVoteType(deal, VoteType.FALSE);
+        return like - dislike;
+    }
+
+    private double getDiscountRate(Deal deal) {
+        double regular = deal.getPrice().regularPrice();
+        double discounted = deal.getPrice().discountedPrice();
+        return (regular > 0) ? (regular - discounted) / regular : 0;
+    }
+
+
+    // 시간 범위 정렬
+    private LocalDateTime resolveStartDate(TimeRangeType timeRangeType) {
+        if (timeRangeType == null) return null;
+
+        LocalDateTime now = LocalDateTime.now();
+
+        return switch (timeRangeType) {
+            case LAST3HOURS -> now.minusHours(3);
+            case LAST6HOURS -> now.minusHours(6);
+            case LAST12HOURS -> now.minusHours(12);
+            case LAST24HOURS -> now.minusHours(24);
+            case LAST3DAYS -> now.minusDays(3);
+            case LAST7DAYS -> now.minusDays(7);
+        };
+    }
 }

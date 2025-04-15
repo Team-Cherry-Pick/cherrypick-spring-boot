@@ -18,7 +18,7 @@ import java.util.List;
 public class DealSearchRequestDTO {
 
     // 카테고리 ID
-    private String categoryId;
+    private Long categoryId;
 
     // 검색어 (제목, 본문)
     private String keyword;
