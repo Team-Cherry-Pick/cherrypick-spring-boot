@@ -115,7 +115,17 @@ public class DealService {
                 .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
 
         // 카테고리 정보
-        List<String> categorys = List.of(deal.getCategoryId().getName());
+        List<String> categoryNames = new ArrayList<>();
+        Long categoryId = deal.getCategoryId().getCategoryId();
+
+        // 카테고리 이름을 부모에서 자식 순으로 조회
+        while (categoryId != null) {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new BaseException(DealErrorCode.CATEGORY_NOT_FOUND));
+
+            categoryNames.add(0, category.getName());  // 부모부터 자식 순으로 저장하기 위해 앞에 추가
+            categoryId = category.getParentId();  // 부모 카테고리로 이동
+        }
 
         // User 엔티티 정보
         com.cherrypick.backend.domain.user.vo.User userVo = new com.cherrypick.backend.domain.user.vo.User(
@@ -163,7 +173,7 @@ public class DealService {
                 List.of(), // TODO: 이미지 URL LIST
                 userVo,
                 storeVo,
-                categorys,
+                categoryNames,
                 deal.getTitle(),
                 infoTags,
                 deal.getShipping(), // TODO: 한화 int 처리
