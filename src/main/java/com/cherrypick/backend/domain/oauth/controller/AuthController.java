@@ -99,6 +99,7 @@ public class AuthController {
     @GetMapping("/refresh")
     public AuthResponseDTOs.AccessToken auth(HttpServletRequest request)
     {
+        // 쿠키에서 refresh를 찾아낸다.
         var cookies = Arrays.stream(request.getCookies()).toList();
         String refreshToken = cookies.stream()
                 .filter(cookie -> cookie.getName().equals("refresh"))
@@ -106,13 +107,7 @@ public class AuthController {
                 .map(Cookie::getValue)
                 .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
-        Long userId = jwtUtil.getUserId(refreshToken);
-        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
-
-        return AuthResponseDTOs.AccessToken.builder()
-                .accessToken(jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname()))
-                .forYou("null값")
-                .build();
+        return authService.refreshAccessToken(refreshToken);
     }
 
     @Operation(

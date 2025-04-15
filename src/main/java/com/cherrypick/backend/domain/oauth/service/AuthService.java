@@ -1,10 +1,12 @@
 package com.cherrypick.backend.domain.oauth.service;
 
+import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.oauth.dto.OAuth2UserDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
+import com.cherrypick.backend.global.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
@@ -15,6 +17,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +27,9 @@ public class AuthService extends DefaultOAuth2UserService
 {
     private final UserRepository userRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final JWTUtil jwtUtil;
+
+    private final String REFRESH_TOKEN_KEY_NAME = "RT:user:";
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -79,17 +85,34 @@ public class AuthService extends DefaultOAuth2UserService
         return newNickName;
     }
 
-    public void setResfreshToken(Long userId, String refreshToken)
+    public void saveResfreshToken(Long userId, String refreshToken)
     {
-        redisTemplate.opsForValue().set("refresh:"+userId.toString() , refreshToken);
-
+        // 토큰의 지속시간은 1주일
+        redisTemplate.opsForValue().set(REFRESH_TOKEN_KEY_NAME+userId.toString() , refreshToken, Duration.ofMinutes(7 * 24 * 60));
     }
 
-    public String getRefreshToken(Long userId)
+    public String loadRefreshToken(Long userId)
     {
-        return Optional.ofNullable(redisTemplate.opsForValue().get("refresh:"+userId.toString()))
+        return Optional.ofNullable(redisTemplate.opsForValue().get(REFRESH_TOKEN_KEY_NAME+userId.toString()))
                 .map(Object::toString)
-                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_FOUND)) ;
+                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_EXPIRED)) ;
+    }
+
+    public AuthResponseDTOs.AccessToken refreshAccessToken(String refreshToken)
+    {
+
+        Long userId = jwtUtil.getUserId(refreshToken);
+
+        // 서버에 갖고 있는 토큰과 쿠키의 토큰이 다르다면
+        if(!refreshToken.equals(loadRefreshToken(userId)))
+            throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
+
+        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+        return AuthResponseDTOs.AccessToken.builder()
+                .accessToken(jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname()))
+                .forYou("null값")
+                .build();
     }
 
 }
