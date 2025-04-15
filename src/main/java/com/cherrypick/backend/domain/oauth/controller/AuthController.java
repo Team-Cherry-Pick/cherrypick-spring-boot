@@ -1,5 +1,7 @@
-package com.cherrypick.backend.domain.user.controller;
+package com.cherrypick.backend.domain.oauth.controller;
 
+import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.oauth.service.AuthService;
 import com.cherrypick.backend.domain.user.entity.Role;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
@@ -8,24 +10,27 @@ import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.stereotype.Controller;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-@RestController @Tag(name = "User", description = "유저 로직을 다룹니다.")
+import java.util.Arrays;
+
+@RestController @Tag(name = "Auth", description = "인증 두과장")
 @RequiredArgsConstructor @Slf4j
-@RequestMapping("/api/user")
-public class UserController {
+@RequestMapping("/api/auth")
+public class AuthController {
 
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
+    private final AuthService authService;
 
     String HTML = """
                 <!DOCTYPE html>
@@ -76,11 +81,44 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 유저입니다. userId를 다시 한번 확인해주세요."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
-    @GetMapping("/test/access-token")
+    @PostMapping("/test/access-token")
     public String accessToken(@Parameter(description = "유저번호") Long userId) {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
         return jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname());
+    }
+
+    @Operation(
+            summary = "access token 재발급",
+            description = "refresh 쿠키를 가진 채로 실행해주시면 access token을 재발급 합니다." +
+                    "이때 refresh token도 함께 재발급 되어 쿠키로 저장해드립니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "JWT 토큰 생성 성공"),
+            @ApiResponse(responseCode = "404", description = "리프레시 토큰 / 유저를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/refresh")
+    public AuthResponseDTOs.AccessToken auth(HttpServletRequest request, HttpServletResponse response)
+    {
+        // 쿠키에서 refresh를 찾아낸다.
+        var cookies = Arrays.stream(request.getCookies()).toList();
+        String refreshToken = cookies.stream()
+                .filter(cookie -> cookie.getName().equals("refresh"))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_FOUND));
+
+        // 토큰 검증과 발급이 선행.
+        Long userId = jwtUtil.getUserId(refreshToken);
+        var accessToken = authService.refreshAccessToken(userId, refreshToken);
+
+        // 리프레시 토큰도 파기 후 재생성해서 보내줌
+        var newRefreshToken = jwtUtil.createRefreshToken(userId);
+        response.addCookie(jwtUtil.createRefreshCookie(newRefreshToken));
+        authService.saveResfreshToken(userId, newRefreshToken);
+
+        return accessToken;
     }
 
     @Operation(
@@ -96,15 +134,9 @@ public class UserController {
     public String jwtFilter(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String Authorization) {
 
         log.info(Authorization);
-        var userDetail = jwtUtil.getUserDetailDTO(Authorization);
+        var userDetail = jwtUtil.getUserDetailDTOFromAccessToken(Authorization);
 
         return "JWT Authorized : " + userDetail.userId() + " " + userDetail.nickname() + " " + userDetail.role().toString();
-    }
-
-    @GetMapping("/test")
-    public String test() {
-
-        return "SUCCESS";
     }
 
 }

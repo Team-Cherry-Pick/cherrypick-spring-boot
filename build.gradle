@@ -45,7 +45,8 @@ dependencies {
     implementation 'com.slack.api:slack-api-client:1.45.0'
 
     // Redis
-    // implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'

@@ -1,25 +1,35 @@
-package com.cherrypick.backend.global.config.oauth;
+package com.cherrypick.backend.domain.oauth.service;
 
+import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.oauth.dto.OAuth2UserDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
+import com.cherrypick.backend.global.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service @RequiredArgsConstructor @Slf4j
-public class OAuth2Service extends DefaultOAuth2UserService
+public class AuthService extends DefaultOAuth2UserService
 {
     private final UserRepository userRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final JWTUtil jwtUtil;
+
+    private final String REFRESH_TOKEN_KEY_NAME = "RT:user:";
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -59,10 +69,10 @@ public class OAuth2Service extends DefaultOAuth2UserService
 
     }
 
-
+    // 닉네임을 좀 더 까리하게 만들어줍니다.
     public String getRandomNickname(String originalNickname)
     {
-        var adjectiveList = List.of("멋있는 ", "대단한 ", "알뜰한 ", "네모난 ", "귀여운 ", "깜찍한 ", "듬직한 ", "깔롱한 ", "늠름한 ", "살뜰한 ", "짜릿한 ", "행복한 ", "소중한 ");
+        var adjectiveList = List.of("멋있는 ", "대단한 ", "알뜰한 ", "네모난 ", "귀여운 ", "깜찍한 ", "듬직한 ", "깔롱한 ", "늠름한 ", "살뜰한 ", "짜릿한 ", "행복한 ", "소중한 ", "유능한 ", "강력한 ", "유연한 ", "쌈뽕한 ");
         int randomAdj = (int) Math.round(Math.random() * adjectiveList.size());
 
         // 닉네임 만들기, 존재하는 닉네임이라면 다시 만들어줌.
@@ -75,5 +85,31 @@ public class OAuth2Service extends DefaultOAuth2UserService
         return newNickName;
     }
 
+    public void saveResfreshToken(Long userId, String refreshToken)
+    {
+        // 토큰의 지속시간은 1주일
+        redisTemplate.opsForValue().set(REFRESH_TOKEN_KEY_NAME+userId.toString() , refreshToken, Duration.ofMinutes(7 * 24 * 60));
+    }
+
+    public String loadRefreshToken(Long userId)
+    {
+        return Optional.ofNullable(redisTemplate.opsForValue().get(REFRESH_TOKEN_KEY_NAME+userId.toString()))
+                .map(Object::toString)
+                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_EXPIRED)) ;
+    }
+
+    public AuthResponseDTOs.AccessToken refreshAccessToken(Long userId, String refreshToken)
+    {
+        // 서버에 갖고 있는 토큰과 쿠키의 토큰이 다르다면
+        if(!refreshToken.equals(loadRefreshToken(userId)))
+            throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
+
+        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+        return AuthResponseDTOs.AccessToken.builder()
+                .accessToken(jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname()))
+                .forYou("null값")
+                .build();
+    }
 
 }
