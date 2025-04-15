@@ -73,12 +73,10 @@ public class SecurityConfig {
                         .successHandler(oauth2SuccessHandler)
                 );
 
-        // 로그아웃 경로
         http
-                .logout( logout -> logout
-                                .logoutUrl("/logout")
-                                .logoutSuccessUrl("/")
-
+                .logout(logout -> logout
+                        .logoutUrl("/logout")  // 로그아웃 요청 URL
+                        .deleteCookies("refresh")  // 쿠키 삭제
                 );
 
 
