@@ -113,37 +113,68 @@ public class DealService {
 
     // 게시글 전체조회 (검색)
     @Transactional
-    public List<DealSearchResponseDTO> searchDeals(DealSearchRequestDTO request) {
+    public List<DealSearchResponseDTO> searchDeals(DealSearchRequestDTO dto) {
+
+        // 카테고리 유효성 검사
+        if (dto.getCategoryId() != null &&
+                !categoryRepository.existsById(dto.getCategoryId())) {
+            throw new BaseException(DealErrorCode.CATEGORY_NOT_FOUND);
+        }
+
+        // 할인 방법 유효성 검사
+        if (dto.getDiscountIds() != null && !dto.getDiscountIds().isEmpty()) {
+            List<Long> foundDiscountIds = discountRepository.findAllById(dto.getDiscountIds())
+                    .stream()
+                    .map(Discount::getDiscountId)
+                    .toList();
+
+            if (foundDiscountIds.size() != dto.getDiscountIds().size()) {
+                throw new BaseException(DealErrorCode.DISCOUNT_NOT_FOUND);
+            }
+        }
+
+        // 스토어 유효성 검사
+        if (dto.getStoreIds() != null && !dto.getStoreIds().isEmpty()) {
+            List<Long> foundStoreIds = storeRepository.findAllById(dto.getStoreIds())
+                    .stream()
+                    .map(Store::getStoreId)
+                    .toList();
+
+            if (foundStoreIds.size() != dto.getStoreIds().size()) {
+                throw new BaseException(DealErrorCode.STORE_NOT_FOUND);
+            }
+        }
+
         // 시간 범위 필터
-        LocalDateTime startDate = resolveStartDate(request.getTimeRange());
+        LocalDateTime startDate = resolveStartDate(dto.getTimeRange());
         LocalDateTime endDate = LocalDateTime.now();
 
         // 가격 필터
-        Double minPrice = request.getPriceFilter() != null ? request.getPriceFilter().minPrice() : null;
-        Double maxPrice = request.getPriceFilter() != null ? request.getPriceFilter().maxPrice() : null;
-        PriceType priceType = request.getPriceFilter() != null
-                ? request.getPriceFilter().priceType()
+        Double minPrice = dto.getPriceFilter() != null ? dto.getPriceFilter().minPrice() : null;
+        Double maxPrice = dto.getPriceFilter() != null ? dto.getPriceFilter().maxPrice() : null;
+        PriceType priceType = dto.getPriceFilter() != null
+                ? dto.getPriceFilter().priceType()
                 : null;
 
         // 기본 필터
-        boolean viewSoldOut = request.getFilters() != null && request.getFilters().viewSoldOut();
-        boolean freeShipping = request.getFilters() != null && request.getFilters().freeShipping();
-        boolean variousPrice = request.isVariousPrice();
+        boolean viewSoldOut = dto.getFilters() != null && dto.getFilters().viewSoldOut();
+        boolean freeShipping = dto.getFilters() != null && dto.getFilters().freeShipping();
+        boolean variousPrice = dto.isVariousPrice();
 
         // 할인, 스토어
-        List<Long> discountIds = (request.getDiscountIds() == null || request.getDiscountIds().isEmpty())
-                ? null : request.getDiscountIds();
-        List<Long> storeIds = (request.getStoreIds() == null || request.getStoreIds().isEmpty())
-                ? null : request.getStoreIds();
+        List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty())
+                ? null : dto.getDiscountIds();
+        List<Long> storeIds = (dto.getStoreIds() == null || dto.getStoreIds().isEmpty())
+                ? null : dto.getStoreIds();
 
         // 가격 정렬 여부 판단
-        boolean sortPriceHigh = request.getSortType() == SortType.PRICE_HIGH;
-        boolean sortPriceLow = request.getSortType() == SortType.PRICE_LOW;
+        boolean sortPriceHigh = dto.getSortType() == SortType.PRICE_HIGH;
+        boolean sortPriceLow = dto.getSortType() == SortType.PRICE_LOW;
 
         // DB 조회 + 가격 정렬 (쿼리에서 처리)
         List<Deal> deals = dealRepository.searchDeals(
-                request.getCategoryId(),
-                request.getKeyword(),
+                dto.getCategoryId(),
+                dto.getKeyword(),
                 viewSoldOut,
                 freeShipping,
                 startDate,
@@ -160,7 +191,7 @@ public class DealService {
 
         // 저가순, 고가순을 제외한 정렬
         if (!sortPriceHigh && !sortPriceLow) {
-            deals = sortDeals(deals, request.getSortType());
+            deals = sortDeals(deals, dto.getSortType());
         }
 
         // 응답 매핑
