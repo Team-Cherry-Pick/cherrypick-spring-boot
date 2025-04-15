@@ -19,7 +19,6 @@ public enum DealErrorCode implements BaseErrorCode {
     DEAL_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 핫딜 게시글입니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 스토어입니다."),
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
     DISCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 할인 정보입니다.");
 
     private final HttpStatus status;
