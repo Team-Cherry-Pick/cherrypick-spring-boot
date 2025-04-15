@@ -26,6 +26,7 @@ spring:
 
   security:
     oauth2:
+
       client:
         registration:
           kakao:
@@ -44,7 +45,12 @@ spring:
   userInfoUrl: /api/user # 관심사 분리를 위해 유저 회원정보 수정 URL 분리, OAuth2SuccessHandler에서 신규 유저를 리다이렉트하는데 쓰임.
 
   jwt:
-    secret: ohvenatorbeatussantustuamfadipardiatcortuusnevictusfiatmorte
+    access:
+      key: ohvenatorbeatussantustuamfadipardiatcortuusnevictusfiatmorte
+      period: 3600000
+    refresh:
+      key: telllmegoodhunterofthechurchhaveyouseenthelightaremychurchhunterswerehonorablespartansihopetobe
+      period: 604800000
 
 slack:
   webhook:

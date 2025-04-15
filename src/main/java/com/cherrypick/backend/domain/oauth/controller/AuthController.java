@@ -110,7 +110,7 @@ public class AuthController {
                 .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         // 토큰 검증과 발급이 선행.
-        Long userId = jwtUtil.getUserId(refreshToken);
+        Long userId = jwtUtil.getUserIdFromRefreshToken(refreshToken);
         var accessToken = authService.refreshAccessToken(userId, refreshToken);
 
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
