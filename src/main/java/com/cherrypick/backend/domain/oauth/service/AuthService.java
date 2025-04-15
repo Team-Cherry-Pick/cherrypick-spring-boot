@@ -98,11 +98,8 @@ public class AuthService extends DefaultOAuth2UserService
                 .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_EXPIRED)) ;
     }
 
-    public AuthResponseDTOs.AccessToken refreshAccessToken(String refreshToken)
+    public AuthResponseDTOs.AccessToken refreshAccessToken(Long userId, String refreshToken)
     {
-
-        Long userId = jwtUtil.getUserId(refreshToken);
-
         // 서버에 갖고 있는 토큰과 쿠키의 토큰이 다르다면
         if(!refreshToken.equals(loadRefreshToken(userId)))
             throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);

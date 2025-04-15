@@ -4,6 +4,7 @@ package com.cherrypick.backend.global.util;
 import com.cherrypick.backend.domain.user.entity.Role;
 import com.cherrypick.backend.domain.user.dto.UserDetailDTO;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -91,6 +92,14 @@ public class JWTUtil
                 .expiration(new Date(System.currentTimeMillis() + refreshValidPeriod))
                 .signWith(secretKey)
                 .compact();
+    }
+
+    public Cookie createRefreshCookie(String value){
+        var cookie = new Cookie("refresh", value);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        return cookie;
     }
 
 }

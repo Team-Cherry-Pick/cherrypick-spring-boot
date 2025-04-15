@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -88,8 +89,9 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "AccessToken 재발급",
-            description = "refresh 쿠키를 가진 채로 실행해주시면 AccessToken을 재발급 합니다."
+            summary = "access token 재발급",
+            description = "refresh 쿠키를 가진 채로 실행해주시면 access token을 재발급 합니다." +
+                    "이때 refresh token도 함께 재발급 되어 쿠키로 저장해드립니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "JWT 토큰 생성 성공"),
@@ -97,7 +99,7 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/refresh")
-    public AuthResponseDTOs.AccessToken auth(HttpServletRequest request)
+    public AuthResponseDTOs.AccessToken auth(HttpServletRequest request, HttpServletResponse response)
     {
         // 쿠키에서 refresh를 찾아낸다.
         var cookies = Arrays.stream(request.getCookies()).toList();
@@ -107,7 +109,16 @@ public class AuthController {
                 .map(Cookie::getValue)
                 .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
-        return authService.refreshAccessToken(refreshToken);
+        // 토큰 검증과 발급이 선행.
+        Long userId = jwtUtil.getUserId(refreshToken);
+        var accessToken = authService.refreshAccessToken(userId, refreshToken);
+
+        // 리프레시 토큰도 파기 후 재생성해서 보내줌
+        var newRefreshToken = jwtUtil.createRefreshToken(userId);
+        response.addCookie(jwtUtil.createRefreshCookie(newRefreshToken));
+        authService.saveResfreshToken(userId, newRefreshToken);
+
+        return accessToken;
     }
 
     @Operation(
