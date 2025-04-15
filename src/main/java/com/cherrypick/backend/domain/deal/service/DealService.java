@@ -16,7 +16,7 @@ import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.store.repository.StoreRepository;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
-import com.cherrypick.backend.domain.vote.enums.voteType;
+import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.cherrypick.backend.domain.vote.repository.VoteRepository;
 import com.cherrypick.backend.global.config.oauth.UserDetailDTO;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -145,8 +145,8 @@ public class DealService {
         List<String> infoTags = getInfoTags(deal);
 
         // 좋아요/싫어요 수 조회
-        long likeCount = voteRepository.countByDealIdAndVoteType(deal, voteType.TRUE);
-        long dislikeCount = voteRepository.countByDealIdAndVoteType(deal, voteType.FALSE);
+        long likeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
+        long dislikeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.FALSE);
 
         // 댓글 수 조회
         long commentCount = commentRepository.countByDealId_DealIdAndIsDeleteFalse(dealId);

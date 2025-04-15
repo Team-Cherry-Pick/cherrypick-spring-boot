@@ -18,6 +18,6 @@ public record DealCreateRequestDTO(
         Shipping shipping,
         String content,
         List<Long> discountIds,
-        List<String> discountNames // discountIds가 null일 때만 사용
+        List<String> discountNames
 ) {
 }
