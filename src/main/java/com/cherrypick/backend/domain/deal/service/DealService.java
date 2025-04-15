@@ -152,21 +152,11 @@ public class DealService {
             );
         }
 
+        // 인포 태그 생성
         List<String> infoTags = getInfoTags(deal);
 
-        // 좋아요/싫어요 수 조회
-        long likeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
-        long dislikeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.FALSE);
-
-        // 댓글 수 조회
-        long commentCount = commentRepository.countByDealId_DealIdAndIsDeleteFalse(dealId);
-
-        // Redis 조회수 로직
-        String dealViewKey = "deal:view:" + dealId;
-        redisTemplate.opsForValue().increment(dealViewKey, 1);
-
-        Object redisViewValue = redisTemplate.opsForValue().get(dealViewKey);
-        long totalViews = redisViewValue == null ? 0L : ((Number) redisViewValue).longValue();
+        // 매트릭스 조회 (조회수, 좋아요 수, 싫어요 수, 댓글 수)
+        long[] metrics = getDealMetrics(deal);
 
         return new DealDetailResponseDTO(
                 deal.getDealId(),
@@ -179,10 +169,10 @@ public class DealService {
                 deal.getShipping(), // TODO: 한화 int 처리
                 deal.getPrice(), // TODO: 한화 int 처리
                 deal.getContent(),
-                (int) totalViews,
-                (int) likeCount,
-                (int) dislikeCount,
-                (int) commentCount,
+                (int) metrics[0], // totalViews
+                (int) metrics[1], // likeCount
+                (int) metrics[2], // dislikeCount
+                (int) metrics[3], // commentCount
                 deal.getDeepLink(),
                 deal.getOriginalUrl(),
                 deal.isSoldOut()
@@ -285,6 +275,25 @@ public class DealService {
         deal.setIsDelete(true);
 
         return new DealResponseDTOs.Delete("핫딜 게시글 삭제 성공");
+    }
+
+    // 핫딜 투표, 조회수, 댓글수 조회
+    private long[] getDealMetrics(Deal deal) {
+        // 좋아요, 싫어요 수 조회
+        long likeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
+        long dislikeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.FALSE);
+
+        // 댓글 수 조회
+        long commentCount = commentRepository.countByDealId_DealIdAndIsDeleteFalse(deal.getDealId());
+
+        // 조회수 처리
+        String dealViewKey = "deal:view:" + deal.getDealId();
+        redisTemplate.opsForValue().increment(dealViewKey, 1);
+
+        Object redisViewValue = redisTemplate.opsForValue().get(dealViewKey);
+        long totalViews = redisViewValue == null ? 0L : ((Number) redisViewValue).longValue();
+
+        return new long[]{(int) totalViews, (int) likeCount, (int) dislikeCount, (int) commentCount};
     }
 
     // 인포 태그 생성 메소드
