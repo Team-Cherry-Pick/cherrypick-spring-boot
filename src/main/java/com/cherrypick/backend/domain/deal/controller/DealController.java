@@ -18,10 +18,12 @@ public class DealController {
 
     // 게시글 생성
     @PostMapping
-    public DealResponseDTOs.Create createDeal(
+    public ResponseEntity<DealResponseDTOs.Create> createDeal(
             @RequestParam(value = "version", defaultValue = "v1") String version,
             @RequestBody DealCreateRequestDTO dealCreateRequestDTO) {
-        return dealService.createDeal(dealCreateRequestDTO);
+
+        DealResponseDTOs.Create response = dealService.createDeal(dealCreateRequestDTO);
+        return ResponseEntity.status(201).body(response);
     }
 
     // 게시글 상세 조회
@@ -29,16 +31,25 @@ public class DealController {
     public ResponseEntity<DealDetailResponseDTO> getDealDetail(
             @PathVariable Long dealId,
             @RequestParam(value = "version", defaultValue = "v1") String version) {
-        DealDetailResponseDTO response = dealService.getDealDetail(dealId);
-        return ResponseEntity.ok(response);
+
+        return ResponseEntity.ok(dealService.getDealDetail(dealId));
     }
 
     // 게시물 수정
-    @PatchMapping()
+    @PatchMapping
     public ResponseEntity<DealResponseDTOs.Update> updateDeal(
             @RequestBody DealUpdateRequestDTO dto,
             @RequestParam(value = "version", defaultValue = "v1") String version) {
+
         return ResponseEntity.ok(dealService.updateDeal(dto));
     }
 
+    // 게시글 삭제
+    @DeleteMapping("/{dealId}")
+    public ResponseEntity<DealResponseDTOs.Delete> deleteDeal(
+            @PathVariable Long dealId,
+            @RequestParam(value = "version", defaultValue = "v1") String version) {
+
+        return ResponseEntity.ok(dealService.deleteDeal(dealId));
+    }
 }
