@@ -1,10 +1,11 @@
 package com.cherrypick.backend.global.config.security;
 
-import com.cherrypick.backend.domain.oauth2.dto.OAuth2LoginSuccessResponseDTO;
-import com.cherrypick.backend.domain.oauth2.dto.OAuth2UserDTO;
+import com.cherrypick.backend.domain.oauth.dto.OAuth2LoginSuccessResponseDTO;
+import com.cherrypick.backend.domain.oauth.dto.OAuth2UserDTO;
 import com.cherrypick.backend.global.util.JWTUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -32,19 +33,30 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String redirectUrl = new String(Base64.getUrlDecoder().decode(request.getParameter("state")));
         if(userInfo.isNewUser()) redirectUrl = userInfoUpdateURL;
 
+        // 엑세스 토큰과 리프레시 토큰
         String accessToken = "Bearer " + jwtUtil.createAccessToken(userInfo.userId(), userInfo.role(), userInfo.nickname());
-        String refreshToken = null;
+        String refreshToken = jwtUtil.createRefreshToken(userInfo.userId());
+
+        // 리프레시 토큰은 쿠키로 담아줌. (서버에서 읽을 수만 있으면 장땡
+        response.addCookie(createRefreshCookie(refreshToken));
 
         var responseDTO = OAuth2LoginSuccessResponseDTO.builder()
                 .userId(userInfo.userId())
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .isNewUser(userInfo.isNewUser())
                 .redirectURL(redirectUrl)
                 .build();
 
         response.getWriter().write(objectMapper.writeValueAsString(responseDTO));
 
+    }
+
+    private Cookie createRefreshCookie(String value){
+        var cookie = new Cookie("refresh", value);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        return cookie;
     }
 
 

@@ -45,7 +45,7 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        var userDetailDTO = jwtUtil.getUserDetailDTO(token);
+        var userDetailDTO = jwtUtil.getUserDetailDTOFromAccessToken(token);
 
         //스프링 시큐리티 인증 토큰 생성
         Authentication authToken = new UsernamePasswordAuthenticationToken(userDetailDTO, null, userDetailDTO.getAuthorities());

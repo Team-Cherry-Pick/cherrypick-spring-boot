@@ -12,12 +12,14 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 @Component @Slf4j
 public class JWTUtil
 {
     private final SecretKey secretKey;
-    private final long validPeriod = 60 * 60 * 60L;
+    private final long accessValidPeriod = 60 * 60 * 60L;
+    private final long refreshValidPeriod = 60 * 60 * 24 * 7L;
 
     public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
 
@@ -29,12 +31,12 @@ public class JWTUtil
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
     }
 
-    public String getRole(String token) {
+    private String getRole(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
-    public String getNickname(String token) {
+    private String getNickname(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("nickname", String.class);
     }
@@ -49,9 +51,8 @@ public class JWTUtil
 
     }
 
-    public UserDetailDTO getUserDetailDTO(String accessToken) {
+    public UserDetailDTO getUserDetailDTOFromAccessToken(String accessToken) {
 
-        log.info(accessToken);
         accessToken = removeBearer(accessToken);
 
         return UserDetailDTO.builder()
@@ -75,10 +76,21 @@ public class JWTUtil
                 .claim("role", role.toString())
                 .claim("type", "access")
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + validPeriod))
+                .expiration(new Date(System.currentTimeMillis() + accessValidPeriod))
                 .signWith(secretKey)
                 .compact();
 
+    }
+
+    public String createRefreshToken(long userId) {
+        return Jwts.builder()
+                .claim("userId", userId)
+                .claim("state", UUID.randomUUID().toString())
+                .claim("type", "refresh")
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + refreshValidPeriod))
+                .signWith(secretKey)
+                .compact();
     }
 
 }

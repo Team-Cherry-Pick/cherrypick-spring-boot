@@ -1,7 +1,7 @@
 package com.cherrypick.backend.global.config;
 
 import com.cherrypick.backend.global.config.security.CustomAuthorizationRequestResolver;
-import com.cherrypick.backend.domain.oauth2.service.OAuth2Service;
+import com.cherrypick.backend.domain.oauth.service.AuthService;
 import com.cherrypick.backend.global.config.security.OAuth2SuccessHandler;
 import com.cherrypick.backend.global.config.security.*;
 import com.cherrypick.backend.global.util.JWTUtil;
@@ -26,7 +26,7 @@ import java.util.List;
 @EnableWebSecurity @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final OAuth2Service oauth2Service;
+    private final AuthService oauthService;
     private final OAuth2SuccessHandler oauth2SuccessHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
     private final JWTUtil jwtUtil;
@@ -69,7 +69,7 @@ public class SecurityConfig {
                         .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(customAuthorizationRequestResolver))
                         .loginPage("/login")
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                        .userService(oauth2Service))
+                        .userService(oauthService))
                         .successHandler(oauth2SuccessHandler)
                 );
 
