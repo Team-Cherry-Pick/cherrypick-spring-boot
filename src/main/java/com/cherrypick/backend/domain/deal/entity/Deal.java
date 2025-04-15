@@ -67,7 +67,8 @@ public class Deal {
     private String storeName;
     private String discountName;
 
-    private boolean isDelete;
+    @Builder.Default
+    private Boolean isDelete = false;
 
     @CreatedDate
     @Column(updatable = false)

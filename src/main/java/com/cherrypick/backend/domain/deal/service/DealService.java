@@ -182,9 +182,19 @@ public class DealService {
     // 게시글 수정
     @Transactional
     public DealResponseDTOs.Update updateDeal(DealUpdateRequestDTO dto) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (!(principal instanceof UserDetailDTO userDetails)) {
+            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
+        }
 
         Deal deal = dealRepository.findById(dto.dealId())
                 .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
+
+        // 작성자 검증
+        if (!deal.getUserId().getUserId().equals(userDetails.userId())) {
+            throw new BaseException(GlobalErrorCode.FORBIDDEN);
+        }
 
         if (dto.title() != null) {
             deal.setTitle(dto.title());
@@ -242,10 +252,30 @@ public class DealService {
             deal.setSoldOut(false); // dto.isSoldOut()이 false일 경우
         }
 
-
         return new DealResponseDTOs.Update(deal.getDealId(), "핫딜 게시글 수정 성공");
     }
 
+    // 게시글 삭제 (Soft Delete)
+    @Transactional
+    public DealResponseDTOs.Delete deleteDeal(Long dealId) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (!(principal instanceof UserDetailDTO userDetails)) {
+            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
+        }
+
+        Deal deal = dealRepository.findById(dealId)
+                .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
+
+        // 작성자 검증
+        if (!deal.getUserId().getUserId().equals(userDetails.userId())) {
+            throw new BaseException(GlobalErrorCode.FORBIDDEN);
+        }
+
+        deal.setIsDelete(true);
+
+        return new DealResponseDTOs.Delete("핫딜 게시글 삭제 성공");
+    }
 
     // 인포 태그 생성 메소드
     @NotNull
