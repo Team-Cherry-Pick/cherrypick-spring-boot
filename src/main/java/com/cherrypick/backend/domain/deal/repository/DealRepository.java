@@ -17,6 +17,7 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
     LEFT JOIN d.discounts discount
     LEFT JOIN d.storeId store
     WHERE 
+        d.isDelete = FALSE and 
         (:categoryId IS NULL OR c.categoryId = :categoryId OR c.parentId = :categoryId)
         AND (:keyword IS NULL OR (LOWER(d.title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
                               OR LOWER(d.content) LIKE LOWER(CONCAT('%', :keyword, '%'))))
