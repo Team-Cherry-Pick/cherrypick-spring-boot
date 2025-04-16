@@ -1,69 +1,105 @@
-package com.cherrypick.backend.global.config.security;
+package com.cherrypick.backend.global.util;
 
-import com.cherrypick.backend.global.util.JWTUtil;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+
+import com.cherrypick.backend.domain.user.entity.Role;
+import com.cherrypick.backend.domain.user.dto.UserDetailDTO;
+import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-@RequiredArgsConstructor @Slf4j
-public class JWTFilter extends OncePerRequestFilter {
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.UUID;
 
-    private final JWTUtil jwtUtil;
+@Component @Slf4j
+public class JWTUtil
+{
+    private final SecretKey secretKey;
+    private final long accessValidPeriod = 60 * 60 * 60L;
+    private final long refreshValidPeriod = 60 * 60 * 24 * 7L;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
 
-        //request에서 Authorization 헤더를 찾음
-        String authorization= request.getHeader("Authorization");
+        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+    }
 
-        //Authorization 헤더 검증
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+    public Long getUserId(String token) {
 
-            System.out.println("token null");
-            filterChain.doFilter(request, response);
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
+    }
 
-            return;
+    private String getRole(String token) {
+
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
+    }
+
+    private String getNickname(String token) {
+
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("nickname", String.class);
+    }
+
+    public Boolean isExpired(String token) {
+
+        try{
+            return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+        } catch (Exception e) {
+            return true;
         }
 
-        //Bearer 부분 제거 후 순수 토큰만 획득
-        String token = jwtUtil.removeBearer(authorization);
+    }
 
-        //토큰 소멸 시간 검증
-        if (jwtUtil.isExpired(token)) {
+    public UserDetailDTO getUserDetailDTOFromAccessToken(String accessToken) {
 
-            System.out.println("token expired");
-            filterChain.doFilter(request, response);
+        accessToken = removeBearer(accessToken);
 
-            return;
-        }
+        return UserDetailDTO.builder()
+                .userId(getUserId(accessToken))
+                .nickname(getNickname(accessToken))
+                .role(Role.valueOf(getRole(accessToken)))
+                .build();
+    }
 
-        var userDetailDTO = jwtUtil.getUserDetailDTOFromAccessToken(token);
+    public String removeBearer(String token)
+    {
+        return token.replace("Bearer ", "");
+    }
 
-        //스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(userDetailDTO, null, userDetailDTO.getAuthorities());
-        //세션에 사용자 등록
-        SecurityContextHolder.getContext().setAuthentication(authToken);
 
-        log.info("JWT 등록 완료");
+    public String createAccessToken(Long userId, Role role, String nickname) {
 
-        filterChain.doFilter(request, response);
+        return Jwts.builder()
+                .claim("userId", userId)
+                .claim("nickname", nickname)
+                .claim("role", role.toString())
+                .claim("type", "access")
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + accessValidPeriod))
+                .signWith(secretKey)
+                .compact();
+
+    }
+
+    public String createRefreshToken(long userId) {
+        return Jwts.builder()
+                .claim("userId", userId)
+                .claim("state", UUID.randomUUID().toString())
+                .claim("type", "refresh")
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + refreshValidPeriod))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public Cookie createRefreshCookie(String value){
+        var cookie = new Cookie("refresh", value);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        return cookie;
     }
 
 }
-접기
-
-
-
-
-
-
-
-

@@ -2,6 +2,7 @@ package com.cherrypick.backend.domain.vote.service;
 
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
+import com.cherrypick.backend.domain.user.dto.UserDetailDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.domain.vote.dto.request.VoteRequestDTO;
@@ -9,7 +10,6 @@ import com.cherrypick.backend.domain.vote.dto.response.VoteResponseDTO;
 import com.cherrypick.backend.domain.vote.entity.Vote;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.cherrypick.backend.domain.vote.repository.VoteRepository;
-import com.cherrypick.backend.global.config.oauth.UserDetailDTO;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
