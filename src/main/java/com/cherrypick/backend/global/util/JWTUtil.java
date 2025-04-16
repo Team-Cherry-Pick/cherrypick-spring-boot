@@ -18,34 +18,42 @@ import java.util.UUID;
 @Component @Slf4j
 public class JWTUtil
 {
-    private final SecretKey secretKey;
-    private final long accessValidPeriod = 60 * 60 * 60L;
-    private final long refreshValidPeriod = 60 * 60 * 24 * 7L;
+    private final SecretKey accessSecretKey;
+    private final SecretKey refreshSecretKey;
 
-    public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
+    private final Long accessValidPeriod;
+    private final Long refreshValidPeriod;
 
-        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+    public JWTUtil(@Value("${spring.jwt.access.key}") String accessSecret ,
+                   @Value("${spring.jwt.refresh.key}") String refreshSecret,
+                   @Value("${spring.jwt.access.period}") long accessValidPeriod,
+                   @Value("${spring.jwt.refresh.period}") long refreshValidPeriod) {
+
+        this.accessSecretKey = new SecretKeySpec(accessSecret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.refreshSecretKey = new SecretKeySpec(refreshSecret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.accessValidPeriod = accessValidPeriod;
+        this.refreshValidPeriod = refreshValidPeriod;
     }
 
-    public Long getUserId(String token) {
+    private Long getUserId(String token) {
 
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
+        return Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
     }
 
     private String getRole(String token) {
 
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
+        return Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
     private String getNickname(String token) {
 
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("nickname", String.class);
+        return Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(token).getPayload().get("nickname", String.class);
     }
 
     public Boolean isExpired(String token) {
 
         try{
-            return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+            return Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
         } catch (Exception e) {
             return true;
         }
@@ -63,11 +71,15 @@ public class JWTUtil
                 .build();
     }
 
+    public Long getUserIdFromRefreshToken(String token) {
+
+        return Jwts.parser().verifyWith(refreshSecretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
+    }
+
     public String removeBearer(String token)
     {
         return token.replace("Bearer ", "");
     }
-
 
     public String createAccessToken(Long userId, Role role, String nickname) {
 
@@ -78,7 +90,7 @@ public class JWTUtil
                 .claim("type", "access")
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessValidPeriod))
-                .signWith(secretKey)
+                .signWith(accessSecretKey)
                 .compact();
 
     }
@@ -90,7 +102,7 @@ public class JWTUtil
                 .claim("type", "refresh")
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshValidPeriod))
-                .signWith(secretKey)
+                .signWith(refreshSecretKey)
                 .compact();
     }
 
