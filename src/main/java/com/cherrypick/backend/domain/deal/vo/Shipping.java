@@ -6,11 +6,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
 @Embeddable
-public class Shipping {
-
-    @Enumerated(EnumType.STRING)
-    private ShippingType shippingType;
-
-    private double shippingPrice;
-    private String shippingRule;
-}
+public record Shipping(
+        @Enumerated(EnumType.STRING)
+        ShippingType shippingType,
+        double shippingPrice,
+        String shippingRule
+) {}

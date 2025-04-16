@@ -6,10 +6,10 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
 @Embeddable
-public record Price(
+public record PriceFilter (
+
         @Enumerated(EnumType.STRING)
         PriceType priceType,
-        double regularPrice,
-        double discountedPrice
-) {}
-
+        double maxPrice,
+        double minPrice
+){}

@@ -8,6 +8,8 @@ import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -65,6 +67,13 @@ public class Deal {
     private String storeName;
     private String discountName;
 
+    @Builder.Default
+    private Boolean isDelete = false;
+
+    @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 }
