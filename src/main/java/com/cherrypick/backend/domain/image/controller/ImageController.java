@@ -1,6 +1,7 @@
 package com.cherrypick.backend.domain.image.controller;
 
 import com.cherrypick.backend.domain.image.dto.request.ImageUploadRequestDTO;
+import com.cherrypick.backend.domain.image.dto.response.ImageDeleteResponseDTO;
 import com.cherrypick.backend.domain.image.dto.response.ImageUploadResponseDTO;
 import com.cherrypick.backend.domain.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,14 @@ public class ImageController {
             @RequestParam(value = "version", defaultValue = "v1") String version
     ) {
         List<ImageUploadResponseDTO> response = imageService.uploadImages(dto);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{imageId}")
+    public ResponseEntity<ImageDeleteResponseDTO> deleteImage(
+            @PathVariable Long imageId,
+            @RequestParam(value = "version", defaultValue = "v1") String version) {
+        ImageDeleteResponseDTO response = imageService.deleteImage(imageId);
         return ResponseEntity.ok(response);
     }
 }

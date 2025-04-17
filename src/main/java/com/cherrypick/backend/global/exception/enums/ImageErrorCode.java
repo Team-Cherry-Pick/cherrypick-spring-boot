@@ -14,7 +14,10 @@ public enum ImageErrorCode implements BaseErrorCode {
     IMAGE_READ_FAILED(HttpStatus.BAD_REQUEST, "이미지를 읽는 데 실패했습니다."),
     IMAGE_COMPRESS_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 압축에 실패했습니다."),
     IMAGE_S3_PUT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3에 업로드하는 데 실패했습니다."),
-    IMAGE_S3_URL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3 URL 생성에 실패했습니다.");
+    IMAGE_S3_URL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3 URL 생성에 실패했습니다."),
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 이미지를 찾을 수 없습니다."),
+    IMAGE_S3_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3에서 이미지 삭제에 실패했습니다."),
+    IMAGE_URL_INVALID(HttpStatus.BAD_REQUEST, "유효하지 않은 이미지 URL입니다.");
 
     private final HttpStatus status;
     private final String message;
