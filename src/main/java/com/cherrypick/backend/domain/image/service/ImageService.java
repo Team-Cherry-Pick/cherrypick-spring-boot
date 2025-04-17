@@ -4,6 +4,7 @@ import com.cherrypick.backend.domain.image.dto.request.ImageUploadRequestDTO;
 import com.cherrypick.backend.domain.image.dto.response.ImageDeleteResponseDTO;
 import com.cherrypick.backend.domain.image.dto.response.ImageUploadResponseDTO;
 import com.cherrypick.backend.domain.image.entity.Image;
+import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
@@ -88,6 +89,18 @@ public class ImageService {
                 imageRepository.delete(image);
             } catch (Exception ignored) {
             }
+        }
+    }
+
+    // 이미지를 특정 대상에 연결하는 공통 메소드
+    @Transactional
+    public void attachImage(Long refId, List<Long> imageIds, ImageType imageType) {
+        List<Image> images = imageRepository.findAllById(imageIds);
+
+        for (Image image : images) {
+            image.setRefId(refId);          // 게시글 ID나 유저 ID
+            image.setImageType(imageType);  // DEAL / USER
+            image.setTemp(false);           // false로 update
         }
     }
 }
