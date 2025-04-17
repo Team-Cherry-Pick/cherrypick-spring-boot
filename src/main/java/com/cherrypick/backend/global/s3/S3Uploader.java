@@ -27,12 +27,14 @@ public class S3Uploader {
     @Value("${aws.s3.bucket}")
     private String bucket;
 
+    // 이미지 업로드
     public String upload(MultipartFile file, String folderName) {
         String fileName = folderName + "/" + UUID.randomUUID() + ".jpg";
 
-        byte[] compressedImage = compressHighQuality(file);  // 내부에서 에러 처리
+        byte[] compressedImage = compressHighQuality(file); // 이미지 압축
 
         try {
+            // // S3에 이미지 저장
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucket)
@@ -54,6 +56,7 @@ public class S3Uploader {
         }
     }
 
+    // 이미지 압축 (.jpg)
     private byte[] compressHighQuality(MultipartFile file) {
         BufferedImage originalImage;
         try {
@@ -71,7 +74,7 @@ public class S3Uploader {
             Thumbnails.of(originalImage)
                     .size(2000, 2000) // 이미지 비율 Thumbnailator에서 유지됨
                     .outputFormat("jpg")
-                    .outputQuality(0.9f)
+                    .outputQuality(0.9f) // 화질 설정
                     .toOutputStream(baos);
             return baos.toByteArray();
         } catch (IOException e) {
@@ -82,7 +85,6 @@ public class S3Uploader {
     // 이미지 삭제
     public void delete(String imageUrl) {
         try {
-            // imageUrl: https://s3.amazonaws.com/your-bucket/folder/uuid.jpg
             String key = extractKeyFromUrl(imageUrl);
 
             s3Client.deleteObject(builder -> builder
@@ -94,9 +96,8 @@ public class S3Uploader {
         }
     }
 
-    // URL 추출
+    // URL에서 key 추출
     private String extractKeyFromUrl(String imageUrl) {
-        // URL에서 key만 추출 (예: deal/123/0.jpg)
         int index = imageUrl.indexOf(".amazonaws.com/");
         if (index == -1) {
             throw new BaseException(ImageErrorCode.IMAGE_URL_INVALID);

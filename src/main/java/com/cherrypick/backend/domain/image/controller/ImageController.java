@@ -17,6 +17,7 @@ public class ImageController {
 
     private final ImageService imageService;
 
+    // 이미지 업로드
     @PostMapping
     public ResponseEntity<List<ImageUploadResponseDTO>> uploadImages(
             @ModelAttribute ImageUploadRequestDTO dto,
@@ -26,6 +27,7 @@ public class ImageController {
         return ResponseEntity.ok(response);
     }
 
+    // 이미지 삭제
     @DeleteMapping("/{imageId}")
     public ResponseEntity<ImageDeleteResponseDTO> deleteImage(
             @PathVariable Long imageId,

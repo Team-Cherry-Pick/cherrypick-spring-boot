@@ -24,10 +24,12 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final S3Uploader s3Uploader;
 
+    // 이미지 업로드
     public List<ImageUploadResponseDTO> uploadImages(ImageUploadRequestDTO dto) {
         MultipartFile[] images = dto.images();
         Integer[] indexes = dto.indexes();
 
+        // 이미지 개수랑 인덱스 개수 안 맞으면 에러
         if (images.length != indexes.length) {
             throw new BaseException(ImageErrorCode.IMAGE_COUNT_MISMATCH);
         }
@@ -74,6 +76,7 @@ public class ImageService {
         return new ImageDeleteResponseDTO("이미지 삭제 완료");
     }
 
+    // 임시 이미지 삭제
     @Scheduled(cron = "0 0 3 * * *") // 매일 새벽 3시
     @Transactional
     public void cleanUpTempImages() {
