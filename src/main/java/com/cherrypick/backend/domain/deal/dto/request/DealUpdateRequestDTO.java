@@ -9,7 +9,6 @@ import java.util.List;
 public record DealUpdateRequestDTO(
 
         Long dealId,
-        // TODO: Ids로 받게 변경
         List<ImageUrl> imageUrls,
         String title,
         Long categoryId,
