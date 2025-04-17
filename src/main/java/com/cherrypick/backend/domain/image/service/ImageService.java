@@ -9,6 +9,7 @@ import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.s3.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -71,5 +72,19 @@ public class ImageService {
         imageRepository.delete(image);
 
         return new ImageDeleteResponseDTO("이미지 삭제 완료");
+    }
+
+    @Scheduled(cron = "0 0 3 * * *") // 매일 새벽 3시
+    @Transactional
+    public void cleanUpTempImages() {
+        List<Image> tempImages = imageRepository.findAllByIsTempTrue();
+
+        for (Image image : tempImages) {
+            try {
+                s3Uploader.delete(image.getImageUrl());
+                imageRepository.delete(image);
+            } catch (Exception ignored) {
+            }
+        }
     }
 }
