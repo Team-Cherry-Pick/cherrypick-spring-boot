@@ -6,6 +6,7 @@ import com.cherrypick.backend.domain.image.dto.response.ImageUploadResponseDTO;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
+import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.s3.S3Uploader;
@@ -101,6 +102,20 @@ public class ImageService {
             image.setRefId(refId);          // 게시글 ID나 유저 ID
             image.setImageType(imageType);  // DEAL / USER
             image.setTemp(false);           // false로 update
+        }
+    }
+
+    // 이미지 순서 수정 대비
+    @Transactional
+    public void attachAndIndexImages(Long refId, List<ImageUrl> imageUrls, ImageType imageType) {
+        for (ImageUrl imageUrl : imageUrls) {
+            Image image = imageRepository.findById(imageUrl.imageId())
+                    .orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
+
+            image.setRefId(refId);
+            image.setImageType(imageType);
+            image.setTemp(false);
+            image.setImageIndex(imageUrl.indexes());
         }
     }
 }
