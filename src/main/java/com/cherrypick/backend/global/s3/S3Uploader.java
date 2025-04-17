@@ -78,4 +78,30 @@ public class S3Uploader {
             throw new BaseException(ImageErrorCode.IMAGE_COMPRESS_FAILED);
         }
     }
+
+    // 이미지 삭제
+    public void delete(String imageUrl) {
+        try {
+            // imageUrl: https://s3.amazonaws.com/your-bucket/folder/uuid.jpg
+            String key = extractKeyFromUrl(imageUrl);
+
+            s3Client.deleteObject(builder -> builder
+                    .bucket(bucket)
+                    .key(key)
+                    .build());
+        } catch (Exception e) {
+            throw new BaseException(ImageErrorCode.IMAGE_S3_DELETE_FAILED);
+        }
+    }
+
+    // URL 추출
+    private String extractKeyFromUrl(String imageUrl) {
+        // URL에서 key만 추출 (예: deal/123/0.jpg)
+        int index = imageUrl.indexOf(".amazonaws.com/");
+        if (index == -1) {
+            throw new BaseException(ImageErrorCode.IMAGE_URL_INVALID);
+        }
+        return imageUrl.substring(index + ".amazonaws.com/".length());
+    }
+
 }

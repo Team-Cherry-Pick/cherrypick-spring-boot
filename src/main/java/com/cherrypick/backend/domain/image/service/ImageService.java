@@ -1,6 +1,7 @@
 package com.cherrypick.backend.domain.image.service;
 
 import com.cherrypick.backend.domain.image.dto.request.ImageUploadRequestDTO;
+import com.cherrypick.backend.domain.image.dto.response.ImageDeleteResponseDTO;
 import com.cherrypick.backend.domain.image.dto.response.ImageUploadResponseDTO;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
@@ -9,6 +10,7 @@ import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.s3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -57,5 +59,17 @@ public class ImageService {
         }
 
         return responses;
+    }
+
+    // 이미지 삭제
+    @Transactional
+    public ImageDeleteResponseDTO deleteImage(Long imageId) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
+
+        s3Uploader.delete(image.getImageUrl());
+        imageRepository.delete(image);
+
+        return new ImageDeleteResponseDTO("이미지 삭제 완료");
     }
 }
