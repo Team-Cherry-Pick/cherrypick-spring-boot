@@ -49,7 +49,7 @@ public class ImageService {
             imageEntity.setImageIndex(index);
             imageEntity.setImageType(null);
             imageEntity.setRefId(null);
-            imageEntity.setTemp(false);
+            imageEntity.setTemp(true);
 
             imageRepository.save(imageEntity);
 
