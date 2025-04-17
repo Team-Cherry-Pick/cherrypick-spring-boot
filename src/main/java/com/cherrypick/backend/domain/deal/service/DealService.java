@@ -289,9 +289,9 @@ public class DealService {
                 deal.getPrice(), // TODO: 한화 int 처리
                 deal.getContent(),
                 (int) totalViews,
-                (int) metrics[1], // likeCount
-                (int) metrics[2], // dislikeCount
-                (int) metrics[3], // commentCount
+                (int) metrics[0], // likeCount
+                (int) metrics[1], // dislikeCount
+                (int) metrics[2], // commentCount
                 deal.getDeepLink(),
                 deal.getOriginalUrl(),
                 deal.isSoldOut()
