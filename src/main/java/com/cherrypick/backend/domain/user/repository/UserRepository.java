@@ -9,10 +9,10 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>
 {
-    @Query(value="SELECT * FROM user WHERE oauth_id=:id", nativeQuery = true)
+    @Query(value="SELECT * FROM user WHERE oauth_id=:id;", nativeQuery = true)
     Optional<User> findUserByOauthId(@Param("id") String oauthId);
 
-    @Query(value="SELECT * FROM user WHERE nickname=:nickname", nativeQuery = true)
+    @Query(value="SELECT * FROM user WHERE nickname=:nickname;", nativeQuery = true)
     Optional<User> findUserByNickname(@Param("nickname") String nickname);
 
 }
