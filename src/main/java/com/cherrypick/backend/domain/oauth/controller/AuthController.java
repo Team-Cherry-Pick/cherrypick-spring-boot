@@ -53,7 +53,7 @@ public class AuthController {
 
                       // 인코딩해서 redirect 파라미터에 붙임
                       const encoded = encodeURIComponent(safeRedirect);
-                      const url = `http://localhost:8080/oauth2/authorization/kakao?redirect=${encoded}`;
+                      const url = `http://repik.kr:8080/oauth2/authorization/kakao?redirect=${encoded}`;
 
                       window.location.href = url;
                     }

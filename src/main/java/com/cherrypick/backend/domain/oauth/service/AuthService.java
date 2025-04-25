@@ -45,6 +45,8 @@ public class AuthService extends DefaultOAuth2UserService
         if(user.isPresent()){
             // 저장된 유저 불러오기
             loginUser = user.get();
+
+            log.info(":::: 기존 유저가 로그인 하였습니다 : " + user.toString());
             return OAuth2UserDTO.from(loginUser, false);
         }
         else{
@@ -58,6 +60,7 @@ public class AuthService extends DefaultOAuth2UserService
 
             // 신규 유저 저장
             userRepository.save(loginUser);
+            log.info(":::: 신규 유저입니다. 로그인되었습니다. : " + user.toString());
             return OAuth2UserDTO.from(loginUser, true);
         }
 
