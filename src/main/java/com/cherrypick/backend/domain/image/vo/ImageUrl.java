@@ -6,5 +6,5 @@ import jakarta.persistence.Embeddable;
 public record ImageUrl(
         Long imageId,
         String url,
-        int index
+        int indexes
 ) {}
