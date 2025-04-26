@@ -10,7 +10,7 @@ public record DealCreateRequestDTO(
 
         String title,
         Long categoryId,
-        List<ImageUrl> imageUrls,
+        List<Long> imageIds,
         String originalUrl,
         Long storeId,
         String storeName, // storeId가 null일 때만 사용
