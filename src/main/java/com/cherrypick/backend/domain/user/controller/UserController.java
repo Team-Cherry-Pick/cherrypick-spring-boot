@@ -10,9 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -30,7 +28,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/nickname-validation")
-    public ResponseEntity<UserResponseDTOs.nicknameValid> nicknameValidation(@Parameter(description = "유효성을 검증 받을 닉네임을 입력합니다.(파라미터)") String nickname) {
+    public ResponseEntity<UserResponseDTOs.NicknameValidDTO> nicknameValidation(@Parameter(description = "유효성을 검증 받을 닉네임을 입력합니다.(파라미터)") String nickname) {
 
         return ResponseEntity.ok(userService.nicknameValidation(nickname));
     }

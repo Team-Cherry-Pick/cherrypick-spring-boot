@@ -12,6 +12,11 @@ public class AuthUtil
 
     }
 
+    public static boolean isAuthenticated()
+    {
+        return  SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
+    }
+
     public static UserDetailDTO getUserDetail(){
         var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
