@@ -17,6 +17,11 @@ import com.cherrypick.backend.domain.deal.enums.TimeRangeType;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.discount.entity.Discount;
 import com.cherrypick.backend.domain.discount.repository.DiscountRepository;
+import com.cherrypick.backend.domain.image.entity.Image;
+import com.cherrypick.backend.domain.image.enums.ImageType;
+import com.cherrypick.backend.domain.image.repository.ImageRepository;
+import com.cherrypick.backend.domain.image.service.ImageService;
+import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.store.repository.StoreRepository;
 import com.cherrypick.backend.domain.user.dto.UserDetailDTO;
@@ -49,6 +54,8 @@ public class DealService {
     private final VoteRepository voteRepository;
     private final CommentRepository commentRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final ImageService imageService;
+    private final ImageRepository imageRepository;
 
     // 게시글 생성
     @Transactional
@@ -107,6 +114,11 @@ public class DealService {
                 .build();
 
         Deal saved = dealRepository.save(deal);
+
+        // 이미지랑 매핑
+        if (dto.imageIds() != null && !dto.imageIds().isEmpty()) {
+            imageService.attachImage(saved.getDealId(), dto.imageIds(), ImageType.DEAL);
+        }
 
         return new DealResponseDTOs.Create(saved.getDealId(), "핫딜 게시글 생성 성공");
     }
@@ -204,9 +216,23 @@ public class DealService {
             long likeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
             long commentCount = commentRepository.countByDealId_DealIdAndIsDeleteFalse(deal.getDealId());
 
+            Image firstImage = imageRepository
+                    .findTopByRefIdAndImageTypeOrderByImageIndexAsc(deal.getDealId(), ImageType.DEAL)
+                    .orElse(null);
+
+            // 썸네일 가져오기
+            ImageUrl imageUrl = null;
+            if (firstImage != null) {
+                imageUrl = new ImageUrl(
+                        firstImage.getImageId(),
+                        firstImage.getImageUrl(),
+                        firstImage.getImageIndex()
+                );
+            }
+
             return new DealSearchResponseDTO(
                     deal.getDealId(),
-                    null, // TODO: 이미지 처리
+                    imageUrl,
                     deal.getTitle(),
                     deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
                     getInfoTags(deal),
@@ -277,9 +303,19 @@ public class DealService {
         // 매트릭스 조회 (조회수, 좋아요 수, 싫어요 수, 댓글 수)
         long[] metrics = getDealMetrics(deal);
 
+        List<Image> images = imageRepository.findByRefIdAndImageTypeOrderByImageIndexAsc(deal.getDealId(), ImageType.DEAL);
+
+        List<ImageUrl> imageUrls = images.stream()
+                .map(image -> new ImageUrl(
+                        image.getImageId(),
+                        image.getImageUrl(),
+                        image.getImageIndex()
+                ))
+                .toList();
+
         return new DealDetailResponseDTO(
                 deal.getDealId(),
-                List.of(), // TODO: 이미지 URL LIST
+                imageUrls,
                 userVo,
                 storeVo,
                 categoryNames,
@@ -289,9 +325,9 @@ public class DealService {
                 deal.getPrice(), // TODO: 한화 int 처리
                 deal.getContent(),
                 (int) totalViews,
-                (int) metrics[1], // likeCount
-                (int) metrics[2], // dislikeCount
-                (int) metrics[3], // commentCount
+                (int) metrics[0], // likeCount
+                (int) metrics[1], // dislikeCount
+                (int) metrics[2], // commentCount
                 deal.getDeepLink(),
                 deal.getOriginalUrl(),
                 deal.isSoldOut()
@@ -369,6 +405,11 @@ public class DealService {
             deal.setSoldOut(true); // dto.isSoldOut()이 true일 경우
         } else {
             deal.setSoldOut(false); // dto.isSoldOut()이 false일 경우
+        }
+
+        // 이미지 매핑
+        if (dto.imageUrls() != null && !dto.imageUrls().isEmpty()) {
+            imageService.attachAndIndexImages(deal.getDealId(), dto.imageUrls(), ImageType.DEAL);
         }
 
         return new DealResponseDTOs.Update(deal.getDealId(), "핫딜 게시글 수정 성공");
