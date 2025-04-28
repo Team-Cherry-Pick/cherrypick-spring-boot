@@ -52,6 +52,7 @@ public class Deal {
     @Embedded
     private Shipping shipping;
 
+    @Column(length = 500)
     private String content;
 
     @ManyToMany
@@ -66,6 +67,9 @@ public class Deal {
 
     private String storeName;
     private String discountName;
+
+    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DealTag> dealTags = new ArrayList<>();
 
     @Builder.Default
     private Boolean isDelete = false;

@@ -118,4 +118,23 @@ public class ImageService {
             image.setImageIndex(imageUrl.indexes());
         }
     }
+
+    // 크롤링용 매서드
+    public List<Long> saveImageUrls(List<String> imgUrls) {
+
+        List<Long> imageIds = new ArrayList<>();
+        int cnt = 0;
+        for(String imgUrl : imgUrls) {
+
+            var img = Image.builder()
+                    .imageIndex(cnt++)
+                    .imageUrl(imgUrl)
+                    .isTemp(true)
+                    .build();
+
+            imageIds.add(imageRepository.save(img).getImageId());
+        }
+
+        return imageIds;
+    }
 }
