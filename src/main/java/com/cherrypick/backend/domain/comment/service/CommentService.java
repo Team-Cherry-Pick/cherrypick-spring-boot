@@ -3,6 +3,9 @@ package com.cherrypick.backend.domain.comment.service;
 import com.cherrypick.backend.domain.comment.dto.request.CommentRequestDTOs;
 import com.cherrypick.backend.domain.comment.dto.response.CommentResponseDTOs;
 import com.cherrypick.backend.domain.comment.entity.Comment;
+import com.cherrypick.backend.domain.comment.entity.CommentLike;
+import com.cherrypick.backend.domain.comment.entity.CommentLikeId;
+import com.cherrypick.backend.domain.comment.repository.CommentLikeRepository;
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
@@ -27,6 +30,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final DealRepository dealRepository;
     private final UserRepository userRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     // 댓글 생성
     @Transactional
@@ -98,4 +102,42 @@ public class CommentService {
         return new CommentResponseDTOs.Delete(comment.getCommentId(), "댓글 삭제 성공");
     }
 
+    // 댓글 좋아요
+    @Transactional
+    public CommentResponseDTOs.Like likeComment(CommentRequestDTOs.Like request) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (!(principal instanceof UserDetailDTO userDetails)) {
+            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
+        }
+
+        User user = userRepository.findById(userDetails.userId())
+                .orElseThrow(() -> new BaseException(GlobalErrorCode.UNAUTHORIZED));
+
+        Comment comment = commentRepository.findById(request.commentID())
+                .orElseThrow(() -> new BaseException(CommentErrorCode.COMMENT_NOT_FOUND));
+
+        CommentLikeId likeId = new CommentLikeId(user.getUserId(), comment.getCommentId());
+
+        boolean exists = commentLikeRepository.existsById(likeId);
+
+        String message;
+
+        if (request.isLike()) {
+            // 좋아요 추가
+            if (!exists) {
+                CommentLike like = new CommentLike(comment, user);
+                commentLikeRepository.save(like);
+            }
+            message = "댓글 좋아요 성공";
+        } else {
+            // 좋아요 취소
+            if (exists) {
+                commentLikeRepository.deleteById(likeId);
+            }
+            message = "댓글 좋아요 취소 성공";
+        }
+
+        return new CommentResponseDTOs.Like(comment.getCommentId(), message);
+    }
 }

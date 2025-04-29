@@ -44,4 +44,15 @@ public class CommentController {
         return ResponseEntity.ok(commentService.deleteComment(commentId));
     }
 
+    // 댓글 좋아요
+    @Operation(
+            summary = "댓글 좋아요 및 좋아요 취소 API V1",
+            description = "댓글에 좋아요를 누르거나 취소합니다. boolean 타입으로 구분합니다. JWT 인증 필수입니다."
+    )
+    @PutMapping("/like")
+    public ResponseEntity<CommentResponseDTOs.Like> likeComment(
+            @RequestBody CommentRequestDTOs.Like request,
+            @RequestParam(value = "version", defaultValue = "v1") String version) {
+        return ResponseEntity.ok(commentService.likeComment(request));
+    }
 }
