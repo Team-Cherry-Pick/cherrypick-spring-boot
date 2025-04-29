@@ -25,10 +25,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Push Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-app:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
+      - name: Create .env file from Secrets
+        run: echo "${{ secrets.ENV }}" > .env
+
+      - name: Build and Push Docker image (with cache)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy to EC2 Server
         uses: appleboy/ssh-action@v0.1.6
@@ -41,15 +48,6 @@ jobs:
             docker stop spring-app || true
             docker rm spring-app || true
             docker run -d --name spring-app \
+              --env-file .env \
               -p 8080:8080 \
-              -e DATASOURCE_URL=${{ secrets.DATASOURCE_URL }} \
-              -e DATASOURCE_USERNAME=${{ secrets.DATASOURCE_USERNAME }} \
-              -e DATASOURCE_PASSWORD=${{ secrets.DATASOURCE_PASSWORD }} \
-              -e DATASOURCE_DRIVER_CLASS_NAME=${{ secrets.DATASOURCE_DRIVER_CLASS_NAME }} \
-              -e KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
-              -e KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }} \
-              -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
-              -e S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }} \
-              -e S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }} \
-              -e BUCKET_NAME=${{ secrets.BUCKET_NAME }} \
               ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
