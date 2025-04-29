@@ -13,6 +13,7 @@ import com.cherrypick.backend.global.util.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,12 +24,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final ImageService imageService;
 
+    @Transactional
     public UserResponseDTOs.UpdateDTO userUpdate(UserRequestDTOs.UpdateDTO dto){
 
         // 인증된 유저의 ID를 찾음, 인증되지 않았다면 오류.
         var userId = AuthUtil.getUserDetail().userId();
-        log.info(dto.toString());
-
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
         imageService.deleteImageByUserId(userId);
@@ -37,12 +37,12 @@ public class UserService {
         user.setNickname(dto.nickname());
         user.setEmail(dto.email());
 
-
         var updatedUser = userRepository.save(user);
 
         return UserResponseDTOs.UpdateDTO.from(updatedUser);
     }
 
+    @Transactional(readOnly = true)
     public UserDetailResponseDTO getUserDetail()
     {
         Long userId = AuthUtil.getUserDetail().userId();
@@ -52,6 +52,7 @@ public class UserService {
         return UserDetailResponseDTO.from(user, profileImage);
     }
 
+    @Transactional(readOnly = true)
     public UserResponseDTOs.NicknameValidDTO nicknameValidation(String nickname) {
 
         if(nickname.length() < 2) {
@@ -69,10 +70,6 @@ public class UserService {
                     .details("닉네임은 20자를 넘길 수 없습니다.")
                     .build();
         }
-
-        log.info(nickname);
-        userRepository.findAll().forEach(user -> {log.info(user.toString());});
-
 
         if(userRepository.findUserByNickname(nickname).isPresent())
         {
