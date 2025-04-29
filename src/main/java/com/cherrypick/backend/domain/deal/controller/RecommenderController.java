@@ -3,6 +3,7 @@ package com.cherrypick.backend.domain.deal.controller;
 import com.cherrypick.backend.domain.deal.dto.request.DealRequestDTOs;
 import com.cherrypick.backend.domain.deal.service.RecommenderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,20 +20,20 @@ public class RecommenderController {
 
     @PostMapping("/user/{user_id}/logs")
     @ResponseBody
-    public String createLog(@RequestBody DealRequestDTOs.UserBehaviorDTO logDto)
+    public ResponseEntity<?> createLog(@RequestBody DealRequestDTOs.UserBehaviorDTO logDto)
     {
 
-        return recommenderService.addUserBehaviorLog(logDto);
+        return ResponseEntity.ok(recommenderService.addUserBehaviorLog(logDto));
     }
-    /*
+
     @GetMapping("/user/{user_id}/logs")
     @ResponseBody
-    public ResponseEntity<?> viewLog(@PathVariable("user_id") int userId)
+    public ResponseEntity<?> viewLog(@PathVariable("user_id") Long userId)
     {
 
-        return ResponseEntity.ok(dashBoardService.getLogByUserId(userId));
+        return ResponseEntity.ok(recommenderService.getLogByUserId(userId));
     }
-
+/*
     @GetMapping("/user/{user_id}/tags")
     @ResponseBody
     public ResponseEntity<?> getUserHashWeight(@PathVariable("user_id") int userId)
