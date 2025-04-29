@@ -2,10 +2,12 @@ package com.cherrypick.backend.domain.comment.service;
 
 import com.cherrypick.backend.domain.comment.dto.request.CommentRequestDTOs;
 import com.cherrypick.backend.domain.comment.dto.response.BestCommentResponseDTO;
+import com.cherrypick.backend.domain.comment.dto.response.CommentListResponseDTO;
 import com.cherrypick.backend.domain.comment.dto.response.CommentResponseDTOs;
 import com.cherrypick.backend.domain.comment.entity.Comment;
 import com.cherrypick.backend.domain.comment.entity.CommentLike;
 import com.cherrypick.backend.domain.comment.entity.CommentLikeId;
+import com.cherrypick.backend.domain.comment.enums.SortType;
 import com.cherrypick.backend.domain.comment.repository.CommentLikeRepository;
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.entity.Deal;
@@ -78,6 +80,40 @@ public class CommentService {
         commentRepository.save(comment);
 
         return new CommentResponseDTOs.Create(comment.getCommentId(), "댓글 작성 성공");
+    }
+
+    // 댓글 전체 조회
+    @Transactional
+    public List<CommentListResponseDTO> getCommentList(Long dealId, SortType sortType) {
+        boolean exists = dealRepository.existsById(dealId);
+        if (!exists) {
+            throw new BaseException(DealErrorCode.DEAL_NOT_FOUND);
+        }
+
+        // 댓글이 없는 경우
+        List<Comment> allComments = commentRepository.findAllByDealId(dealId);
+        if (allComments.isEmpty()) {
+            throw new BaseException(CommentErrorCode.NO_COMMENTS_FOUND);
+        }
+
+        // 부모 댓글 조회
+        List<Comment> parentComments = switch (sortType) {
+            case POPULAR -> commentRepository.findParentCommentsByLikes(dealId);
+            case LATEST -> commentRepository.findParentCommentsLatest(dealId);
+        };
+
+        return parentComments.stream()
+                .map(parent -> {
+                    // 대댓글 조회 (작성된 순으로)
+                    List<Comment> replies = commentRepository.findReplies(parent.getCommentId());
+
+                    List<CommentListResponseDTO> replyDtos = replies.stream()
+                            .map(this::toCommentDtoWithoutReplies)
+                            .toList();
+
+                    return toCommentDtoWithReplies(parent, replyDtos);
+                })
+                .toList();
     }
 
     // 베스트 댓글 조회
@@ -182,4 +218,50 @@ public class CommentService {
 
         return new CommentResponseDTOs.Like(comment.getCommentId(), message);
     }
+
+    // DTO 변환 메소드들
+
+    // 부모 댓글 + 대댓글 리스트까지 포함한 DTO 만들기
+    private CommentListResponseDTO toCommentDtoWithReplies(Comment comment, List<CommentListResponseDTO> replies) {
+        int totalLikes = commentLikeRepository.countByCommentId(comment);
+        int totalReplys = replies.size();
+
+        return new CommentListResponseDTO(
+                comment.getCommentId(),
+                comment.getParentId(),
+                new com.cherrypick.backend.domain.user.vo.User(
+                        comment.getUserId().getUserId(),
+                        comment.getUserId().getNickname(),
+                        null
+                ),
+                comment.getContent(),
+                totalLikes,
+                totalReplys,
+                comment.getCreatedAt(),
+                comment.isDelete(),
+                replies
+        );
+    }
+
+    // 대댓글 1개짜리 DTO 만들기
+    private CommentListResponseDTO toCommentDtoWithoutReplies(Comment comment) {
+        int totalLikes = commentLikeRepository.countByCommentId(comment);
+
+        return new CommentListResponseDTO(
+                comment.getCommentId(),
+                comment.getParentId(),
+                new com.cherrypick.backend.domain.user.vo.User(
+                        comment.getUserId().getUserId(),
+                        comment.getUserId().getNickname(),
+                        null
+                ),
+                comment.getContent(),
+                totalLikes,
+                0,
+                comment.getCreatedAt(),
+                comment.isDelete(),
+                List.of()
+        );
+    }
+
 }
