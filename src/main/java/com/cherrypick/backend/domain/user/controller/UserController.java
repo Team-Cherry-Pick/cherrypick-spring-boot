@@ -38,7 +38,7 @@ public class UserController {
 
     @Operation(
             summary = "유저 정보 수정.",
-            description = "수정요~"
+            description = "이미지 수정에 대해서는 이미지 업로드 API를 경유 후 ID를 입력."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "유저 정보를 수정하였습니다."),
@@ -52,11 +52,11 @@ public class UserController {
     }
 
     @Operation(
-            summary = "유저 정보 수정.",
-            description = "수정요~"
+            summary = "유저 정보 조회",
+            description = "현재 인증 상태인 유저 정보를 조회합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "유저 정보를 수정하였습니다."),
+            @ApiResponse(responseCode = "200", description = "유저 정보 조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("")
@@ -64,7 +64,5 @@ public class UserController {
     {
         return ResponseEntity.ok(userService.getUserDetail());
     }
-
-
 
 }
