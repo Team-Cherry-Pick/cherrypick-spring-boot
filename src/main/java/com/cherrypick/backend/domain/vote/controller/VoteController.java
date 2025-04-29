@@ -19,7 +19,7 @@ public class VoteController {
 
     @Operation(
             summary = "게시글 투표 API V1",
-            description = "게시글을 투표합니다. TRUE, FALSE, NONE 형태가 존재하며 FALSE일 경우는 DislikeReason이 필수입니다. JWT 인증 필수입니다."
+            description = "게시글을 투표합니다. TRUE, FALSE, NONE 형태가 존재하며 FALSE일 경우는 비추천 사유가 필수입니다. 비추천 사유는 미완성 상태로 추후 협의가 필요합니다. JWT 인증 필수입니다."
     )
     @PutMapping("/{dealId}/vote")
     public ResponseEntity<VoteResponseDTO> vote(
