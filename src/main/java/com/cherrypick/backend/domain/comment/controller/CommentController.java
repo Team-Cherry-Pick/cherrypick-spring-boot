@@ -2,7 +2,9 @@ package com.cherrypick.backend.domain.comment.controller;
 
 import com.cherrypick.backend.domain.comment.dto.request.CommentRequestDTOs;
 import com.cherrypick.backend.domain.comment.dto.response.BestCommentResponseDTO;
+import com.cherrypick.backend.domain.comment.dto.response.CommentListResponseDTO;
 import com.cherrypick.backend.domain.comment.dto.response.CommentResponseDTOs;
+import com.cherrypick.backend.domain.comment.enums.SortType;
 import com.cherrypick.backend.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +35,15 @@ public class CommentController {
 
         CommentResponseDTOs.Create response = commentService.createComment(dealId, request);
         return ResponseEntity.ok(response);
+    }
+
+    // 댓글 전체 조회
+    @GetMapping("/comment/{dealId}")
+    public ResponseEntity<List<CommentListResponseDTO>> getCommentList(
+            @PathVariable Long dealId,
+            @RequestParam(defaultValue = "LATEST") SortType sortType,
+            @RequestParam(value = "version", defaultValue = "v1") String version) {
+        return ResponseEntity.ok(commentService.getCommentList(dealId, sortType));
     }
 
     // 베스트 댓글 조회
