@@ -61,7 +61,7 @@ public class DealService {
     @Transactional
     public DealResponseDTOs.Create createDeal(DealCreateRequestDTO dto) {
 
-        // TODO: 이미지 처리, 딥링크 변환
+        // TODO: 딥링크 변환
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 

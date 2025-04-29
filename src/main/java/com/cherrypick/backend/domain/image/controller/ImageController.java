@@ -30,7 +30,7 @@ public class ImageController {
             @ModelAttribute ImageUploadRequestDTO dto,
             @RequestParam(value = "version", defaultValue = "v1") String version
     ) {
-        List<ImageUploadResponseDTO> response = imageService.uploadImages(dto);
+        List<ImageUploadResponseDTO> response = imageService.createImages(dto);
         return ResponseEntity.ok(response);
     }
 
