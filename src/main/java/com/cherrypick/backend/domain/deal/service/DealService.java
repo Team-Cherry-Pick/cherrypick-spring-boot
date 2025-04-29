@@ -24,7 +24,7 @@ import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.store.repository.StoreRepository;
-import com.cherrypick.backend.domain.user.dto.UserDetailDTO;
+import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
@@ -65,7 +65,7 @@ public class DealService {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof UserDetailDTO userDetails)) {
+        if (!(principal instanceof AuthenticationDetailDTO userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
         }
 
@@ -339,7 +339,7 @@ public class DealService {
     public DealResponseDTOs.Update updateDeal(DealUpdateRequestDTO dto) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof UserDetailDTO userDetails)) {
+        if (!(principal instanceof AuthenticationDetailDTO userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
         }
 
@@ -420,7 +420,7 @@ public class DealService {
     public DealResponseDTOs.Delete deleteDeal(Long dealId) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof UserDetailDTO userDetails)) {
+        if (!(principal instanceof AuthenticationDetailDTO userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
         }
 
