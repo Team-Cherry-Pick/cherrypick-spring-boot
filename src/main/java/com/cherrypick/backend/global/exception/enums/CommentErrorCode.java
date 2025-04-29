@@ -16,7 +16,8 @@ public enum CommentErrorCode implements BaseErrorCode {
     // ✅ 404 NOT FOUND
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
     PARENT_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 부모 댓글입니다."),
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글 작성자를 찾을 수 없습니다.");
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글 작성자를 찾을 수 없습니다."),
+    NO_COMMENTS_FOUND(HttpStatus.NOT_FOUND, "해당 딜에 등록된 댓글이 없습니다.");
 
     private final HttpStatus status;
     private final String message;

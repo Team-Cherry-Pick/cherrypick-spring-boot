@@ -1,6 +1,7 @@
 package com.cherrypick.backend.domain.comment.controller;
 
 import com.cherrypick.backend.domain.comment.dto.request.CommentRequestDTOs;
+import com.cherrypick.backend.domain.comment.dto.response.BestCommentResponseDTO;
 import com.cherrypick.backend.domain.comment.dto.response.CommentResponseDTOs;
 import com.cherrypick.backend.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,9 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Tag(name = "Comment", description = "댓글 CRUD")
-@RequestMapping("/api/comment")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class CommentController {
 
@@ -22,7 +25,7 @@ public class CommentController {
             summary = "댓글 생성 API V1",
             description = "댓글을 생성합니다. JWT 인증 필수입니다."
     )
-    @PostMapping("/{dealId}")
+    @PostMapping("/comment/{dealId}")
     public ResponseEntity<CommentResponseDTOs.Create> createComment(
             @PathVariable Long dealId,
             @RequestBody CommentRequestDTOs.Create request,
@@ -32,12 +35,24 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
+    // 베스트 댓글 조회
+    @Operation(
+            summary = "베스트 댓글 조회 API V1",
+            description = "베스트 댓글을 최대 2개 조회합니다. 삭제된 댓글은 제외하며, 없거나 겹치는 경우 최신순으로 상위 2개를 조회합니다."
+    )
+    @GetMapping("/best-comment/{dealId}")
+    public ResponseEntity<List<BestCommentResponseDTO>> getBestComments(
+            @PathVariable Long dealId,
+            @RequestParam(value = "version", defaultValue = "v1") String version){
+        return ResponseEntity.ok(commentService.getBestComments(dealId));
+    }
+
     // 댓글 삭제
     @Operation(
             summary = "댓글 삭제 API V1",
             description = "댓글을 삭제합니다. JWT 인증 필수입니다."
     )
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("/comment/{commentId}")
     public ResponseEntity<CommentResponseDTOs.Delete> deleteComment(
             @PathVariable Long commentId,
             @RequestParam(value = "version", defaultValue = "v1") String version) {
@@ -49,7 +64,7 @@ public class CommentController {
             summary = "댓글 좋아요 및 좋아요 취소 API V1",
             description = "댓글에 좋아요를 누르거나 취소합니다. boolean 타입으로 구분합니다. JWT 인증 필수입니다."
     )
-    @PutMapping("/like")
+    @PutMapping("/comment/like")
     public ResponseEntity<CommentResponseDTOs.Like> likeComment(
             @RequestBody CommentRequestDTOs.Like request,
             @RequestParam(value = "version", defaultValue = "v1") String version) {
