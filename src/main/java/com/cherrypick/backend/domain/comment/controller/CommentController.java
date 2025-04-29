@@ -31,4 +31,17 @@ public class CommentController {
         CommentResponseDTOs.Create response = commentService.createComment(dealId, request);
         return ResponseEntity.ok(response);
     }
+
+    // 댓글 삭제
+    @Operation(
+            summary = "댓글 삭제 API V1",
+            description = "댓글을 삭제합니다. JWT 인증 필수입니다."
+    )
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<CommentResponseDTOs.Delete> deleteComment(
+            @PathVariable Long commentId,
+            @RequestParam(value = "version", defaultValue = "v1") String version) {
+        return ResponseEntity.ok(commentService.deleteComment(commentId));
+    }
+
 }

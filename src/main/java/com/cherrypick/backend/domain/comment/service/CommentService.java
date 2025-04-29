@@ -28,8 +28,10 @@ public class CommentService {
     private final DealRepository dealRepository;
     private final UserRepository userRepository;
 
+    // 댓글 생성
     @Transactional
     public CommentResponseDTOs.Create createComment(Long dealId, CommentRequestDTOs.Create request) {
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if (!(principal instanceof UserDetailDTO userDetails)) {
@@ -70,4 +72,30 @@ public class CommentService {
 
         return new CommentResponseDTOs.Create(comment.getCommentId(), "댓글 작성 성공");
     }
+
+    // 댓글 삭제 (Soft Delete)
+    @Transactional
+    public CommentResponseDTOs.Delete deleteComment(Long commentId) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (!(principal instanceof UserDetailDTO userDetails)) {
+            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
+        }
+
+        User user = userRepository.findById(userDetails.userId())
+                .orElseThrow(() -> new BaseException(GlobalErrorCode.UNAUTHORIZED));
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new BaseException(CommentErrorCode.COMMENT_NOT_FOUND));
+
+        // 작성자 검증
+        if (!comment.getUserId().getUserId().equals(user.getUserId())) {
+            throw new BaseException(GlobalErrorCode.FORBIDDEN);
+        }
+
+        comment.setDelete(true);
+
+        return new CommentResponseDTOs.Delete(comment.getCommentId(), "댓글 삭제 성공");
+    }
+
 }
