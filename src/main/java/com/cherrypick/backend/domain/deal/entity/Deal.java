@@ -52,6 +52,7 @@ public class Deal {
     @Embedded
     private Shipping shipping;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToMany

@@ -23,14 +23,13 @@ public class Comment {
     @JoinColumn(name = "deal_id")
     private Deal dealId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Comment parentId;
+    private Long parentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User userId;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private boolean isDelete;
