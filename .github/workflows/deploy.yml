@@ -25,6 +25,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Set up Docker Buildx (for cache)
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
       - name: Create .env file from Secrets
         run: echo "${{ secrets.ENV }}" > .env
 
