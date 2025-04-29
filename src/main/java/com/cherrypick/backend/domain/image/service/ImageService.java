@@ -27,7 +27,7 @@ public class ImageService {
     private final S3Uploader s3Uploader;
 
     // 이미지 업로드
-    public List<ImageUploadResponseDTO> uploadImages(ImageUploadRequestDTO dto) {
+    public List<ImageUploadResponseDTO> createImages(ImageUploadRequestDTO dto) {
         MultipartFile[] images = dto.images();
         Integer[] indexes = dto.indexes();
 
@@ -81,7 +81,7 @@ public class ImageService {
     // 임시 이미지 삭제
     @Scheduled(cron = "0 0 3 * * *") // 매일 새벽 3시
     @Transactional
-    public void cleanUpTempImages() {
+    public void deleteTempImages() {
         List<Image> tempImages = imageRepository.findAllByIsTempTrue();
 
         for (Image image : tempImages) {

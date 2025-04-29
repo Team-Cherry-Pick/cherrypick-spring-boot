@@ -28,7 +28,7 @@ public class VoteService {
     private final UserRepository userRepository;
 
     @Transactional
-    public VoteResponseDTO vote(Long dealId, VoteRequestDTO request) {
+    public VoteResponseDTO createVote(Long dealId, VoteRequestDTO request) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!(principal instanceof UserDetailDTO userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
