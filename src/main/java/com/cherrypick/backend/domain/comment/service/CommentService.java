@@ -1,6 +1,7 @@
 package com.cherrypick.backend.domain.comment.service;
 
 import com.cherrypick.backend.domain.comment.dto.request.CommentRequestDTOs;
+import com.cherrypick.backend.domain.comment.dto.response.BestCommentResponseDTO;
 import com.cherrypick.backend.domain.comment.dto.response.CommentResponseDTOs;
 import com.cherrypick.backend.domain.comment.entity.Comment;
 import com.cherrypick.backend.domain.comment.entity.CommentLike;
@@ -10,8 +11,8 @@ import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.user.dto.UserDetailDTO;
-import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
+import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.CommentErrorCode;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
@@ -22,6 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +78,45 @@ public class CommentService {
         commentRepository.save(comment);
 
         return new CommentResponseDTOs.Create(comment.getCommentId(), "댓글 작성 성공");
+    }
+
+    // 베스트 댓글 조회
+    @Transactional
+    public List<BestCommentResponseDTO> getBestComments(Long dealId) {
+        boolean exists = dealRepository.existsById(dealId);
+        if (!exists) {
+            throw new BaseException(DealErrorCode.DEAL_NOT_FOUND);
+        }
+
+        List<Comment> comments = commentRepository.findAllByDealIdAndIsDeleteFalse(dealId);
+
+        // 댓글이 없는 경우
+        if (comments.isEmpty()) {
+            throw new BaseException(CommentErrorCode.NO_COMMENTS_FOUND);
+        }
+
+        List<BestCommentResponseDTO> result = comments.stream()
+                .map(comment -> {
+                    int totalLikes = commentLikeRepository.countByCommentId(comment);
+                    return new BestCommentResponseDTO(
+                            comment.getCommentId(),
+                            new com.cherrypick.backend.domain.user.vo.User(
+                                    comment.getUserId().getUserId(),
+                                    comment.getUserId().getNickname(),
+                                    null // TODO: 유저 이미지 URL
+                            ),
+                            totalLikes,
+                            comment.getContent()
+                    );
+                })
+                .sorted(
+                        Comparator.comparingInt(BestCommentResponseDTO::totalLikes).reversed()
+                                .thenComparing(BestCommentResponseDTO::commentId, Comparator.reverseOrder())
+                )
+                .limit(2)
+                .toList();
+
+        return result;
     }
 
     // 댓글 삭제 (Soft Delete)
