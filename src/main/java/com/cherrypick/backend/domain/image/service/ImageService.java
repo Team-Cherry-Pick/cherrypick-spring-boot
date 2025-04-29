@@ -11,6 +11,7 @@ import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.s3.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Service @Slf4j
 @RequiredArgsConstructor
 public class ImageService {
 
@@ -137,4 +138,21 @@ public class ImageService {
 
         return imageIds;
     }
+
+    @Transactional
+    public Image getImageByRefId(Long refId, ImageType imageType) {
+
+        var image = imageRepository.findByRefId(refId, imageType);
+        return image.orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
+    }
+
+    // 이미지 삭제
+    @Transactional
+    public ImageDeleteResponseDTO deleteImageByUserId(Long userId) {
+
+        var image = imageRepository.findByRefId(userId, ImageType.USER);
+        if(image.isEmpty()) return new ImageDeleteResponseDTO("해당 유저는 프로필 사진이 없습니다.");
+        return deleteImage(image.map(Image::getRefId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
+    }
+
 }
