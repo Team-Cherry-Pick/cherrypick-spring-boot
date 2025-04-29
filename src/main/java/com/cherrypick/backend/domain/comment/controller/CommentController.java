@@ -38,6 +38,10 @@ public class CommentController {
     }
 
     // 댓글 전체 조회
+    @Operation(
+            summary = "댓글 전체 조회 API V1",
+            description = "게시글 별 댓글을 전체 조회합니다. 삭제된 댓글도 포함되며, 기본 정렬은 최신순입니다."
+    )
     @GetMapping("/comment/{dealId}")
     public ResponseEntity<List<CommentListResponseDTO>> getCommentList(
             @PathVariable Long dealId,
