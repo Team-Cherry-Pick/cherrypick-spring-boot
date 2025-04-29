@@ -30,9 +30,6 @@ jobs:
         with:
           driver: docker-container
 
-      - name: Create .env file from Secrets
-        run: echo "${{ secrets.ENV }}" > .env
-
       - name: Build and Push Docker image (with cache)
         uses: docker/build-push-action@v5
         with:
@@ -53,6 +50,6 @@ jobs:
             docker stop spring-app || true
             docker rm spring-app || true
             docker run -d --name spring-app \
-              --env-file .env \
               -p 8080:8080 \
+              $(echo "${{ secrets.ENV }}" | sed 's/^/-e /' | tr '\n' ' ') \
               ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
