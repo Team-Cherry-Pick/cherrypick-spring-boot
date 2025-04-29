@@ -2,7 +2,7 @@ package com.cherrypick.backend.global.util;
 
 
 import com.cherrypick.backend.domain.user.entity.Role;
-import com.cherrypick.backend.domain.user.dto.UserDetailDTO;
+import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
@@ -60,11 +60,11 @@ public class JWTUtil
 
     }
 
-    public UserDetailDTO getUserDetailDTOFromAccessToken(String accessToken) {
+    public AuthenticationDetailDTO getUserDetailDTOFromAccessToken(String accessToken) {
 
         accessToken = removeBearer(accessToken);
 
-        return UserDetailDTO.builder()
+        return AuthenticationDetailDTO.builder()
                 .userId(getUserId(accessToken))
                 .nickname(getNickname(accessToken))
                 .role(Role.valueOf(getRole(accessToken)))

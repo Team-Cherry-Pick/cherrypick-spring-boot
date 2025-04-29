@@ -1,6 +1,9 @@
 package com.cherrypick.backend.domain.user.service;
 
 
+import com.cherrypick.backend.domain.image.enums.ImageType;
+import com.cherrypick.backend.domain.image.service.ImageService;
+import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
 import com.cherrypick.backend.domain.user.dto.UserRequestDTOs;
 import com.cherrypick.backend.domain.user.dto.UserResponseDTOs;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
@@ -11,25 +14,42 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor @Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ImageService imageService;
 
     public UserResponseDTOs.UpdateDTO userUpdate(UserRequestDTOs.UpdateDTO dto){
 
         // 인증된 유저의 ID를 찾음, 인증되지 않았다면 오류.
         var userId = AuthUtil.getUserDetail().userId();
+        log.info(dto.toString());
 
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+        imageService.deleteImageByUserId(userId);
+        imageService.attachImage(userId, List.of(dto.imageId()), ImageType.USER);
+
         user.setNickname(dto.nickname());
         user.setEmail(dto.email());
 
-        userRepository.save(user);
 
+        var updatedUser = userRepository.save(user);
 
-        return null;
+        return UserResponseDTOs.UpdateDTO.from(updatedUser);
+    }
+
+    public UserDetailResponseDTO getUserDetail()
+    {
+        Long userId = AuthUtil.getUserDetail().userId();
+        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+        var profileImage = imageService.getImageByRefId(userId, ImageType.USER);
+
+        return UserDetailResponseDTO.from(user, profileImage);
     }
 
     public UserResponseDTOs.NicknameValidDTO nicknameValidation(String nickname) {

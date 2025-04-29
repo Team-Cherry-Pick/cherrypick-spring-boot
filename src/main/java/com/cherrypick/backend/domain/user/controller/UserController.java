@@ -1,7 +1,11 @@
 package com.cherrypick.backend.domain.user.controller;
 
+import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
+import com.cherrypick.backend.domain.user.dto.UserRequestDTOs;
 import com.cherrypick.backend.domain.user.dto.UserResponseDTOs;
 import com.cherrypick.backend.domain.user.service.UserService;
+import com.cherrypick.backend.global.exception.BaseException;
+import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,10 +14,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@RestController
+@RestController @RequestMapping("/api/user")
 @RequiredArgsConstructor @Slf4j @Tag(name="유저 컨트롤러", description = "유저 로직을 전담")
 public class UserController {
 
@@ -33,6 +36,34 @@ public class UserController {
         return ResponseEntity.ok(userService.nicknameValidation(nickname));
     }
 
+    @Operation(
+            summary = "유저 정보 수정.",
+            description = "수정요~"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "유저 정보를 수정하였습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PatchMapping("")
+    public ResponseEntity<UserResponseDTOs.UpdateDTO> update(@Parameter(description = "유효성을 검증 받을 닉네임을 입력합니다.(파라미터)")UserRequestDTOs.UpdateDTO dto) {
+
+        dto.validate(); // 요구 조건에 맞지 않으면 오류를 일으킴.
+        return ResponseEntity.ok(userService.userUpdate(dto));
+    }
+
+    @Operation(
+            summary = "유저 정보 수정.",
+            description = "수정요~"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "유저 정보를 수정하였습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("")
+    public ResponseEntity<UserDetailResponseDTO> getUserDetail()
+    {
+        return ResponseEntity.ok(userService.getUserDetail());
+    }
 
 
 

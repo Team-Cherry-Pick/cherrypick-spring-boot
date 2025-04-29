@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Builder
-public record UserDetailDTO(
+public record AuthenticationDetailDTO(
         Long userId,
         String nickname,
         Role role
