@@ -11,6 +11,7 @@ import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.s3.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Service @Slf4j
 @RequiredArgsConstructor
 public class ImageService {
 
@@ -27,7 +28,7 @@ public class ImageService {
     private final S3Uploader s3Uploader;
 
     // 이미지 업로드
-    public List<ImageUploadResponseDTO> uploadImages(ImageUploadRequestDTO dto) {
+    public List<ImageUploadResponseDTO> createImages(ImageUploadRequestDTO dto) {
         MultipartFile[] images = dto.images();
         Integer[] indexes = dto.indexes();
 
@@ -81,7 +82,7 @@ public class ImageService {
     // 임시 이미지 삭제
     @Scheduled(cron = "0 0 3 * * *") // 매일 새벽 3시
     @Transactional
-    public void cleanUpTempImages() {
+    public void deleteTempImages() {
         List<Image> tempImages = imageRepository.findAllByIsTempTrue();
 
         for (Image image : tempImages) {
@@ -118,4 +119,40 @@ public class ImageService {
             image.setImageIndex(imageUrl.indexes());
         }
     }
+
+    // 크롤링용 매서드
+    public List<Long> saveImageUrls(List<String> imgUrls) {
+
+        List<Long> imageIds = new ArrayList<>();
+        int cnt = 0;
+        for(String imgUrl : imgUrls) {
+
+            var img = Image.builder()
+                    .imageIndex(cnt++)
+                    .imageUrl(imgUrl)
+                    .isTemp(true)
+                    .build();
+
+            imageIds.add(imageRepository.save(img).getImageId());
+        }
+
+        return imageIds;
+    }
+
+    @Transactional
+    public Image getImageByRefId(Long refId, ImageType imageType) {
+
+        var image = imageRepository.findByRefId(refId, imageType);
+        return image.orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
+    }
+
+    // 이미지 삭제
+    @Transactional
+    public ImageDeleteResponseDTO deleteImageByUserId(Long userId) {
+
+        var image = imageRepository.findByRefId(userId, ImageType.USER);
+        if(image.isEmpty()) return new ImageDeleteResponseDTO("해당 유저는 프로필 사진이 없습니다.");
+        return deleteImage(image.map(Image::getRefId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
+    }
+
 }

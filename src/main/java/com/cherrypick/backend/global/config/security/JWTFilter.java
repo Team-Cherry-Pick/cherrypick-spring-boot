@@ -26,8 +26,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         //Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-
-            System.out.println("token null");
+            log.trace(":::: JWTFilter : Token NULL");
             filterChain.doFilter(request, response);
 
             return;
@@ -39,7 +38,7 @@ public class JWTFilter extends OncePerRequestFilter {
         //토큰 소멸 시간 검증
         if (jwtUtil.isExpired(token)) {
 
-            System.out.println("token expired");
+            log.trace(":::: JWTFilter : Token Expired");
             filterChain.doFilter(request, response);
 
             return;
@@ -47,12 +46,10 @@ public class JWTFilter extends OncePerRequestFilter {
 
         var userDetailDTO = jwtUtil.getUserDetailDTOFromAccessToken(token);
 
-        //스프링 시큐리티 인증 토큰 생성
+        // 스프링 시큐리티 인증 토큰 생성
         Authentication authToken = new UsernamePasswordAuthenticationToken(userDetailDTO, null, userDetailDTO.getAuthorities());
-        //세션에 사용자 등록
+        // 사용자 등록 완료.
         SecurityContextHolder.getContext().setAuthentication(authToken);
-
-        log.info("JWT 등록 완료");
 
         filterChain.doFilter(request, response);
     }

@@ -3,6 +3,8 @@ package com.cherrypick.backend.domain.image.repository;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,4 +19,9 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     // 게시글 이미지 전체조회
     List<Image> findByRefIdAndImageTypeOrderByImageIndexAsc(Long refId, ImageType imageType);
+
+    // 유저 이미지 조회
+    @Query(value = "SELECT * FROM image WHERE ref_id=:refId and image_type=:imageType", nativeQuery = true)
+    Optional<Image> findByRefId(@Param("refId")Long refId, @Param("imageType") ImageType imageType);
+
 }
