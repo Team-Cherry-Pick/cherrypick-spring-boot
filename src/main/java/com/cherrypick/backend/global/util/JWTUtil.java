@@ -110,7 +110,7 @@ public class JWTUtil
         var cookie = new Cookie("refresh", value);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         return cookie;
     }
 
