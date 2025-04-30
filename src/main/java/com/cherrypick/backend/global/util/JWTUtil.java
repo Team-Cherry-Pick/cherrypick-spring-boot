@@ -7,11 +7,13 @@ import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 import java.util.UUID;
 
@@ -106,12 +108,14 @@ public class JWTUtil
                 .compact();
     }
 
-    public Cookie createRefreshCookie(String value){
-        var cookie = new Cookie("refresh", value);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        return cookie;
+    public ResponseCookie createRefreshCookie(String value){
+        return ResponseCookie.from("refreshToken", value)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(Duration.ofDays(14))
+                .build();
     }
 
 }
