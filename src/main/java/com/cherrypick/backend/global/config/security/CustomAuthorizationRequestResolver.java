@@ -34,6 +34,8 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
     private OAuth2AuthorizationRequest customize(OAuth2AuthorizationRequest authRequest, HttpServletRequest request) {
         if (authRequest == null) return null;
 
+        log.info(":::: 신규 로그인 요청이 발생하였습니다 ::::");
+
         // redirect : 유저가 이전에 방문했던 페이지. 로그인 성공 시 해당 URL 로 리다이렉트
         // url을 Base64로 인코딩하여 state에 붙여줌.
         String redirect = Base64.getUrlEncoder().encodeToString(request.getParameter("redirect").getBytes());

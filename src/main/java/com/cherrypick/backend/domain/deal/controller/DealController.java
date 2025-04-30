@@ -6,6 +6,7 @@ import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchResponseDTO;
+import com.cherrypick.backend.domain.deal.service.DealCrawlService;
 import com.cherrypick.backend.domain.deal.service.DealService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +23,7 @@ import java.util.List;
 public class DealController {
 
     private final DealService dealService;
+    private final DealCrawlService dealCrawlService;
 
     // 게시글 생성
     @Operation(
@@ -92,5 +94,16 @@ public class DealController {
             @RequestParam(value = "version", defaultValue = "v1") String version) {
 
         return ResponseEntity.ok(dealService.deleteDeal(dealId));
+    }
+
+    // 크롤링 API
+    @GetMapping("/crawl-board")
+    public String crawlBoard(String count) {
+        try {
+            dealCrawlService.crawlAndSaveBoard(Integer.parseInt(count));
+            return "게시글 크롤링 및 저장 완료";
+        } catch (Exception e) {
+            return "오류 발생: " + e.getMessage();
+        }
     }
 }

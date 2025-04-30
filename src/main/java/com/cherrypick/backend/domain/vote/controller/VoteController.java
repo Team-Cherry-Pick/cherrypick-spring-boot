@@ -27,7 +27,7 @@ public class VoteController {
             @RequestBody VoteRequestDTO dto,
             @RequestParam(value = "version", defaultValue = "v1") String version
     ) {
-        VoteResponseDTO response = voteService.vote(dealId, dto);
+        VoteResponseDTO response = voteService.createVote(dealId, dto);
         return ResponseEntity.ok(response);
     }
 }

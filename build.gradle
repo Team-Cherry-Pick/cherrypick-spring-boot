@@ -65,6 +65,14 @@ dependencies {
     // 이미지 압축 & 리사이징 라이브러리
     implementation 'net.coobird:thumbnailator:0.4.14'
 
+    // Crawler
+    implementation 'org.jsoup:jsoup:1.15.4'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.19.1'
+    implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
+
+    // 재컴파일 하지 않아도 즉시 적용
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
     // Logback
     // implementation 'net.logstash.logback:logstash-logback-encoder:7.3'
 

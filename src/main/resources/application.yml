@@ -15,12 +15,16 @@ spring:
     driver-class-name: ${DATASOURCE_DRIVER_CLASS_NAME}
 
   jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
     hibernate:
       ddl-auto: update
 
   data:
     redis:
-      host: localhost
+      host: ${REDIS_HOST}
       port: 6379
       lettuce:
         pool:
@@ -51,7 +55,7 @@ spring:
   jwt:
     access:
       key: ohvenatorbeatussantustuamfadipardiatcortuusnevictusfiatmorte
-      period: 3600000
+      period: 360000000
     refresh:
       key: telllmegoodhunterofthechurchhaveyouseenthelightaremychurchhunterswerehonorablespartansihopetobe
       period: 604800000
@@ -60,6 +64,10 @@ slack:
   webhook:
     url: ${SLACK_WEBHOOK_URL}
 
+openai:
+  api-key: ${OPENAI_API_KEY}
+  api-url: ${OPENAI_API_URL}
+
 aws:
   s3:
     region: ap-northeast-2
@@ -67,4 +75,8 @@ aws:
     secret-key: ${S3_SECRET_KEY}
     bucket: ${BUCKET_NAME}
 
-
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql: trace
+    org.hibernate.orm.jdbc.bind: trace  # Hibernate 6.x 이상에서 파라미터 값 출력에 필요

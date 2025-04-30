@@ -1,0 +1,33 @@
+package com.cherrypick.backend.domain.deal.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity @Getter @Setter @ToString
+@AllArgsConstructor @NoArgsConstructor
+@Builder
+public class DealTag
+{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long dealTagId;
+
+    // 진짜 DB 컬럼 매핑 (ID만 들고 있는 필드)
+    @Column(name = "deal_id", nullable = false)
+    private Long dealId;
+
+    @Column(name = "hash_tag_id", nullable = false)
+    private Long hashTagId;
+
+
+    // 쿼리 최적화를 위해 객체는 분리.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deal_id", insertable = false, updatable = false)
+    private Deal deal;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hash_tag_id", insertable = false, updatable = false)
+    private HashTag hashTag;
+
+}
+

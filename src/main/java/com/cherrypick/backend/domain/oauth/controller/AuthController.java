@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -53,7 +54,7 @@ public class AuthController {
 
                       // 인코딩해서 redirect 파라미터에 붙임
                       const encoded = encodeURIComponent(safeRedirect);
-                      const url = `http://localhost:8080/oauth2/authorization/kakao?redirect=${encoded}`;
+                      const url = `http://repik.kr:8080/oauth2/authorization/kakao?redirect=${encoded}`;
 
                       window.location.href = url;
                     }
@@ -99,7 +100,7 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/refresh")
-    public AuthResponseDTOs.AccessToken auth(HttpServletRequest request, HttpServletResponse response)
+    public ResponseEntity<AuthResponseDTOs.AccessToken> auth(HttpServletRequest request, HttpServletResponse response)
     {
         // 쿠키에서 refresh를 찾아낸다.
         var cookies = Arrays.stream(request.getCookies()).toList();
@@ -118,7 +119,7 @@ public class AuthController {
         response.addCookie(jwtUtil.createRefreshCookie(newRefreshToken));
         authService.saveResfreshToken(userId, newRefreshToken);
 
-        return accessToken;
+        return ResponseEntity.ok(accessToken);
     }
 
     @Operation(
