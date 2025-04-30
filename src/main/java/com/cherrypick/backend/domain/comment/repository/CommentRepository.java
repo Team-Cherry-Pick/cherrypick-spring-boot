@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
@@ -48,5 +50,18 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     ORDER BY c.createdAt ASC
     """)
     List<Comment> findReplies(Long parentId);
+
+    @Query("SELECT c.dealId.dealId, COUNT(c) FROM Comment c WHERE c.dealId.dealId IN :dealIds AND c.isDelete = false GROUP BY c.dealId.dealId")
+    List<Object[]> countCommentsGroupedByDealId(@Param("dealIds") List<Long> dealIds);
+
+    default Map<Long, Long> countByDealIdsGrouped(List<Long> dealIds) {
+        List<Object[]> result = countCommentsGroupedByDealId(dealIds);
+        return result.stream()
+                .collect(Collectors.toMap(
+                        r -> (Long) r[0],
+                        r -> (Long) r[1]
+                ));
+    }
+
 
 }
