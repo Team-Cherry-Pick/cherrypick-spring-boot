@@ -336,8 +336,8 @@ public class DealService {
                 categoryNames,
                 deal.getTitle(),
                 infoTags,
-                deal.getShipping(), // TODO: 한화 int 처리
-                deal.getPrice(), // TODO: 한화 int 처리
+                deal.getShipping(),
+                deal.getPrice(),
                 deal.getContent(),
                 (int) totalViews,
                 (int) metrics[0], // likeCount
