@@ -8,6 +8,7 @@ import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
+import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchResponseDTO;
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.enums.PriceType;
@@ -34,6 +35,8 @@ import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -124,68 +127,49 @@ public class DealService {
         return new DealResponseDTOs.Create(saved.getDealId(), "핫딜 게시글 생성 성공");
     }
 
-    // 게시글 전체조회 (검색)
+    // 게시글 전체조회 (검색, 페이징)
     @Transactional
-    public List<DealSearchResponseDTO> searchDeals(DealSearchRequestDTO dto) {
+    public DealSearchPageResponseDTO searchDeals(DealSearchRequestDTO dto, int page, int size) {
 
-        // 카테고리 유효성 검사
-        if (dto.getCategoryId() != null &&
-                !categoryRepository.existsById(dto.getCategoryId())) {
+        if (dto.getCategoryId() != null && !categoryRepository.existsById(dto.getCategoryId())) {
             throw new BaseException(DealErrorCode.CATEGORY_NOT_FOUND);
         }
 
-        // 할인 방법 유효성 검사
         if (dto.getDiscountIds() != null && !dto.getDiscountIds().isEmpty()) {
             List<Long> foundDiscountIds = discountRepository.findAllById(dto.getDiscountIds())
-                    .stream()
-                    .map(Discount::getDiscountId)
-                    .toList();
-
+                    .stream().map(Discount::getDiscountId).toList();
             if (foundDiscountIds.size() != dto.getDiscountIds().size()) {
                 throw new BaseException(DealErrorCode.DISCOUNT_NOT_FOUND);
             }
         }
 
-        // 스토어 유효성 검사
         if (dto.getStoreIds() != null && !dto.getStoreIds().isEmpty()) {
             List<Long> foundStoreIds = storeRepository.findAllById(dto.getStoreIds())
-                    .stream()
-                    .map(Store::getStoreId)
-                    .toList();
-
+                    .stream().map(Store::getStoreId).toList();
             if (foundStoreIds.size() != dto.getStoreIds().size()) {
                 throw new BaseException(DealErrorCode.STORE_NOT_FOUND);
             }
         }
 
-        // 시간 범위 필터
         LocalDateTime startDate = resolveStartDate(dto.getTimeRange());
         LocalDateTime endDate = LocalDateTime.now();
 
-        // 가격 필터
         Double minPrice = dto.getPriceFilter() != null ? dto.getPriceFilter().minPrice() : null;
         Double maxPrice = dto.getPriceFilter() != null ? dto.getPriceFilter().maxPrice() : null;
-        PriceType priceType = dto.getPriceFilter() != null
-                ? dto.getPriceFilter().priceType()
-                : null;
+        PriceType priceType = dto.getPriceFilter() != null ? dto.getPriceFilter().priceType() : null;
 
-        // 기본 필터
         boolean viewSoldOut = dto.getFilters() != null && dto.getFilters().viewSoldOut();
         boolean freeShipping = dto.getFilters() != null && dto.getFilters().freeShipping();
         boolean variousPrice = dto.isVariousPrice();
 
-        // 할인, 스토어
-        List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty())
-                ? null : dto.getDiscountIds();
-        List<Long> storeIds = (dto.getStoreIds() == null || dto.getStoreIds().isEmpty())
-                ? null : dto.getStoreIds();
+        List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty()) ? null : dto.getDiscountIds();
+        List<Long> storeIds = (dto.getStoreIds() == null || dto.getStoreIds().isEmpty()) ? null : dto.getStoreIds();
 
-        // 가격 정렬 여부 판단
         boolean sortPriceHigh = dto.getSortType() == SortType.PRICE_HIGH;
         boolean sortPriceLow = dto.getSortType() == SortType.PRICE_LOW;
 
-        // DB 조회 + 가격 정렬 (쿼리에서 처리)
-        List<Deal> deals = dealRepository.searchDeals(
+        Pageable pageable = PageRequest.of(page, size + 1);
+        List<Deal> deals = dealRepository.searchDealsWithPaging(
                 dto.getCategoryId(),
                 dto.getKeyword(),
                 viewSoldOut,
@@ -199,20 +183,24 @@ public class DealService {
                 discountIds,
                 storeIds,
                 sortPriceHigh,
-                sortPriceLow
+                sortPriceLow,
+                pageable
         );
 
-        // 저가순, 고가순을 제외한 정렬
-        if (!sortPriceHigh && !sortPriceLow) {
-            deals = sortDeals(deals, dto.getSortType());
+        boolean hasNext = deals.size() > size;
+        if (hasNext) {
+            deals = deals.subList(0, size);
         }
 
-        // 응답 매핑
-        return deals.stream().map(deal -> {
-            // 조회수는 증가 없이 조회만
+        List<DealSearchResponseDTO> responseList = deals.stream().map(deal -> {
             String key = "deal:view:" + deal.getDealId();
             Object redisVal = redisTemplate.opsForValue().get(key);
-            long viewCount = redisVal == null ? 0L : ((Number) redisVal).longValue();
+            long viewCount = 0L;
+            if (redisVal != null) {
+                try {
+                    viewCount = Long.parseLong(redisVal.toString());
+                } catch (NumberFormatException ignored) {}
+            }
 
             long likeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
             long commentCount = commentRepository.countByDealId_DealIdAndIsDeleteFalse(deal.getDealId());
@@ -221,7 +209,6 @@ public class DealService {
                     .findTopByRefIdAndImageTypeOrderByImageIndexAsc(deal.getDealId(), ImageType.DEAL)
                     .orElse(null);
 
-            // 썸네일 가져오기
             ImageUrl imageUrl = null;
             if (firstImage != null) {
                 imageUrl = new ImageUrl(
@@ -244,6 +231,8 @@ public class DealService {
                     deal.isSoldOut()
             );
         }).toList();
+
+        return new DealSearchPageResponseDTO(responseList, hasNext);
     }
 
     // 게시글 상세조회
