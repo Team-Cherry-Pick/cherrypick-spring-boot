@@ -24,4 +24,14 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query(value = "SELECT * FROM image WHERE ref_id=:refId and image_type=:imageType", nativeQuery = true)
     Optional<Image> findByRefId(@Param("refId")Long refId, @Param("imageType") ImageType imageType);
 
+    @Query("""
+    SELECT i FROM Image i
+    WHERE i.refId IN :dealIds AND i.imageType = :imageType
+    AND i.imageIndex = (
+        SELECT MIN(i2.imageIndex) FROM Image i2 
+        WHERE i2.refId = i.refId AND i2.imageType = :imageType
+    )
+""")
+    List<Image> findTopImagesByDealIds(@Param("dealIds") List<Long> dealIds, @Param("imageType") ImageType imageType);
+
 }

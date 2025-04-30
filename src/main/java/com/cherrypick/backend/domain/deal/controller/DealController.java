@@ -5,6 +5,7 @@ import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
+import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchResponseDTO;
 import com.cherrypick.backend.domain.deal.service.DealCrawlService;
 import com.cherrypick.backend.domain.deal.service.DealService;
@@ -45,15 +46,17 @@ public class DealController {
             description = "핫딜 게시글을 전체 조회합니다. 필터를 보낼 경우 부분 조회(검색) 기능을 합니다."
     )
     @PostMapping("/search/deal")
-    public ResponseEntity<List<DealSearchResponseDTO>> searchDeals(
+    public ResponseEntity<DealSearchPageResponseDTO> searchDeals(
             @RequestParam(value = "version", defaultValue = "v1") String version,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "40") int size,
             @RequestBody(required = false) DealSearchRequestDTO request) {
 
         if (request == null) {
-            request = new DealSearchRequestDTO(); // 비었을 시 전체조회
+            request = new DealSearchRequestDTO();
         }
 
-        List<DealSearchResponseDTO> response = dealService.searchDeals(request);
+        DealSearchPageResponseDTO response = dealService.searchDeals(request, page, size);
         return ResponseEntity.ok(response);
     }
 

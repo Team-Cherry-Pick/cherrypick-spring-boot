@@ -5,15 +5,21 @@ import lombok.Getter;
 @Getter
 public enum DislikeReason {
 
-    // 상품 정보 틀림
-    INCORRECT_PRODUCT_INFO,
+    // 가격이 아쉬워요
+    BAD_PRICE,
 
-    // 종료됨
-    EXPIRED_DEAL,
+    // 품질이 아쉬워요
+    BAD_QUALITY,
 
-    // 광고성 글
-    ADVERTISEMENT,
+    // 상품 정보가 틀렸어요
+    WRONG_INFO,
 
-    // 개인적 사유
-    PERSONAL_DISLIKE
+    // 품절 상품이에요
+    SOLD_OUT,
+
+    // 광고성 글 같아요
+    ADVERTISING,
+
+    // 기타
+    OTHER
 }
