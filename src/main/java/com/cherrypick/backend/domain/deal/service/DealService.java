@@ -42,9 +42,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -127,7 +126,7 @@ public class DealService {
         return new DealResponseDTOs.Create(saved.getDealId(), "핫딜 게시글 생성 성공");
     }
 
-    // 게시글 전체조회 (검색, 페이징)
+    // 게시글 전체조회 (검색)
     @Transactional
     public DealSearchPageResponseDTO searchDeals(DealSearchRequestDTO dto, int page, int size) {
 
@@ -192,23 +191,39 @@ public class DealService {
             deals = deals.subList(0, size);
         }
 
-        List<DealSearchResponseDTO> responseList = deals.stream().map(deal -> {
-            String key = "deal:view:" + deal.getDealId();
-            Object redisVal = redisTemplate.opsForValue().get(key);
+        List<Long> dealIds = deals.stream().map(Deal::getDealId).toList();
+
+        // Redis 조회수
+        List<String> redisKeys = dealIds.stream().map(id -> "deal:view:" + id).toList();
+        List<Object> redisResults = redisTemplate.opsForValue().multiGet(redisKeys);
+        Map<Long, Long> viewCountMap = new HashMap<>();
+        for (int i = 0; i < dealIds.size(); i++) {
+            Object val = redisResults.get(i);
             long viewCount = 0L;
-            if (redisVal != null) {
+            if (val != null) {
                 try {
-                    viewCount = Long.parseLong(redisVal.toString());
+                    viewCount = Long.parseLong(val.toString());
                 } catch (NumberFormatException ignored) {}
             }
+            viewCountMap.put(dealIds.get(i), viewCount);
+        }
 
-            long likeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
-            long commentCount = commentRepository.countByDealId_DealIdAndIsDeleteFalse(deal.getDealId());
+        // 좋아요 수
+        Map<Long, Long> likeCountMap = voteRepository.countByDealIdsAndVoteTypeGrouped(dealIds, VoteType.TRUE);
+        // 댓글 수
+        Map<Long, Long> commentCountMap = commentRepository.countByDealIdsGrouped(dealIds);
+        // 이미지
+        Map<Long, Image> imageMap = imageRepository.findTopImagesByDealIds(dealIds, ImageType.DEAL).stream()
+                .collect(Collectors.toMap(Image::getRefId, img -> img, (a, b) -> a));
 
-            Image firstImage = imageRepository
-                    .findTopByRefIdAndImageTypeOrderByImageIndexAsc(deal.getDealId(), ImageType.DEAL)
-                    .orElse(null);
+        List<DealSearchResponseDTO> responseList = deals.stream().map(deal -> {
+            Long dealId = deal.getDealId();
 
+            long viewCount = viewCountMap.getOrDefault(dealId, 0L);
+            long likeCount = likeCountMap.getOrDefault(dealId, 0L);
+            long commentCount = commentCountMap.getOrDefault(dealId, 0L);
+
+            Image firstImage = imageMap.get(dealId);
             ImageUrl imageUrl = null;
             if (firstImage != null) {
                 imageUrl = new ImageUrl(
@@ -219,7 +234,7 @@ public class DealService {
             }
 
             return new DealSearchResponseDTO(
-                    deal.getDealId(),
+                    dealId,
                     imageUrl,
                     deal.getTitle(),
                     deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
