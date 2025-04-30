@@ -54,7 +54,7 @@ public class AuthController {
 
                       // 인코딩해서 redirect 파라미터에 붙임
                       const encoded = encodeURIComponent(safeRedirect);
-                      const url = `http://repik.kr:8080/oauth2/authorization/kakao?redirect=${encoded}`;
+                      const url = `http://localhost:8080/oauth2/authorization/kakao?redirect=${encoded}`;
 
                       window.location.href = url;
                     }
@@ -105,7 +105,7 @@ public class AuthController {
         // 쿠키에서 refresh를 찾아낸다.
         var cookies = Arrays.stream(request.getCookies()).toList();
         String refreshToken = cookies.stream()
-                .filter(cookie -> cookie.getName().equals("refresh"))
+                .filter(cookie -> cookie.getName().equals("refreshToken"))
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_FOUND));
@@ -116,7 +116,7 @@ public class AuthController {
 
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
         var newRefreshToken = jwtUtil.createRefreshToken(userId);
-        response.addCookie(jwtUtil.createRefreshCookie(newRefreshToken));
+        response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
         authService.saveResfreshToken(userId, newRefreshToken);
 
         return ResponseEntity.ok(accessToken);
