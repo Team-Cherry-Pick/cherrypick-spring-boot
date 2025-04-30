@@ -46,9 +46,15 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            echo "${{ secrets.ENV }}" > ~/repik.env
+
             docker pull cpdevelopteam/repik:latest
             docker stop repik || true
             docker rm repik || true
-            docker run --name repik --network repik-net -p 8080:8080 -d \
-              $(echo "${{ secrets.ENV }}" | sed 's/^/-e /' | tr '\n' ' ') \
+
+            docker run --name repik \
+              --network repik-net \
+              -p 8080:8080 \
+              -d \
+              --env-file ~/repik.env \
               cpdevelopteam/repik:latest
