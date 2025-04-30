@@ -35,7 +35,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
+          tags: cpdevelopteam/repik:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -46,10 +46,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
-            docker stop spring-app || true
-            docker rm spring-app || true
-            docker run -d --name spring-app \
-              -p 8080:8080 \
+            docker pull cpdevelopteam/repik:latest
+            docker stop repik || true
+            docker rm repik || true
+            docker run --name repik --network repik-net -p 8080:8080 -d \
               $(echo "${{ secrets.ENV }}" | sed 's/^/-e /' | tr '\n' ' ') \
-              ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
+              cpdevelopteam/repik:latest
