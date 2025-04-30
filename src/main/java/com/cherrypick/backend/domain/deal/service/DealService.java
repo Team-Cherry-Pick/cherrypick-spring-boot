@@ -41,6 +41,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -266,11 +267,17 @@ public class DealService {
             categoryId = category.getParentId();  // 부모 카테고리로 이동
         }
 
-        // User 엔티티 정보
+        // 이미지 조회
+        Optional<Image> userImageOpt = imageRepository.findByRefId(
+                deal.getUserId().getUserId(),
+                ImageType.USER
+        );
+
+        // User VO 생성
         com.cherrypick.backend.domain.user.vo.User userVo = new com.cherrypick.backend.domain.user.vo.User(
                 deal.getUserId().getUserId(),
                 deal.getUserId().getNickname(),
-                null // TODO: 이미지 URL
+                userImageOpt.map(Image::getImageUrl).orElse(null)
         );
 
         // Store 정보
@@ -298,7 +305,15 @@ public class DealService {
         String viewKey = "deal:view:" + deal.getDealId();
         redisTemplate.opsForValue().increment(viewKey, 1);
         Object redisVal = redisTemplate.opsForValue().get(viewKey);
-        long totalViews = redisVal == null ? 0L : ((Number) redisVal).longValue();
+
+        long totalViews = 0L;
+        if (redisVal != null) {
+            try {
+                totalViews = Long.parseLong(redisVal.toString());
+            } catch (NumberFormatException e) {
+                totalViews = 0L; // 파싱 실패하면 안전하게 0으로 처리
+            }
+        }
 
         // 매트릭스 조회 (조회수, 좋아요 수, 싫어요 수, 댓글 수)
         long[] metrics = getDealMetrics(deal);

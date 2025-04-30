@@ -12,7 +12,10 @@ import com.cherrypick.backend.domain.comment.repository.CommentLikeRepository;
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
-import com.cherrypick.backend.domain.user.dto.UserDetailDTO;
+import com.cherrypick.backend.domain.image.entity.Image;
+import com.cherrypick.backend.domain.image.enums.ImageType;
+import com.cherrypick.backend.domain.image.repository.ImageRepository;
+import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -27,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,7 @@ public class CommentService {
     private final DealRepository dealRepository;
     private final UserRepository userRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final ImageRepository imageRepository;
 
     // 댓글 생성
     @Transactional
@@ -43,7 +48,7 @@ public class CommentService {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof UserDetailDTO userDetails)) {
+        if (!(principal instanceof AuthenticationDetailDTO userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
         }
 
@@ -134,12 +139,19 @@ public class CommentService {
         List<BestCommentResponseDTO> result = comments.stream()
                 .map(comment -> {
                     int totalLikes = commentLikeRepository.countByCommentId(comment);
+
+                    // 프로필 이미지 조회
+                    Optional<Image> imageOpt = imageRepository.findByRefId(
+                            comment.getUserId().getUserId(),
+                            ImageType.USER
+                    );
+
                     return new BestCommentResponseDTO(
                             comment.getCommentId(),
                             new com.cherrypick.backend.domain.user.vo.User(
                                     comment.getUserId().getUserId(),
                                     comment.getUserId().getNickname(),
-                                    null // TODO: 유저 이미지 URL
+                                    imageOpt.map(Image::getImageUrl).orElse(null)
                             ),
                             totalLikes,
                             comment.getContent()
@@ -160,7 +172,7 @@ public class CommentService {
     public CommentResponseDTOs.Delete deleteComment(Long commentId) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof UserDetailDTO userDetails)) {
+        if (!(principal instanceof AuthenticationDetailDTO userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
         }
 
@@ -185,7 +197,7 @@ public class CommentService {
     public CommentResponseDTOs.Like likeComment(CommentRequestDTOs.Like request) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof UserDetailDTO userDetails)) {
+        if (!(principal instanceof AuthenticationDetailDTO userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
         }
 
@@ -226,13 +238,18 @@ public class CommentService {
         int totalLikes = commentLikeRepository.countByCommentId(comment);
         int totalReplys = replies.size();
 
+        Optional<Image> imageOpt = imageRepository.findByRefId(
+                comment.getUserId().getUserId(),
+                ImageType.USER
+        );
+
         return new CommentListResponseDTO(
                 comment.getCommentId(),
                 comment.getParentId(),
                 new com.cherrypick.backend.domain.user.vo.User(
                         comment.getUserId().getUserId(),
                         comment.getUserId().getNickname(),
-                        null
+                        imageOpt.map(Image::getImageUrl).orElse(null)
                 ),
                 comment.getContent(),
                 totalLikes,
