@@ -44,6 +44,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 리프레시 토큰을 Redis에 저장함.
         authService.saveResfreshToken(userInfo.userId(), refreshToken);
 
+        log.info(":::: 로그인이 성공하였습니다 !");
+        log.info(":::: 인증/인가를 위한 Refresh/Access Token이 발급됩니다.");
+        if(userInfo.isNewUser()) log.info(":::: 해당 유저는 신규 유저입니다.");
+
         var responseDTO = OAuth2LoginSuccessResponseDTO.builder()
                 .userId(userInfo.userId())
                 .accessToken(accessToken)

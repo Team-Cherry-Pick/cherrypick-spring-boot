@@ -2,10 +2,7 @@ package com.cherrypick.backend.domain.deal.dto.response;
 
 import com.cherrypick.backend.domain.deal.vo.Price;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -13,6 +10,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class DealSearchResponseDTO {
 
     private Long dealId;
@@ -25,4 +23,7 @@ public class DealSearchResponseDTO {
     private int totalLikes;
     private int totalComments;
     private boolean isSoldout;
+
+
+
 }

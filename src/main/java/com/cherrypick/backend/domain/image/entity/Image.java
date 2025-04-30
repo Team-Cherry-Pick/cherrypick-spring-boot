@@ -2,12 +2,11 @@ package com.cherrypick.backend.domain.image.entity;
 
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
-@Getter
-@Setter
+@Getter @RequiredArgsConstructor
+@Setter @AllArgsConstructor @Builder
 public class Image {
 
     @Id

@@ -68,6 +68,9 @@ public class Deal {
     private String storeName;
     private String discountName;
 
+    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DealTag> dealTags = new ArrayList<>();
+
     @Builder.Default
     private Boolean isDelete = false;
 

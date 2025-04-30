@@ -24,7 +24,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: ${REDIS_HOST}
       port: 6379
       lettuce:
         pool:
@@ -55,7 +55,7 @@ spring:
   jwt:
     access:
       key: ohvenatorbeatussantustuamfadipardiatcortuusnevictusfiatmorte
-      period: 3600000
+      period: 360000000
     refresh:
       key: telllmegoodhunterofthechurchhaveyouseenthelightaremychurchhunterswerehonorablespartansihopetobe
       period: 604800000
@@ -63,6 +63,10 @@ spring:
 slack:
   webhook:
     url: ${SLACK_WEBHOOK_URL}
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+  api-url: ${OPENAI_API_URL}
 
 aws:
   s3:
