@@ -15,8 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Component @Slf4j @RequiredArgsConstructor
@@ -48,14 +51,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info(":::: 인증/인가를 위한 Refresh/Access Token이 발급됩니다.");
         if(userInfo.isNewUser()) log.info(":::: 해당 유저는 신규 유저입니다.");
 
-        var responseDTO = OAuth2LoginSuccessResponseDTO.builder()
-                .userId(userInfo.userId())
-                .accessToken(accessToken)
-                .isNewUser(userInfo.isNewUser())
-                .redirectURL(redirectUrl)
-                .build();
+        String frontendUrl = UriComponentsBuilder
+                .fromUriString("/login-success/")
+                .queryParam("userId", userInfo.userId())
+                .queryParam("isNewUser", userInfo.isNewUser())
+                .build()
+                .toUriString();
 
-        response.getWriter().write(objectMapper.writeValueAsString(responseDTO));
+        response.sendRedirect(frontendUrl); // 클라이언트를 해당 주소로 리디렉트
 
     }
 
