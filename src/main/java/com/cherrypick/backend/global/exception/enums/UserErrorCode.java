@@ -9,6 +9,9 @@ public enum UserErrorCode implements BaseErrorCode {
 
     // 400 BAD REQUEST
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 가입된 이메일입니다."),
+    NICKNAME_NOT_VALID(HttpStatus.BAD_REQUEST, "닉네임이 형식에 맞지 않습니다."),
+    EMAIL_NOT_VALID(HttpStatus.BAD_REQUEST, "이메일이 형식에 맞지 않습니다."),
+    MISSING_REQUIRED_PARAMETER(HttpStatus.BAD_REQUEST, "필요한 정보가 NULL입니다."),
     REFRESH_TOKEN_NOT_VALID(HttpStatus.BAD_REQUEST, "리프레시 토큰이 유효하지 않습니다."),
     REFRESH_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "리프레시 토큰이 만료되었습니다."),
 
