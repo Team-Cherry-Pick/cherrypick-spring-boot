@@ -8,7 +8,7 @@ import java.util.List;
 @Builder
 public record UserBehaviorLogListDTO(
 
-        List<UserBehaviorLogDTO> userBehaviorLogDTOs
+        List<UserBehaviorLogDTO> userBehaviorLogs
 
 ) {
     @Builder

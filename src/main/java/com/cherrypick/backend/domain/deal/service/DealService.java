@@ -447,7 +447,7 @@ public class DealService {
     }
 
     // 인포 태그 생성 메소드
-    private static List<String> getInfoTags(Deal deal) {
+    public static List<String> getInfoTags(Deal deal) {
         List<String> infoTags = new ArrayList<>();
 
         // 배송 타입이 FREE이면 #무료배송 추가
