@@ -199,7 +199,7 @@ public class RecommenderService
         var key = "user:" + userId + ":interests";
 
         // 관심 해쉬태그 불러오기
-        var userHashTag = redisTemplate.opsForZSet().reverseRange(key,1, 10);
+        var userHashTag = redisTemplate.opsForZSet().reverseRange(key,1, 2);
         var userHashTagIds = userHashTag.stream().map(u -> Long.valueOf(u.toString())).toList();//userHashTag.stream().map(t -> Integer.parseInt(t))
 
         // 각 관심해쉬태그에서 상품 두개씩 가져오기
