@@ -47,9 +47,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 리프레시 토큰을 Redis에 저장함.
         authService.saveResfreshToken(userInfo.userId(), refreshToken);
 
-        log.info(":::: 로그인이 성공하였습니다 !");
-        log.info(":::: 인증/인가를 위한 Refresh/Access Token이 발급됩니다.");
-        if(userInfo.isNewUser()) log.info(":::: 해당 유저는 신규 유저입니다.");
+        System.out.println(":::: 로그인이 성공하였습니다 !");
+        System.out.println(":::: Refresh/Access Token이 발급됩니다.");
+        if(userInfo.isNewUser()) System.out.println(":::: " +userInfo.userId() +"번 유저는 신규 유저입니다.");
 
         String frontendUrl = UriComponentsBuilder
                 .fromUriString("http://localhost:3000/login-success/")

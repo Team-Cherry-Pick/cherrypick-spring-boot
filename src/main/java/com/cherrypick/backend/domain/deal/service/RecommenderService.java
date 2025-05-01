@@ -55,9 +55,8 @@ public class RecommenderService
     // 유저 행동 로그 생성
     public String addUserBehaviorLog(DealRequestDTOs.UserBehaviorDTO behaviorDTO)
     {
-        log.info(behaviorDTO.toString());
+        System.out.println("::::: 행동 로그 삽입 : " + behaviorDTO.toString());
         var rId = redisTemplate.opsForStream().add(STREAM_NAME, behaviorDTO.toMap());
-        log.info(rId.getValue());
 
         return rId.getValue();
     }
@@ -65,7 +64,6 @@ public class RecommenderService
     // 모든 로그를 읽어와 유저의 것으로 정제 후 반환
     public UserBehaviorLogListDTO getLogByUserId(Long userId)
     {
-        log.info("로그조회 시작");
         StreamOperations<String, String, String> streamOps = redisTemplate.opsForStream();
         // 모든 메시지 조회: ID 범위 "-" to "+"
         List<MapRecord<String, String, String>> records = streamOps.range(STREAM_NAME, Range.unbounded());
@@ -199,12 +197,25 @@ public class RecommenderService
         var key = "user:" + userId + ":interests";
 
         // 관심 해쉬태그 불러오기
-        var userHashTag = redisTemplate.opsForZSet().reverseRange(key,1, 2);
+        var userHashTag = redisTemplate.opsForZSet().reverseRange(key,0, 1);
+        var userHashTag2 = redisTemplate.opsForZSet().reverseRange(key,2, 10);
         var userHashTagIds = userHashTag.stream().map(u -> Long.valueOf(u.toString())).toList();//userHashTag.stream().map(t -> Integer.parseInt(t))
+        var userHashTagIds2 = userHashTag2.stream().map(u -> Long.valueOf(u.toString())).toList();//userHashTag.stream().map(t -> Integer.parseInt(t))
 
         // 각 관심해쉬태그에서 상품 두개씩 가져오기
-        var deals = dealRepository.findDealsByTagId(userHashTagIds, 20);
+        var deals = dealRepository.findDealsByTagId(userHashTagIds, 10);
+        var deals2 = dealRepository.findDealsByTagId(userHashTagIds2, 10);
 
+        System.out.println("::::: 유저가 관심 있어할만한 태그 :::::");
+        for(var deal : deals){
+            System.out.println(deal.getTitle());
+        }
+        System.out.println("\n\n::::: 유저가 관심 없을 수도 있는 태그 :::::");
+        for(var deal : deals2){
+            System.out.println(deal.getTitle());
+        }
+
+        deals.addAll(deals2);
 
         List<Long> dealIds = deals.stream().map(Deal::getDealId).toList();
 
