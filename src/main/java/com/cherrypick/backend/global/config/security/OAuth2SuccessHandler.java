@@ -39,7 +39,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if(userInfo.isNewUser()) redirectUrl = userInfoUpdateURL;
 
         // 엑세스 토큰과 리프레시 토큰
-        String accessToken = "Bearer " + jwtUtil.createAccessToken(userInfo.userId(), userInfo.role(), userInfo.nickname());
+        String accessToken =  jwtUtil.createAccessToken(userInfo.userId(), userInfo.role(), userInfo.nickname());
         String refreshToken = jwtUtil.createRefreshToken(userInfo.userId());
 
         // 리프레시 토큰은 쿠키로 담아줌. (서버에서 읽을 수만 있으면 장땡
@@ -53,6 +53,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String frontendUrl = UriComponentsBuilder
                 .fromUriString("http://localhost:3000/login-success/")
+                .queryParam("accessToken", accessToken)
                 .queryParam("userId", userInfo.userId())
                 .queryParam("isNewUser", userInfo.isNewUser())
                 .queryParam("redirectUrl", redirectUrl)
