@@ -2,6 +2,7 @@ package com.cherrypick.backend.domain.deal.service;
 
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.dto.request.DealRequestDTOs;
+import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.UserBehaviorLogListDTO;
 import com.cherrypick.backend.domain.deal.dto.response.UserInterestListDTO;
@@ -188,11 +189,9 @@ public class RecommenderService
 
     }
 
-    public List<DealSearchResponseDTO> getInterestBoard(Long userId)
+    public DealSearchPageResponseDTO getInterestBoard(Long userId)
     {
         var key = "user:" + userId + ":interests";
-
-        var response = new HashMap<String, Object>();
 
         // 관심 해쉬태그 불러오기
         var userHashTag = redisTemplate.opsForZSet().reverseRange(key,1, 10);
@@ -202,21 +201,39 @@ public class RecommenderService
         var deals = dealRepository.findDealsByTagId(userHashTagIds, 20);
 
 
-        // 응답 매핑
-        return deals.stream().map(deal -> {
-            // 조회수는 증가 없이 조회만
-            String viewKey = "deal:view:" + deal.getDealId();
-            Object redisVal = redisTemplate.opsForValue().get(viewKey);
-            long viewCount = redisVal == null ? 0L : ((Number) redisVal).longValue();
+        List<Long> dealIds = deals.stream().map(Deal::getDealId).toList();
 
-            long likeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
-            long commentCount = commentRepository.countByDealId_DealIdAndIsDeleteFalse(deal.getDealId());
+        // Redis 조회수
+        List<String> redisKeys = dealIds.stream().map(id -> "deal:view:" + id).toList();
+        List<Object> redisResults = redisTemplate.opsForValue().multiGet(redisKeys);
+        Map<Long, Long> viewCountMap = new HashMap<>();
+        for (int i = 0; i < dealIds.size(); i++) {
+            Object val = redisResults.get(i);
+            long viewCount = 0L;
+            if (val != null) {
+                try {
+                    viewCount = Long.parseLong(val.toString());
+                } catch (NumberFormatException ignored) {}
+            }
+            viewCountMap.put(dealIds.get(i), viewCount);
+        }
 
-            Image firstImage = imageRepository
-                    .findTopByRefIdAndImageTypeOrderByImageIndexAsc(deal.getDealId(), ImageType.DEAL)
-                    .orElse(null);
+        // 좋아요 수
+        Map<Long, Long> likeCountMap = voteRepository.countByDealIdsAndVoteTypeGrouped(dealIds, VoteType.TRUE);
+        // 댓글 수
+        Map<Long, Long> commentCountMap = commentRepository.countByDealIdsGrouped(dealIds);
+        // 이미지
+        Map<Long, Image> imageMap = imageRepository.findTopImagesByDealIds(dealIds, ImageType.DEAL).stream()
+                .collect(Collectors.toMap(Image::getRefId, img -> img, (a, b) -> a));
 
-            // 썸네일 가져오기
+        List<DealSearchResponseDTO> responseList = deals.stream().map(deal -> {
+            Long dealId = deal.getDealId();
+
+            long viewCount = viewCountMap.getOrDefault(dealId, 0L);
+            long likeCount = likeCountMap.getOrDefault(dealId, 0L);
+            long commentCount = commentCountMap.getOrDefault(dealId, 0L);
+
+            Image firstImage = imageMap.get(dealId);
             ImageUrl imageUrl = null;
             if (firstImage != null) {
                 imageUrl = new ImageUrl(
@@ -227,7 +244,7 @@ public class RecommenderService
             }
 
             return new DealSearchResponseDTO(
-                    deal.getDealId(),
+                    dealId,
                     imageUrl,
                     deal.getTitle(),
                     deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
@@ -239,6 +256,8 @@ public class RecommenderService
                     deal.isSoldOut()
             );
         }).toList();
+
+        return new DealSearchPageResponseDTO(responseList, false);
 
     }
 
