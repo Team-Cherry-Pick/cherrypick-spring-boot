@@ -53,6 +53,15 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public UserDetailResponseDTO getUserDetail(Long userId)
+    {
+        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+        var profileImage = imageService.getImageByRefId(userId, ImageType.USER);
+
+        return UserDetailResponseDTO.from(user, profileImage);
+    }
+
+    @Transactional(readOnly = true)
     public UserResponseDTOs.NicknameValidDTO nicknameValidation(String nickname) {
 
         if(nickname.length() < 2) {
