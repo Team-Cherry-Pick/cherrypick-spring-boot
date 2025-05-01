@@ -52,7 +52,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if(userInfo.isNewUser()) log.info(":::: 해당 유저는 신규 유저입니다.");
 
         String frontendUrl = UriComponentsBuilder
-                .fromUriString("/login-success/")
+                .fromUriString("http://localhost:3000/login-success/")
                 .queryParam("userId", userInfo.userId())
                 .queryParam("isNewUser", userInfo.isNewUser())
                 .queryParam("redirectUrl", redirectUrl)
