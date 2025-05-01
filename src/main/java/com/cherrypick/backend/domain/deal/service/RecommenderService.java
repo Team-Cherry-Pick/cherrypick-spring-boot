@@ -10,6 +10,7 @@ import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.entity.HashTag;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.deal.repository.HashTagRepository;
+import com.cherrypick.backend.domain.deal.vo.Price;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
@@ -18,8 +19,12 @@ import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.cherrypick.backend.domain.vote.repository.VoteRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.Record;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -259,6 +264,90 @@ public class RecommenderService
 
         return new DealSearchPageResponseDTO(responseList, false);
 
+    }
+
+    public DealListResponse getAllList()
+    {
+        var response = new HashMap<String, Object>();
+        PageRequest pageRequest = PageRequest.of(0, 40);
+        var deals = dealRepository.findAll(pageRequest);
+
+        List<Long> dealIds = deals.stream().map(Deal::getDealId).toList();
+
+        // Redis 조회수
+        List<String> redisKeys = dealIds.stream().map(id -> "deal:view:" + id).toList();
+        List<Object> redisResults = redisTemplate.opsForValue().multiGet(redisKeys);
+        Map<Long, Long> viewCountMap = new HashMap<>();
+        for (int i = 0; i < dealIds.size(); i++) {
+            Object val = redisResults.get(i);
+            long viewCount = 0L;
+            if (val != null) {
+                try {
+                    viewCount = Long.parseLong(val.toString());
+                } catch (NumberFormatException ignored) {}
+            }
+            viewCountMap.put(dealIds.get(i), viewCount);
+        }
+
+        // 좋아요 수
+        Map<Long, Long> likeCountMap = voteRepository.countByDealIdsAndVoteTypeGrouped(dealIds, VoteType.TRUE);
+        // 댓글 수
+        Map<Long, Long> commentCountMap = commentRepository.countByDealIdsGrouped(dealIds);
+        // 이미지
+        Map<Long, Image> imageMap = imageRepository.findTopImagesByDealIds(dealIds, ImageType.DEAL).stream()
+                .collect(Collectors.toMap(Image::getRefId, img -> img, (a, b) -> a));
+
+
+
+        var responseList = deals.stream().map(deal -> {
+            Long dealId = deal.getDealId();
+
+            long viewCount = viewCountMap.getOrDefault(dealId, 0L);
+            long likeCount = likeCountMap.getOrDefault(dealId, 0L);
+            long commentCount = commentCountMap.getOrDefault(dealId, 0L);
+
+            Image firstImage = imageMap.get(dealId);
+            ImageUrl imageUrl = null;
+            if (firstImage != null) {
+                imageUrl = new ImageUrl(
+                        firstImage.getImageId(),
+                        firstImage.getImageUrl(),
+                        firstImage.getImageIndex()
+                );
+            }
+
+            return new DealListResponse.DealResponse(
+                    dealId,
+                    imageUrl,
+                    deal.getTitle(),
+                    deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
+                    DealService.getInfoTags(deal),
+                    deal.getPrice(),
+                    deal.getCreatedAt().toString(),
+                    (int) likeCount,
+                    (int) commentCount,
+                    deal.isSoldOut(),
+                    hashTagRepository.findAllByDealId(dealId)
+            );
+        }).toList();
+
+        return new DealListResponse(responseList);
+    }
+
+    @Builder
+    public record DealListResponse(
+            List<DealResponse> deals
+    ){
+        @AllArgsConstructor @Getter
+        public static class DealResponse extends DealSearchResponseDTO{
+            List<String> tags;
+
+            public DealResponse(Long dealId, ImageUrl imageUrl, String title, String s, List<String> infoTags, Price price, String string, int likeCount, int commentCount, boolean soldOut, List<String> tags)
+            {
+                super(dealId, imageUrl, title, s, infoTags, price, string, likeCount, commentCount, soldOut);
+                this.tags = tags;
+            }
+        }
     }
 
 

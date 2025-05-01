@@ -69,4 +69,14 @@ public class RecommenderController {
         return ResponseEntity.ok(recommenderService.getInterestBoard(userId));
     }
 
+    @Operation(
+            summary = "전체 리스트 조회",
+            description = "추천 시스템 기반의 딜 추천을 조회합니다. 딜 검색과 같은 반환 값을 갖습니다 ."
+    )
+    @GetMapping("/deal/list")
+    public ResponseEntity<?> dealList() {
+
+        return ResponseEntity.ok(recommenderService.getAllList());
+    }
+
 }

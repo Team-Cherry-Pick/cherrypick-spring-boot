@@ -17,4 +17,7 @@ public interface HashTagRepository extends JpaRepository<HashTag, Long> {
 
     @Query(value = "Select hash_tag_id from hash_tag where name like %:name% LIMIT 20;", nativeQuery = true)
     List<Integer> findAllByName(@Param("name") String name);
+
+    @Query(value = "SELECT h.name FROM deal_tag dt INNER JOIN hash_tag h on dt.hash_tag_id = h.hash_tag_id WHERE dt.deal_id=:dealId", nativeQuery = true)
+    List<String> findAllByDealId(@Param("dealId") Long dealId);
 }

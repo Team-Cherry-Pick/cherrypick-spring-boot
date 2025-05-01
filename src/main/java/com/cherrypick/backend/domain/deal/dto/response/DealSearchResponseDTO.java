@@ -24,6 +24,4 @@ public class DealSearchResponseDTO {
     private int totalComments;
     private boolean isSoldout;
 
-
-
 }

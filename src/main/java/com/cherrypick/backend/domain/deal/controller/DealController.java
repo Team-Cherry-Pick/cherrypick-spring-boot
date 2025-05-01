@@ -9,6 +9,7 @@ import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchResponseDTO;
 import com.cherrypick.backend.domain.deal.service.DealCrawlService;
 import com.cherrypick.backend.domain.deal.service.DealService;
+import com.cherrypick.backend.domain.deal.service.RecommenderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.List;
 public class DealController {
 
     private final DealService dealService;
+    private final RecommenderService recommenderService;
     private final DealCrawlService dealCrawlService;
 
     // 게시글 생성
