@@ -143,7 +143,7 @@ public class ImageService {
     public Image getImageByRefId(Long refId, ImageType imageType) {
 
         var image = imageRepository.findByRefId(refId, imageType);
-        return image.orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
+        return image.orElseGet(() -> Image.builder().imageId(1L).imageUrl("/").build());
     }
 
     // 이미지 삭제

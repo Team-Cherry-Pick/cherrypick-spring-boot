@@ -21,6 +21,7 @@ public record UserDetailResponseDTO(
 
                 .imageId(image.getImageId())
                 .imageURL(image.getImageUrl())
+
                 .build();
     }
 }
