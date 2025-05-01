@@ -65,7 +65,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserDetail());
     }
 
-    @GetMapping("/user/{user_id}")
+    @GetMapping("/{user_id}")
     public ResponseEntity<UserDetailResponseDTO> getUserDetail(@PathVariable("user_id") Long user_id) {
 
         return ResponseEntity.ok(userService.getUserDetail(user_id));
