@@ -212,7 +212,8 @@ public class DealService {
             if (val != null) {
                 try {
                     viewCount = Long.parseLong(val.toString());
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException ignored) {
+                }
             }
             viewCountMap.put(dealIds.get(i), viewCount);
         }
@@ -570,17 +571,36 @@ public class DealService {
         };
     }
 
+    // 딜스코어 계산 상수 Redis로 관리
+    private double getDealScoreConfig(String key, double defaultValue) {
+        Object val = redisTemplate.opsForHash().get("deal:score:config", key);
+        if (val != null) {
+            try {
+                return Double.parseDouble(val.toString());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return defaultValue;
+    }
+
     // 딜스코어 계산 함수
     private double getDealScore(Deal deal, long viewCount, long likeCount) {
-        double rawScore = viewCount * 0.8 + likeCount * 0.2;
+        // Redis에서 설정값 불러오기 (redis 죽는 거 방지해서 기본값 설정)
+        double weightView = getDealScoreConfig("weight:view", 0.8); // 조회수 가중치
+        double weightLike = getDealScoreConfig("weight:like", 0.2); // 좋아요 가중치
+        int decayStartHour = (int) getDealScoreConfig("decay:startHour", 8); // 8시간 후 차감
+        double decayPerHour = getDealScoreConfig("decay:perHourRate", 0.02); // 그 후 2%씩 차감
+        double minDecayRate = getDealScoreConfig("decay:minRate", 0.2); // 20% 하한선
+
+        double rawScore = viewCount * weightView + likeCount * weightLike;
 
         LocalDateTime createdAt = deal.getCreatedAt();
         long hoursSinceCreated = java.time.Duration.between(createdAt, LocalDateTime.now()).toHours();
 
-        if (hoursSinceCreated <= 8) return rawScore;
+        if (hoursSinceCreated <= decayStartHour) return rawScore;
 
-        long decayedHours = Math.min(hoursSinceCreated - 8, 40);
-        double decayRate = Math.max(1.0 - (decayedHours * 0.02), 0.2);
+        long decayedHours = Math.min(hoursSinceCreated - decayStartHour, 40);
+        double decayRate = Math.max(1.0 - (decayedHours * decayPerHour), minDecayRate);
 
         return rawScore * decayRate;
     }
