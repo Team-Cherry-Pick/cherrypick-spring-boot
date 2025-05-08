@@ -120,8 +120,25 @@ public class ImageService {
         }
     }
 
+    @Transactional
+    public Image getImageByRefId(Long refId, ImageType imageType) {
+
+        var image = imageRepository.findByRefId(refId, imageType);
+        return image.orElseGet(() -> Image.builder().imageId(1L).imageUrl(null).build());
+    }
+
+    // 이미지 삭제
+    @Transactional
+    public ImageDeleteResponseDTO deleteImageByUserId(Long userId) {
+
+        var image = imageRepository.findByRefId(userId, ImageType.USER);
+        if(image.isEmpty()) return new ImageDeleteResponseDTO("해당 유저는 프로필 사진이 없습니다.");
+        return deleteImage(image.map(Image::getRefId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
+    }
+
+
     // 크롤링용 매서드
-    public List<Long> saveImageUrls(List<String> imgUrls) {
+    public List<Long> saveImageUrlsForCrawling(List<String> imgUrls) {
 
         List<Long> imageIds = new ArrayList<>();
         int cnt = 0;
@@ -139,20 +156,5 @@ public class ImageService {
         return imageIds;
     }
 
-    @Transactional
-    public Image getImageByRefId(Long refId, ImageType imageType) {
-
-        var image = imageRepository.findByRefId(refId, imageType);
-        return image.orElseGet(() -> Image.builder().imageId(1L).imageUrl("/").build());
-    }
-
-    // 이미지 삭제
-    @Transactional
-    public ImageDeleteResponseDTO deleteImageByUserId(Long userId) {
-
-        var image = imageRepository.findByRefId(userId, ImageType.USER);
-        if(image.isEmpty()) return new ImageDeleteResponseDTO("해당 유저는 프로필 사진이 없습니다.");
-        return deleteImage(image.map(Image::getRefId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
-    }
 
 }

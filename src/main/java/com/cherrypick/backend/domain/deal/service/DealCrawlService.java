@@ -1,12 +1,11 @@
 package com.cherrypick.backend.domain.deal.service;
 
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
-import com.cherrypick.backend.domain.deal.entity.HashTag;
 import com.cherrypick.backend.domain.deal.enums.PriceType;
 import com.cherrypick.backend.domain.deal.enums.ShippingType;
-import com.cherrypick.backend.domain.deal.repository.HashTagRepository;
 import com.cherrypick.backend.domain.deal.vo.Price;
 import com.cherrypick.backend.domain.deal.vo.Shipping;
+import com.cherrypick.backend.domain.hashtag.service.HashTagService;
 import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -29,8 +26,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -128,7 +123,7 @@ public class DealCrawlService {
                             .shipping(shipping)
                             .storeName(storeName)
                             .price(price)
-                            .imageIds(imageService.saveImageUrls(imgList))
+                            .imageIds(imageService.saveImageUrlsForCrawling(imgList))
                             .discountNames(List.of("현대카드", "쿠팡와우", "이벤트"))
                             .categoryId(1L)
                             .build();

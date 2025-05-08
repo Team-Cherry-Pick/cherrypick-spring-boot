@@ -7,9 +7,9 @@ import com.cherrypick.backend.domain.deal.dto.response.DealSearchResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.UserBehaviorLogListDTO;
 import com.cherrypick.backend.domain.deal.dto.response.UserInterestListDTO;
 import com.cherrypick.backend.domain.deal.entity.Deal;
-import com.cherrypick.backend.domain.deal.entity.HashTag;
+import com.cherrypick.backend.domain.hashtag.entity.HashTag;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
-import com.cherrypick.backend.domain.deal.repository.HashTagRepository;
+import com.cherrypick.backend.domain.hashtag.repository.HashTagRepository;
 import com.cherrypick.backend.domain.deal.vo.Price;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
@@ -17,8 +17,7 @@ import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.cherrypick.backend.domain.vote.repository.VoteRepository;
-import com.cherrypick.backend.global.exception.BaseException;
-import com.cherrypick.backend.global.exception.enums.DealErrorCode;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,6 +39,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Tag(name = "Recommender", description = "추천 시스템")
 @Service @RequiredArgsConstructor @Slf4j
 public class RecommenderService
 {

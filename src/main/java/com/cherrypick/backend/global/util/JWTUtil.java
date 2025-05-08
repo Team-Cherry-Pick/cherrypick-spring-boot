@@ -1,10 +1,9 @@
 package com.cherrypick.backend.global.util;
 
 
-import com.cherrypick.backend.domain.user.entity.Role;
+import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
 import io.jsonwebtoken.Jwts;
-import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;

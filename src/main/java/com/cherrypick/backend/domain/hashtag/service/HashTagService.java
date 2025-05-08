@@ -1,17 +1,14 @@
-package com.cherrypick.backend.domain.deal.service;
+package com.cherrypick.backend.domain.hashtag.service;
 
-import com.cherrypick.backend.domain.deal.entity.DealTag;
-import com.cherrypick.backend.domain.deal.entity.HashTag;
-import com.cherrypick.backend.domain.deal.repository.DealTagRepository;
-import com.cherrypick.backend.domain.deal.repository.HashTagRepository;
+import com.cherrypick.backend.domain.hashtag.entity.DealTag;
+import com.cherrypick.backend.domain.hashtag.entity.HashTag;
+import com.cherrypick.backend.domain.hashtag.repository.DealTagRepository;
+import com.cherrypick.backend.domain.hashtag.repository.HashTagRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Service @RequiredArgsConstructor @Slf4j
