@@ -28,6 +28,7 @@ WHERE
     AND (:startDate IS NULL OR d.createdAt >= :startDate)
     AND (:endDate IS NULL OR d.createdAt <= :endDate)
     AND (:priceTypes IS NULL OR d.price.priceType IN :priceTypes)
+    AND (:variousPrice = TRUE OR d.price.priceType <> 'VARIOUS')
     AND (:minPrice IS NULL OR d.price.discountedPrice >= :minPrice)
     AND (:maxPrice IS NULL OR d.price.discountedPrice <= :maxPrice)
     AND (:discountIds IS NULL OR discount.discountId IN :discountIds)
@@ -47,6 +48,7 @@ ORDER BY
             @Param("minPrice") Double minPrice,
             @Param("maxPrice") Double maxPrice,
             @Param("priceTypes") List<PriceType> priceTypes,
+            @Param("variousPrice") boolean variousPrice,
             @Param("discountIds") List<Long> discountIds,
             @Param("storeIds") List<Long> storeIds,
             @Param("sortPriceHigh") boolean sortPriceHigh,
