@@ -10,6 +10,6 @@ public record PriceFilter (
 
         @Enumerated(EnumType.STRING)
         PriceType priceType,
-        double maxPrice,
-        double minPrice
+        Double maxPrice,
+        Double minPrice
 ){}
