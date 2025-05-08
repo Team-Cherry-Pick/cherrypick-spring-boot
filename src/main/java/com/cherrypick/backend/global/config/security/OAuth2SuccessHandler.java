@@ -42,7 +42,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String accessToken =  jwtUtil.createAccessToken(userInfo.userId(), userInfo.role(), userInfo.nickname());
         String refreshToken = jwtUtil.createRefreshToken(userInfo.userId());
 
-        // 리프레시 토큰은 쿠키로 담아줌. (서버에서 읽을 수만 있으면 장땡
+        // 리프레시 토큰은 쿠키로 담아줌. (서버에서 읽을 수만 있으면 된다
         response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(refreshToken).toString());
         // 리프레시 토큰을 Redis에 저장함.
         authService.saveResfreshToken(userInfo.userId(), refreshToken);

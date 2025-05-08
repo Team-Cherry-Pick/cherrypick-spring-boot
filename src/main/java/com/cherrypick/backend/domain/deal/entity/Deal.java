@@ -4,6 +4,7 @@ import com.cherrypick.backend.domain.category.entity.Category;
 import com.cherrypick.backend.domain.deal.vo.Price;
 import com.cherrypick.backend.domain.deal.vo.Shipping;
 import com.cherrypick.backend.domain.discount.entity.Discount;
+import com.cherrypick.backend.domain.hashtag.entity.DealTag;
 import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.user.entity.User;
 import jakarta.persistence.*;

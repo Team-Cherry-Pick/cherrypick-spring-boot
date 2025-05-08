@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.user.entity;
+package com.cherrypick.backend.domain.user.enums;
 
 import org.springframework.security.core.GrantedAuthority;
 

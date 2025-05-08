@@ -1,6 +1,6 @@
 package com.cherrypick.backend.domain.oauth.dto;
 
-import com.cherrypick.backend.domain.user.entity.Role;
+import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.entity.User;
 import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;

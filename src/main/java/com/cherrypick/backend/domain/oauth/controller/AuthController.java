@@ -2,7 +2,6 @@ package com.cherrypick.backend.domain.oauth.controller;
 
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.oauth.service.AuthService;
-import com.cherrypick.backend.domain.user.entity.Role;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -18,7 +17,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -82,10 +80,16 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "찾을 수 없는 유저입니다. userId를 다시 한번 확인해주세요."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
-    @PostMapping("/test/access-token")
-    public String accessToken(@Parameter(description = "유저번호") Long userId) {
+    @PostMapping("/test/authorization")
+    public String accessToken(@Parameter(description = "유저번호") Long userId, HttpServletRequest request, HttpServletResponse response) {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+        // 리프레시 토큰도 파기 후 재생성해서 보내줌
+        var newRefreshToken = jwtUtil.createRefreshToken(userId);
+        response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
+        authService.saveResfreshToken(userId, newRefreshToken);
+
         return jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname());
     }
 

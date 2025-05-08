@@ -1,11 +1,12 @@
 package com.cherrypick.backend.domain.user.entity;
 
+import com.cherrypick.backend.domain.user.enums.Role;
+import com.cherrypick.backend.domain.user.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Optional;
 

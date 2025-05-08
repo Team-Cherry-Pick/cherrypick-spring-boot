@@ -1,6 +1,6 @@
-package com.cherrypick.backend.domain.deal.repository;
+package com.cherrypick.backend.domain.hashtag.repository;
 
-import com.cherrypick.backend.domain.deal.entity.HashTag;
+import com.cherrypick.backend.domain.hashtag.entity.HashTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

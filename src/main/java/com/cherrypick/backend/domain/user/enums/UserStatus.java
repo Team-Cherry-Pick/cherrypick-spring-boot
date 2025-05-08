@@ -1,7 +1,6 @@
-package com.cherrypick.backend.domain.user.entity;
+package com.cherrypick.backend.domain.user.enums;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 public enum UserStatus {
