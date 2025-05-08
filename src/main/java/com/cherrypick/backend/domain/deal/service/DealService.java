@@ -170,6 +170,7 @@ public class DealService {
 
         boolean viewSoldOut = dto.getFilters() != null && dto.getFilters().viewSoldOut();
         boolean freeShipping = dto.getFilters() != null && dto.getFilters().freeShipping();
+        boolean variousPrice = dto.getVariousPrice() != null ? dto.getVariousPrice() : true;
 
         List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty()) ? null : dto.getDiscountIds();
         List<Long> storeIds = (dto.getStoreIds() == null || dto.getStoreIds().isEmpty()) ? null : dto.getStoreIds();
@@ -189,6 +190,7 @@ public class DealService {
                 minPrice,
                 maxPrice,
                 priceTypes.isEmpty() ? null : priceTypes,
+                variousPrice,
                 discountIds,
                 storeIds,
                 sortPriceHigh,

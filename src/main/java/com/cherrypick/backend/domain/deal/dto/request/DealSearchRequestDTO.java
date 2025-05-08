@@ -36,7 +36,7 @@ public class DealSearchRequestDTO {
     private PriceFilter priceFilter;
 
     // 다양한 가격 포함 여부
-    private boolean variousPrice;
+    private Boolean variousPrice;
 
     // 할인 방식 (복수 선택)
     private List<Long> discountIds;
