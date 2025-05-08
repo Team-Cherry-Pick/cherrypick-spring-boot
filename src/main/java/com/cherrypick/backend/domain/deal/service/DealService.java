@@ -127,9 +127,7 @@ public class DealService {
     }
 
     // 게시글 전체조회 (검색)
-    @Transactional
     public DealSearchPageResponseDTO searchDeals(DealSearchRequestDTO dto, int page, int size) {
-
         if (dto.getCategoryId() != null && !categoryRepository.existsById(dto.getCategoryId())) {
             throw new BaseException(DealErrorCode.CATEGORY_NOT_FOUND);
         }
@@ -153,13 +151,25 @@ public class DealService {
         LocalDateTime startDate = resolveStartDate(dto.getTimeRange());
         LocalDateTime endDate = LocalDateTime.now();
 
-        Double minPrice = dto.getPriceFilter() != null ? dto.getPriceFilter().minPrice() : null;
-        Double maxPrice = dto.getPriceFilter() != null ? dto.getPriceFilter().maxPrice() : null;
-        PriceType priceType = dto.getPriceFilter() != null ? dto.getPriceFilter().priceType() : null;
+        Double minPrice = null;
+        Double maxPrice = null;
+        List<PriceType> priceTypes = new ArrayList<>();
+
+        if (dto.getPriceFilter() != null) {
+            PriceType type = dto.getPriceFilter().priceType();
+
+            minPrice = dto.getPriceFilter().minPrice();
+            maxPrice = dto.getPriceFilter().maxPrice();
+
+            if ((minPrice != null || maxPrice != null) && type == null) {
+                throw new BaseException(DealErrorCode.INVALID_PRICE_TYPE);
+            }
+
+            if (type != null) priceTypes.add(type);
+        }
 
         boolean viewSoldOut = dto.getFilters() != null && dto.getFilters().viewSoldOut();
         boolean freeShipping = dto.getFilters() != null && dto.getFilters().freeShipping();
-        boolean variousPrice = dto.isVariousPrice();
 
         List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty()) ? null : dto.getDiscountIds();
         List<Long> storeIds = (dto.getStoreIds() == null || dto.getStoreIds().isEmpty()) ? null : dto.getStoreIds();
@@ -168,6 +178,7 @@ public class DealService {
         boolean sortPriceLow = dto.getSortType() == SortType.PRICE_LOW;
 
         Pageable pageable = PageRequest.of(page, size + 1);
+
         List<Deal> deals = dealRepository.searchDealsWithPaging(
                 dto.getCategoryId(),
                 dto.getKeyword(),
@@ -177,8 +188,7 @@ public class DealService {
                 endDate,
                 minPrice,
                 maxPrice,
-                priceType,
-                variousPrice,
+                priceTypes.isEmpty() ? null : priceTypes,
                 discountIds,
                 storeIds,
                 sortPriceHigh,
@@ -193,7 +203,6 @@ public class DealService {
 
         List<Long> dealIds = deals.stream().map(Deal::getDealId).toList();
 
-        // Redis 조회수
         List<String> redisKeys = dealIds.stream().map(id -> "deal:view:" + id).toList();
         List<Object> redisResults = redisTemplate.opsForValue().multiGet(redisKeys);
         Map<Long, Long> viewCountMap = new HashMap<>();
@@ -208,17 +217,20 @@ public class DealService {
             viewCountMap.put(dealIds.get(i), viewCount);
         }
 
-        // 좋아요 수
         Map<Long, Long> likeCountMap = voteRepository.countByDealIdsAndVoteTypeGrouped(dealIds, VoteType.TRUE);
-        // 댓글 수
         Map<Long, Long> commentCountMap = commentRepository.countByDealIdsGrouped(dealIds);
-        // 이미지
         Map<Long, Image> imageMap = imageRepository.findTopImagesByDealIds(dealIds, ImageType.DEAL).stream()
                 .collect(Collectors.toMap(Image::getRefId, img -> img, (a, b) -> a));
 
+        if (dto.getSortType() == SortType.POPULARITY
+                || dto.getSortType() == SortType.VIEWS
+                || dto.getSortType() == SortType.VOTES
+                || dto.getSortType() == SortType.DISCOUNT_RATE) {
+            deals = sortDeals(deals, dto.getSortType(), viewCountMap, likeCountMap);
+        }
+
         List<DealSearchResponseDTO> responseList = deals.stream().map(deal -> {
             Long dealId = deal.getDealId();
-
             long viewCount = viewCountMap.getOrDefault(dealId, 0L);
             long likeCount = likeCountMap.getOrDefault(dealId, 0L);
             long commentCount = commentCountMap.getOrDefault(dealId, 0L);
@@ -492,20 +504,33 @@ public class DealService {
     }
 
     // 정렬 함수
-    private List<Deal> sortDeals(List<Deal> deals, SortType sortType) {
+    private List<Deal> sortDeals(List<Deal> deals, SortType sortType,
+                                 Map<Long, Long> viewCountMap,
+                                 Map<Long, Long> likeCountMap) {
         if (sortType == null) return deals;
 
         return switch (sortType) {
             case VIEWS -> deals.stream()
-                    .sorted((d1, d2) -> Long.compare(getViewCount(d2), getViewCount(d1)))
+                    .sorted((d1, d2) -> Long.compare(
+                            viewCountMap.getOrDefault(d2.getDealId(), 0L),
+                            viewCountMap.getOrDefault(d1.getDealId(), 0L)))
                     .toList();
 
             case VOTES -> deals.stream()
-                    .sorted((d1, d2) -> Long.compare(getVoteScore(d2), getVoteScore(d1)))
+                    .sorted((d1, d2) -> Long.compare(
+                            likeCountMap.getOrDefault(d2.getDealId(), 0L),
+                            likeCountMap.getOrDefault(d1.getDealId(), 0L)))
                     .toList();
 
-            case LATEST -> deals.stream()
-                    .sorted((d1, d2) -> d2.getCreatedAt().compareTo(d1.getCreatedAt()))
+            case POPULARITY -> deals.stream()
+                    .sorted((d1, d2) -> Double.compare(
+                            getDealScore(d2,
+                                    viewCountMap.getOrDefault(d2.getDealId(), 0L),
+                                    likeCountMap.getOrDefault(d2.getDealId(), 0L)),
+                            getDealScore(d1,
+                                    viewCountMap.getOrDefault(d1.getDealId(), 0L),
+                                    likeCountMap.getOrDefault(d1.getDealId(), 0L))
+                    ))
                     .toList();
 
             case DISCOUNT_RATE -> deals.stream()
@@ -514,21 +539,12 @@ public class DealService {
                             getDiscountRate(d1)))
                     .toList();
 
+            case LATEST -> deals.stream()
+                    .sorted((d1, d2) -> d2.getCreatedAt().compareTo(d1.getCreatedAt()))
+                    .toList();
+
             default -> deals;
         };
-    }
-
-    // 정렬 보조 함수
-    private long getViewCount(Deal deal) {
-        String key = "deal:view:" + deal.getDealId();
-        Object val = redisTemplate.opsForValue().get(key);
-        return val == null ? 0L : ((Number) val).longValue();
-    }
-
-    private long getVoteScore(Deal deal) {
-        long like = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
-        long dislike = voteRepository.countByDealIdAndVoteType(deal, VoteType.FALSE);
-        return like - dislike;
     }
 
     private double getDiscountRate(Deal deal) {
@@ -552,5 +568,20 @@ public class DealService {
             case LAST3DAYS -> now.minusDays(3);
             case LAST7DAYS -> now.minusDays(7);
         };
+    }
+
+    // 딜스코어 계산 함수
+    private double getDealScore(Deal deal, long viewCount, long likeCount) {
+        double rawScore = viewCount * 0.8 + likeCount * 0.2;
+
+        LocalDateTime createdAt = deal.getCreatedAt();
+        long hoursSinceCreated = java.time.Duration.between(createdAt, LocalDateTime.now()).toHours();
+
+        if (hoursSinceCreated <= 8) return rawScore;
+
+        long decayedHours = Math.min(hoursSinceCreated - 8, 40);
+        double decayRate = Math.max(1.0 - (decayedHours * 0.02), 0.2);
+
+        return rawScore * decayRate;
     }
 }
