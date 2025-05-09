@@ -70,4 +70,3 @@ ORDER BY
     List<Deal> findDealsByTagId(@Param("tagIds")List<Long> tagIds, @Param("count") int count);
 
 }
-
