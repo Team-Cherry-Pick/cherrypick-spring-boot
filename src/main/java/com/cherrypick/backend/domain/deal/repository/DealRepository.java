@@ -27,10 +27,14 @@ WHERE
     AND (:freeShipping = FALSE OR d.shipping.shippingType = 'FREE')
     AND (:startDate IS NULL OR d.createdAt >= :startDate)
     AND (:endDate IS NULL OR d.createdAt <= :endDate)
-    AND (:priceTypes IS NULL OR d.price.priceType IN :priceTypes)
-    AND (:variousPrice = TRUE OR d.price.priceType <> 'VARIOUS')
-    AND (:minPrice IS NULL OR d.price.discountedPrice >= :minPrice)
-    AND (:maxPrice IS NULL OR d.price.discountedPrice <= :maxPrice)
+    AND (
+        (d.price.priceType = 'VARIOUS' AND :variousPrice = TRUE)
+        OR (
+            (:priceTypes IS NULL OR d.price.priceType IN :priceTypes)
+            AND (:minPrice IS NULL OR d.price.discountedPrice >= :minPrice)
+            AND (:maxPrice IS NULL OR d.price.discountedPrice <= :maxPrice)
+        )
+    )
     AND (:discountIds IS NULL OR discount.discountId IN :discountIds)
     AND (:storeIds IS NULL OR store.storeId IN :storeIds)
 ORDER BY
