@@ -19,4 +19,6 @@ public class Category {
     private Long parentId;
 
     private String name;
+
+    private int level;
 }
