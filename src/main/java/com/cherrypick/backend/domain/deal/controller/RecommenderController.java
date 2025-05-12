@@ -3,13 +3,14 @@ package com.cherrypick.backend.domain.deal.controller;
 import com.cherrypick.backend.domain.deal.dto.request.DealRequestDTOs;
 import com.cherrypick.backend.domain.deal.service.RecommenderService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller@RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api") @Tag(name="Recommender System", description = "추천 시스템 관련 API")
 public class RecommenderController {
     private final RecommenderService recommenderService;
 
