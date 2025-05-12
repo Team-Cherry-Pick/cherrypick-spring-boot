@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,9 +28,9 @@ public class CategoryController
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/category")
-    public CategoryListDTO getCategories(@RequestParam(value = "version", defaultValue = "v1") String version)
+    public ResponseEntity<CategoryListDTO> getCategories(@RequestParam(value = "version", defaultValue = "v1") String version)
     {
-        return categoryService.getCategories();
+        return ResponseEntity.ok(categoryService.getCategories());
     }
 
 }

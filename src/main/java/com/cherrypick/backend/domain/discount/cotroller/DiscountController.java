@@ -18,9 +18,9 @@ public class DiscountController
     @Operation(summary = "할인 정보 조회 API"
             , description = "할인 정보를 조회합니다.")
     @GetMapping("/discount")
-    public DiscountResponseListDTO getDiscountList(){
+    public ResponseEntity<DiscountResponseListDTO> getDiscountList(){
 
-        return discountService.getDiscountList();
+        return ResponseEntity.ok(discountService.getDiscountList());
     }
 
 }
