@@ -54,7 +54,6 @@ public class DealCrawlService {
         setupDriver();
         randomSleep();
 
-
         for (int i = 1; i <= count; i++) {
             try
             {
@@ -169,6 +168,7 @@ public class DealCrawlService {
 
     // OpenAI API 호출
     private Set<String> getChatGPTResponse(String title, String content) {
+
         RestTemplate restTemplate = new RestTemplate();
 
         //String prompt = title + "\n 이 제목을 보고 가격과 해시태그 10개를 뽑아줘. " +
@@ -207,6 +207,7 @@ public class DealCrawlService {
         org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(requestBody, headers);
 
         try {
+
             org.springframework.http.ResponseEntity<String> responseEntity =
                     restTemplate.exchange(openAiApiUrl, org.springframework.http.HttpMethod.POST, request, String.class);
 
