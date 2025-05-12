@@ -16,8 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api") @RequiredArgsConstructor
 public class CategoryController
 {
-
-    final CategoryService categoryService;
+    private final CategoryService categoryService;
 
     @Operation(
             summary = "카테고리 조회 API V1",
