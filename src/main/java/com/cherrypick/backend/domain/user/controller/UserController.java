@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController @RequestMapping("/api/user")
-@RequiredArgsConstructor @Slf4j @Tag(name="User", description = "유저 로직을 전담(전자담배)")
+@RequiredArgsConstructor @Slf4j @Tag(name="User", description = "유저 로직을 전담")
 public class UserController {
 
     private final UserService userService;
