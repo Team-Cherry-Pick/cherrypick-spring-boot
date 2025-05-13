@@ -287,9 +287,8 @@ public class DealService {
         }
 
         // 이미지 조회
-        Optional<Image> userImageOpt = imageRepository.findByRefId(
-                deal.getUserId().getUserId(),
-                ImageType.USER
+        Optional<Image> userImageOpt = imageRepository.findByUserId(
+                deal.getUserId().getUserId()
         );
 
         // User VO 생성

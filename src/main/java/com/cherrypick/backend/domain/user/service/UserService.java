@@ -47,7 +47,7 @@ public class UserService {
     {
         Long userId = AuthUtil.getUserDetail().userId();
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
-        var profileImage = imageService.getImageByRefId(userId, ImageType.USER);
+        var profileImage = imageService.getImageByUserId(userId);
 
         return UserDetailResponseDTO.from(user, profileImage);
     }
@@ -56,7 +56,7 @@ public class UserService {
     public UserDetailResponseDTO getUserDetail(Long userId)
     {
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
-        var profileImage = imageService.getImageByRefId(userId, ImageType.USER);
+        var profileImage = imageService.getImageByUserId(userId);
 
         return UserDetailResponseDTO.from(user, profileImage);
     }

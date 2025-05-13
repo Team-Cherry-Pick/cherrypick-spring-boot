@@ -16,8 +16,10 @@ spring:
 
   jpa:
     properties:
+      show-sql: true # 배포 시 주석처리
       hibernate:
         format_sql: true
+        use_sql_comments: true
     hibernate:
       ddl-auto: update
 
@@ -74,3 +76,8 @@ aws:
     secret-key: ${S3_SECRET_KEY}
     bucket: ${BUCKET_NAME}
 
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql: trace
+    org.hibernate.orm.jdbc.bind: trace  # Hibernate 6.x 이상에서 파라미터 값 출력에 필요

@@ -121,17 +121,17 @@ public class ImageService {
     }
 
     @Transactional
-    public Image getImageByRefId(Long refId, ImageType imageType) {
+    public Image getImageByUserId(Long userId) {
 
-        var image = imageRepository.findByRefId(refId, imageType);
-        return image.orElseGet(() -> Image.builder().imageId(1L).imageUrl(null).build());
+        var image = imageRepository.findByUserId(userId);
+        return image.orElseGet(() -> Image.builder().imageId(null).imageUrl(null).build());
     }
 
     // 이미지 삭제
     @Transactional
     public ImageDeleteResponseDTO deleteImageByUserId(Long userId) {
 
-        var image = imageRepository.findByRefId(userId, ImageType.USER);
+        var image = imageRepository.findByUserId(userId);
         if(image.isEmpty()) return new ImageDeleteResponseDTO("해당 유저는 프로필 사진이 없습니다.");
         return deleteImage(image.map(Image::getRefId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
     }
