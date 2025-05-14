@@ -85,5 +85,15 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserDetail(user_id));
     }
 
+    @Operation(
+            summary = "유저 삭제 API V1",
+            description = "해당 유저의 status를 DEACTIVATED로 바꿔 일정 기간 이후 삭제합니다."
+    )
+    @DeleteMapping("")
+    public ResponseEntity<UserResponseDTOs.DeleteResponseDTO> deleteUser(@RequestParam(value = "version", defaultValue = "v1") String version)
+    {
+
+        return ResponseEntity.ok(userService.softDelete());
+    }
 
 }

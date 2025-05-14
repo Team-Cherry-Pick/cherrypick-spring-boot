@@ -1,5 +1,6 @@
 package com.cherrypick.backend.domain.user.entity;
 
+import com.cherrypick.backend.domain.user.enums.Gender;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.enums.UserStatus;
 import jakarta.persistence.*;
@@ -28,7 +29,8 @@ public class User {
     private String phoneNumber;       // 핸드폰 번호 (이걸로 1인 1계정 함)
     private String email;             // 이메일 (
     private LocalDate birthday;       // 생일
-    private String gender;            // 성별
+    @Enumerated(EnumType.STRING)
+    private Gender gender;            // 성별
     private String provider;          // 업체명 ex) kakao
     @Enumerated(EnumType.STRING)
     private UserStatus status;        // 소프트 딜리트 (삭제 상태면

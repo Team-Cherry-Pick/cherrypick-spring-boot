@@ -6,6 +6,7 @@ import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
 import com.cherrypick.backend.domain.user.dto.UserRequestDTOs;
 import com.cherrypick.backend.domain.user.dto.UserResponseDTOs;
+import com.cherrypick.backend.domain.user.enums.UserStatus;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
@@ -25,7 +26,7 @@ public class UserService {
     private final ImageService imageService;
 
     @Transactional
-    public UserResponseDTOs.UpdateDTO userUpdate(UserRequestDTOs.UpdateDTO dto){
+    public UserDetailResponseDTO userUpdate(UserRequestDTOs.UpdateDTO dto){
 
         // 인증된 유저의 ID를 찾음, 인증되지 않았다면 오류.
         var userId = AuthUtil.getUserDetail().userId();
@@ -38,8 +39,9 @@ public class UserService {
         user.setEmail(dto.email());
 
         var updatedUser = userRepository.save(user);
+        var profileImage = imageService.getImageByUserId(userId);
 
-        return UserResponseDTOs.UpdateDTO.from(updatedUser);
+        return UserDetailResponseDTO.from(updatedUser, profileImage);
     }
 
     @Transactional(readOnly = true)
@@ -92,6 +94,16 @@ public class UserService {
                 .details("사용하실 수 있는 닉네임입니다!")
                 .build();
 
+    }
+
+    public UserResponseDTOs.DeleteResponseDTO softDelete() {
+
+        var userId = AuthUtil.getUserDetail().userId();
+        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+        user.setStatus(UserStatus.DEACTIVATED);
+        var deletedUserId = userRepository.save(user);
+
+        return new UserResponseDTOs.DeleteResponseDTO(deletedUserId.getUserId(), "soft delete success");
     }
 
 
