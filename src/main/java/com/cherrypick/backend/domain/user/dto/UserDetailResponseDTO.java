@@ -9,6 +9,9 @@ public record UserDetailResponseDTO(
         Long userId,
         String nickname,
         String email,
+        String phoneNumber,
+        String gender,
+        String birthday,
         String imageURL,
         Long imageId
 )
@@ -18,7 +21,6 @@ public record UserDetailResponseDTO(
                 .userId(user.getUserId())
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-
                 .imageId(image.getImageId())
                 .imageURL(image.getImageUrl())
 

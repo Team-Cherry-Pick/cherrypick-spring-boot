@@ -43,6 +43,7 @@ public class AuthService extends DefaultOAuth2UserService
 
         User loginUser = null;
         if(user.isPresent()){
+            log.info("흠1");
             // 저장된 유저 불러오기
             loginUser = user.get();
 
@@ -57,7 +58,6 @@ public class AuthService extends DefaultOAuth2UserService
 
             // 닉네임 달아주기
             loginUser.setNickname(getRandomNickname(loginUser.getNickname()));
-
             // 신규 유저 저장
             userRepository.save(loginUser);
             log.info(":::: 신규 유저입니다. 로그인되었습니다. : " + user.toString());

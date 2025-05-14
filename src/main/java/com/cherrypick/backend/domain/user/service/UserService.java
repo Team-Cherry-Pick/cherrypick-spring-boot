@@ -46,10 +46,7 @@ public class UserService {
     public UserDetailResponseDTO getUserDetail()
     {
         Long userId = AuthUtil.getUserDetail().userId();
-        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
-        var profileImage = imageService.getImageByUserId(userId);
-
-        return UserDetailResponseDTO.from(user, profileImage);
+        return getUserDetail(userId);
     }
 
     @Transactional(readOnly = true)

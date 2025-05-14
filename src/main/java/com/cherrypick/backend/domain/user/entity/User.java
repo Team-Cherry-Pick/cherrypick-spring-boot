@@ -25,7 +25,6 @@ public class User {
 
     private String oauthId;           // 소셜로그인 업체에서 받은 ID
     private String nickname;          // 유저 닉네임
-    @Column(unique = true)
     private String phoneNumber;       // 핸드폰 번호 (이걸로 1인 1계정 함)
     private String email;             // 이메일 (
     private LocalDate birthday;       // 생일
@@ -44,10 +43,11 @@ public class User {
         return User.builder()
                 .oauthId(userAttr.get("id").toString())
                 .nickname(Optional.ofNullable((HashMap<String, String>)userAttr.get("properties")).map(p -> p.get("nickname")).get().toString())
-                .email("example@example.com")
-                .birthday(LocalDate.of(1999, 12, 31))
+                .email(Optional.ofNullable((HashMap<String, String>)userAttr.get("properties")).map(p -> p.get("account_email")).get().toString())
+                .birthday(null)
+                .gender(null)
+                .provider(null)
                 .provider("kakao")
-                .gender("male")
                 .status(UserStatus.ACTIVE)
                 .role(Role.CLIENT)
                 .build();

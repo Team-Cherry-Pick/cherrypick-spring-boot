@@ -43,7 +43,9 @@ spring:
             client-id: ${KAKAO_CLIENT_ID}
             redirect-uri: ${KAKAO_REDIRECT_URI}
             authorization-grant-type: authorization_code
-            scope: profile_nickname
+            scope:
+              - profile_nickname
+              - account_email
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
