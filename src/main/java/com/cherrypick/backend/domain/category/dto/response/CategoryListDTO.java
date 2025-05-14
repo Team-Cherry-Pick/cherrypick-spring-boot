@@ -10,13 +10,13 @@ public record CategoryListDTO(List<CategoryDTO> categories) {
 
     @Builder
     public record CategoryDTO(
-            Long id,
+            Long categoryId,
             String name,
             List<CategoryDTO> subCategories
     ) {
         public static CategoryDTO of(Category category, List<CategoryDTO> subCategories) {
             return CategoryDTO.builder()
-                    .id(category.getCategoryId())
+                    .categoryId(category.getCategoryId())
                     .name(category.getName())
                     .subCategories(subCategories)
                     .build();

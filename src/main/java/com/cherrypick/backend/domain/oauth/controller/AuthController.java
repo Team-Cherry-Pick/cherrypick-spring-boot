@@ -103,7 +103,7 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "리프레시 토큰 / 유저를 찾을 수 없습니다."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
-    @GetMapping("/refresh")
+    @PostMapping("/refresh")
     public ResponseEntity<AuthResponseDTOs.AccessToken> auth(HttpServletRequest request, HttpServletResponse response)
     {
         // 쿠키에서 refresh를 찾아낸다.
