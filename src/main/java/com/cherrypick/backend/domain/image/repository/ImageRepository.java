@@ -20,9 +20,9 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     // 게시글 이미지 전체조회
     List<Image> findByRefIdAndImageTypeOrderByImageIndexAsc(Long refId, ImageType imageType);
 
-    // 유저 이미지 조회
-    @Query(value = "SELECT * FROM image WHERE ref_id=:refId and image_type=:imageType", nativeQuery = true)
-    Optional<Image> findByRefId(@Param("refId")Long refId, @Param("imageType") ImageType imageType);
+    // 이미지 조회
+    @Query(value = "SELECT * FROM image WHERE ref_id=:refId and image_type='USER'", nativeQuery = true)
+    Optional<Image> findByUserId(@Param("refId")Long refId);
 
     @Query("""
     SELECT i FROM Image i

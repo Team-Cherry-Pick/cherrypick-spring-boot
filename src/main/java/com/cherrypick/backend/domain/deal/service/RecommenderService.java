@@ -17,6 +17,7 @@ import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.cherrypick.backend.domain.vote.repository.VoteRepository;
+import com.cherrypick.backend.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -275,6 +276,12 @@ public class RecommenderService
 
         return new DealSearchPageResponseDTO(responseList, false);
 
+    }
+
+    public DealSearchPageResponseDTO getInterestBoard()
+    {
+        var userId = AuthUtil.getUserDetail().userId();
+        return getInterestBoard(userId);
     }
 
     public DealListResponse getAllList()

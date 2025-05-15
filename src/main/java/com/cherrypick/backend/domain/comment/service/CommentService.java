@@ -13,7 +13,6 @@ import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.image.entity.Image;
-import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
@@ -141,9 +140,8 @@ public class CommentService {
                     int totalLikes = commentLikeRepository.countByCommentId(comment);
 
                     // 프로필 이미지 조회
-                    Optional<Image> imageOpt = imageRepository.findByRefId(
-                            comment.getUserId().getUserId(),
-                            ImageType.USER
+                    Optional<Image> imageOpt = imageRepository.findByUserId(
+                            comment.getUserId().getUserId()
                     );
 
                     return new BestCommentResponseDTO(
@@ -238,9 +236,8 @@ public class CommentService {
         int totalLikes = commentLikeRepository.countByCommentId(comment);
         int totalReplys = replies.size();
 
-        Optional<Image> imageOpt = imageRepository.findByRefId(
-                comment.getUserId().getUserId(),
-                ImageType.USER
+        Optional<Image> imageOpt = imageRepository.findByUserId(
+                comment.getUserId().getUserId()
         );
 
         return new CommentListResponseDTO(

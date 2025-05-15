@@ -1,5 +1,6 @@
 package com.cherrypick.backend.domain.user.entity;
 
+import com.cherrypick.backend.domain.user.enums.Gender;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.enums.UserStatus;
 import jakarta.persistence.*;
@@ -25,9 +26,10 @@ public class User {
 
     private String oauthId;           // 소셜로그인 업체에서 받은 ID
     private String nickname;          // 유저 닉네임
-    private String email;             // 이메일
-    private LocalDate birthday;            // 생일
-    private String gender;            // 성별
+    private String email;             // 이메일 (
+    private LocalDate birthday;       // 생일
+    @Enumerated(EnumType.STRING)
+    private Gender gender;            // 성별
     private String provider;          // 업체명 ex) kakao
     @Enumerated(EnumType.STRING)
     private UserStatus status;        // 소프트 딜리트 (삭제 상태면
@@ -42,10 +44,11 @@ public class User {
         return User.builder()
                 .oauthId(userAttr.get("id").toString())
                 .nickname(Optional.ofNullable((HashMap<String, String>)userAttr.get("properties")).map(p -> p.get("nickname")).get().toString())
-                .email("example@example.com")
-                .birthday(LocalDate.of(1999, 12, 31))
+                .email(Optional.ofNullable((HashMap<String, String>)userAttr.get("properties")).map(p -> p.get("account_email")).get().toString())
+                .birthday(null)
+                .gender(null)
+                .provider(null)
                 .provider("kakao")
-                .gender("male")
                 .status(UserStatus.ACTIVE)
                 .role(Role.CLIENT)
                 .build();

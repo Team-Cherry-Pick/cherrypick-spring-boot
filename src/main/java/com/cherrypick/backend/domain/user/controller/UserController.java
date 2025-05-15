@@ -3,6 +3,7 @@ package com.cherrypick.backend.domain.user.controller;
 import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
 import com.cherrypick.backend.domain.user.dto.UserRequestDTOs;
 import com.cherrypick.backend.domain.user.dto.UserResponseDTOs;
+import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.service.UserService;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
@@ -47,8 +48,8 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PatchMapping("")
-    public ResponseEntity<UserResponseDTOs.UpdateDTO> update(
-            @Parameter(description = "유효성을 검증 받을 닉네임을 입력합니다.(파라미터)")UserRequestDTOs.UpdateDTO dto,
+    public ResponseEntity<UserDetailResponseDTO> update(
+            @Parameter(description = "유효성을 검증 받을 닉네임을 입력합니다.(파라미터)") UserUpdateRequestDTO dto,
             @RequestParam(value = "version", defaultValue = "v1") String version) {
 
         dto.validate(); // 요구 조건에 맞지 않으면 오류를 일으킴.
@@ -85,5 +86,15 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserDetail(user_id));
     }
 
+    @Operation(
+            summary = "유저 삭제 API V1",
+            description = "해당 유저의 status를 DEACTIVATED로 바꿔 일정 기간 이후 삭제합니다."
+    )
+    @DeleteMapping("")
+    public ResponseEntity<UserResponseDTOs.DeleteResponseDTO> deleteUser(@RequestParam(value = "version", defaultValue = "v1") String version, @RequestBody UserRequestDTOs.DeleteRequestDTO deleteRequestDTO)
+    {
+
+        return ResponseEntity.ok(userService.softDelete(deleteRequestDTO));
+    }
 
 }
