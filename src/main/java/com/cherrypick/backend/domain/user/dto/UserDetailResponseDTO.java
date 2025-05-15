@@ -13,7 +13,6 @@ public record UserDetailResponseDTO(
         Long userId,
         String nickname,
         String email,
-        String phoneNumber,     // nullable
         Gender gender,          // nullable
         String birthday,        // nullable
         String imageURL,        // nullable
@@ -25,7 +24,6 @@ public record UserDetailResponseDTO(
                 .userId(user.getUserId())
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-                .phoneNumber(user.getPhoneNumber())
                 .gender(user.getGender())
                 .birthday(Optional.ofNullable(user.getBirthday()).map(LocalDate::toString).orElse(null))
                 .imageId(image.getImageId())

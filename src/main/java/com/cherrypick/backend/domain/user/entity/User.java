@@ -26,7 +26,6 @@ public class User {
 
     private String oauthId;           // 소셜로그인 업체에서 받은 ID
     private String nickname;          // 유저 닉네임
-    private String phoneNumber;       // 핸드폰 번호 (이걸로 1인 1계정 함)
     private String email;             // 이메일 (
     private LocalDate birthday;       // 생일
     @Enumerated(EnumType.STRING)
