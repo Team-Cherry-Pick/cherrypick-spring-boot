@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import javax.imageio.ImageIO;
@@ -40,6 +41,7 @@ public class S3Uploader {
                             .bucket(bucket)
                             .key(fileName)
                             .contentType("image/jpeg")
+                            .acl(ObjectCannedACL.PUBLIC_READ)
                             .build(),
                     RequestBody.fromBytes(compressedImage)
             );
