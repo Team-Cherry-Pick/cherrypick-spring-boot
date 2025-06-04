@@ -467,6 +467,12 @@ public class DealService {
 
         deal.setIsDelete(true);
 
+        // 삭제 후 해당 이미지 isTemp = true로 설정
+        List<Image> images = imageRepository.findByRefIdAndImageTypeOrderByImageIndexAsc(dealId, ImageType.DEAL);
+        for (Image image : images) {
+            image.setTemp(true);
+        }
+
         return new DealResponseDTOs.Delete("핫딜 게시글 삭제 성공");
     }
 
