@@ -268,6 +268,7 @@ public class RecommenderService
                     DealService.getInfoTags(deal),
                     deal.getPrice(),
                     deal.getCreatedAt().toString(),
+                    (int) deal.getDealScore(),
                     (int) likeCount,
                     (int) commentCount,
                     deal.isSoldOut()
@@ -342,6 +343,7 @@ public class RecommenderService
                     DealService.getInfoTags(deal),
                     deal.getPrice(),
                     deal.getCreatedAt().toString(),
+                    (int) deal.getDealScore(),
                     (int) likeCount,
                     (int) commentCount,
                     deal.isSoldOut(),
@@ -360,9 +362,9 @@ public class RecommenderService
         public static class DealResponse extends DealSearchResponseDTO{
             List<String> tags;
 
-            public DealResponse(Long dealId, ImageUrl imageUrl, String title, String s, List<String> infoTags, Price price, String string, int likeCount, int commentCount, boolean soldOut, List<String> tags)
+            public DealResponse(Long dealId, ImageUrl imageUrl, String title, String s, List<String> infoTags, Price price, String string, int dealScore, int likeCount, int commentCount, boolean soldOut, List<String> tags)
             {
-                super(dealId, imageUrl, title, s, infoTags, price, string, likeCount, commentCount, soldOut);
+                super(dealId, imageUrl, title, s, infoTags, price, string, dealScore, likeCount, commentCount, soldOut);
                 this.tags = tags;
             }
         }

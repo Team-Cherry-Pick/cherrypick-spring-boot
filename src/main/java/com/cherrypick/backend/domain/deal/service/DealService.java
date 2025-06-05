@@ -256,6 +256,7 @@ public class DealService {
                     getInfoTags(deal),
                     deal.getPrice(),
                     deal.getCreatedAt().toString(),
+                    (int) deal.getDealScore(),
                     (int) likeCount,
                     (int) commentCount,
                     deal.isSoldOut()
@@ -279,6 +280,8 @@ public class DealService {
 
         // 카테고리 이름을 부모에서 자식 순으로 조회
         while (categoryId != null) {
+            System.out.println("Current categoryId: " + categoryId);
+
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new BaseException(DealErrorCode.CATEGORY_NOT_FOUND));
 
@@ -357,6 +360,7 @@ public class DealService {
                 deal.getShipping(),
                 deal.getPrice(),
                 deal.getContent(),
+                (int) deal.getDealScore(),
                 (int) totalViews,
                 (int) metrics[0], // likeCount
                 (int) metrics[1], // dislikeCount
@@ -467,6 +471,12 @@ public class DealService {
 
         deal.setIsDelete(true);
 
+        // 삭제 후 해당 이미지 isTemp = true로 설정
+        List<Image> images = imageRepository.findByRefIdAndImageTypeOrderByImageIndexAsc(dealId, ImageType.DEAL);
+        for (Image image : images) {
+            image.setTemp(true);
+        }
+
         return new DealResponseDTOs.Delete("핫딜 게시글 삭제 성공");
     }
 
@@ -525,14 +535,7 @@ public class DealService {
                     .toList();
 
             case POPULARITY -> deals.stream()
-                    .sorted((d1, d2) -> Double.compare(
-                            getDealScore(d2,
-                                    viewCountMap.getOrDefault(d2.getDealId(), 0L),
-                                    likeCountMap.getOrDefault(d2.getDealId(), 0L)),
-                            getDealScore(d1,
-                                    viewCountMap.getOrDefault(d1.getDealId(), 0L),
-                                    likeCountMap.getOrDefault(d1.getDealId(), 0L))
-                    ))
+                    .sorted((d1, d2) -> Double.compare(d2.getDealScore(), d1.getDealScore()))
                     .toList();
 
             case DISCOUNT_RATE -> deals.stream()
@@ -570,39 +573,5 @@ public class DealService {
             case LAST3DAYS -> now.minusDays(3);
             case LAST7DAYS -> now.minusDays(7);
         };
-    }
-
-    // 딜스코어 계산 상수 Redis로 관리
-    private double getDealScoreConfig(String key, double defaultValue) {
-        Object val = redisTemplate.opsForHash().get("deal:score:config", key);
-        if (val != null) {
-            try {
-                return Double.parseDouble(val.toString());
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return defaultValue;
-    }
-
-    // 딜스코어 계산 함수
-    private double getDealScore(Deal deal, long viewCount, long likeCount) {
-        // Redis에서 설정값 불러오기 (redis 죽는 거 방지해서 기본값 설정)
-        double weightView = getDealScoreConfig("weight:view", 0.8); // 조회수 가중치
-        double weightLike = getDealScoreConfig("weight:like", 0.2); // 좋아요 가중치
-        int decayStartHour = (int) getDealScoreConfig("decay:startHour", 8); // 8시간 후 차감
-        double decayPerHour = getDealScoreConfig("decay:perHourRate", 0.02); // 그 후 2%씩 차감
-        double minDecayRate = getDealScoreConfig("decay:minRate", 0.2); // 20% 하한선
-
-        double rawScore = viewCount * weightView + likeCount * weightLike;
-
-        LocalDateTime createdAt = deal.getCreatedAt();
-        long hoursSinceCreated = java.time.Duration.between(createdAt, LocalDateTime.now()).toHours();
-
-        if (hoursSinceCreated <= decayStartHour) return rawScore;
-
-        long decayedHours = Math.min(hoursSinceCreated - decayStartHour, 40);
-        double decayRate = Math.max(1.0 - (decayedHours * decayPerHour), minDecayRate);
-
-        return rawScore * decayRate;
     }
 }

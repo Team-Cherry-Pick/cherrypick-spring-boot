@@ -72,6 +72,9 @@ public class Deal {
     @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DealTag> dealTags = new ArrayList<>();
 
+    @Column(nullable = false)
+    private double dealScore = 0.0;
+
     @Builder.Default
     private Boolean isDelete = false;
 
