@@ -58,15 +58,14 @@ public class VoteService {
         Vote vote = voteRepository.findByUserIdAndDealId(user, deal)
                 .orElse(new Vote());
 
-        // 기존 점수 제거
-        int prevScore = vote.getScore();
+        // 이전 점수 제거
+        double prevScore = vote.getScore();
         deal.setDealScore(clampScore(deal.getDealScore() - prevScore));
 
         // 새 점수 계산
-        int newScore = 0;
+        double newScore = 0.0;
         if (request.voteType() != VoteType.NONE) {
-            double rawScore = calculateSingleScore(user, deal, request.voteType(), LocalDateTime.now());
-            newScore = (int) Math.round(rawScore);
+            newScore = calculateSingleScore(user, deal, request.voteType(), LocalDateTime.now());
             deal.setDealScore(clampScore(deal.getDealScore() + newScore));
         }
 
@@ -92,14 +91,13 @@ public class VoteService {
             case FALSE -> -0.8;
             default -> 0.0;
         };
-        double resistance = 2.0 + (deal.getDealScore() / 100.0); // ResistanceWeight = BaseResistance + (DealScore / ResistanceWeight)
-        return (userWeight * timeDecay * likeWeight / resistance) * 100; // 100배
+        double resistance = 2.0 + (deal.getDealScore() / 100.0);
+        return (userWeight * timeDecay * likeWeight / resistance);
     }
 
     // 생성 시간 감쇠율
     private double getTimeDecay(LocalDateTime createdAt, LocalDateTime now) {
         long hours = Duration.between(createdAt, now).toHours();
-
         if (hours < 0) return 1.0;
         if (hours < 1) return 1.0;
         if (hours < 6) return 0.8;
@@ -109,7 +107,7 @@ public class VoteService {
     }
 
     // 점수 범위 설정
-    private int clampScore(int score) {
-        return Math.max(-1000, Math.min(1000, score));
+    private double clampScore(double score) {
+        return Math.max(-1000.0, Math.min(1000.0, score));
     }
 }

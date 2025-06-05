@@ -268,7 +268,7 @@ public class RecommenderService
                     DealService.getInfoTags(deal),
                     deal.getPrice(),
                     deal.getCreatedAt().toString(),
-                    deal.getDealScore(),
+                    (int) deal.getDealScore(),
                     (int) likeCount,
                     (int) commentCount,
                     deal.isSoldOut()
@@ -343,7 +343,7 @@ public class RecommenderService
                     DealService.getInfoTags(deal),
                     deal.getPrice(),
                     deal.getCreatedAt().toString(),
-                    deal.getDealScore(),
+                    (int) deal.getDealScore(),
                     (int) likeCount,
                     (int) commentCount,
                     deal.isSoldOut(),
