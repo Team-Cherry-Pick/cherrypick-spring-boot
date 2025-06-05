@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Service @RequiredArgsConstructor
 public class CategoryService {
@@ -30,8 +31,10 @@ public class CategoryService {
     // 계층을 타고 내려가서 각 카테고리를 리스트에 담음, 이후 상위 객체에 해당 리스트를 전달.
     public List<CategoryListDTO.CategoryDTO> getCategoryListRecursive(Long parentId ,List<Category> categories)
     {
-        return categories.stream().filter(c -> c.getParentId().equals(parentId))
-                .map(c -> CategoryListDTO.CategoryDTO.of(c, getCategoryListRecursive(c.getCategoryId(), categories)))
+
+        return categories.stream()
+                .filter(c -> Optional.ofNullable(c.getParentId()).orElse(0L).equals(parentId))          // 해당 카테고리의 자식을 찾음
+                .map(c -> CategoryListDTO.CategoryDTO.of(c, getCategoryListRecursive(c.getCategoryId(), categories)))// 자식을 불러와 리스트화 후 담음 (재귀적)
                 .toList();
     }
 
