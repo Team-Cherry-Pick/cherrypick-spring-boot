@@ -60,13 +60,13 @@ public class VoteService {
 
         // 이전 점수 제거
         double prevScore = vote.getScore();
-        deal.setDealScore(clampScore(deal.getDealScore() - prevScore));
+        deal.setHeat(clampScore(deal.getHeat() - prevScore));
 
         // 새 점수 계산
         double newScore = 0.0;
         if (request.voteType() != VoteType.NONE) {
             newScore = calculateSingleScore(user, deal, request.voteType(), LocalDateTime.now());
-            deal.setDealScore(clampScore(deal.getDealScore() + newScore));
+            deal.setHeat(clampScore(deal.getHeat() + newScore));
         }
 
         // 투표 갱신
@@ -91,7 +91,7 @@ public class VoteService {
             case FALSE -> -0.8;
             default -> 0.0;
         };
-        double resistance = 2.0 + (deal.getDealScore() / 100.0); // CurrentResistance = BaseResistance + CurrentHeat / ResistanceWeight
+        double resistance = 2.0 + (deal.getHeat() / 100.0); // CurrentResistance = BaseResistance + CurrentHeat / ResistanceWeight
         return (userWeight * timeDecay * likeWeight / resistance);
     }
 
