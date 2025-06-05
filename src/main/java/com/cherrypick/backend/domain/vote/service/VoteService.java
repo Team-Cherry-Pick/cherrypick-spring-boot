@@ -91,7 +91,7 @@ public class VoteService {
             case FALSE -> -0.8;
             default -> 0.0;
         };
-        double resistance = 2.0 + (deal.getDealScore() / 100.0);
+        double resistance = 2.0 + (deal.getDealScore() / 100.0); // CurrentResistance = BaseResistance + CurrentHeat / ResistanceWeight
         return (userWeight * timeDecay * likeWeight / resistance);
     }
 
