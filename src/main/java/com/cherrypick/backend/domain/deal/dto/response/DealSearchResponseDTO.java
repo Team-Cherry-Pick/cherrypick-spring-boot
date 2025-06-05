@@ -20,7 +20,7 @@ public class DealSearchResponseDTO {
     private List<String> infoTags;
     private Price price;
     private String createdAt;
-    private int dealScore;
+    private int heat;
     private int totalLikes;
     private int totalComments;
     private boolean isSoldout;

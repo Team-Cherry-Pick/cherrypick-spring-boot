@@ -37,6 +37,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -157,14 +158,11 @@ public class DealService {
 
         if (dto.getPriceFilter() != null) {
             PriceType type = dto.getPriceFilter().priceType();
-
             minPrice = dto.getPriceFilter().minPrice();
             maxPrice = dto.getPriceFilter().maxPrice();
-
             if ((minPrice != null || maxPrice != null) && type == null) {
                 throw new BaseException(DealErrorCode.INVALID_PRICE_TYPE);
             }
-
             if (type != null) priceTypes.add(type);
         }
 
@@ -175,10 +173,15 @@ public class DealService {
         List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty()) ? null : dto.getDiscountIds();
         List<Long> storeIds = (dto.getStoreIds() == null || dto.getStoreIds().isEmpty()) ? null : dto.getStoreIds();
 
-        boolean sortPriceHigh = dto.getSortType() == SortType.PRICE_HIGH;
-        boolean sortPriceLow = dto.getSortType() == SortType.PRICE_LOW;
+        Sort sort;
+        switch (dto.getSortType()) {
+            case PRICE_HIGH -> sort = Sort.by(Sort.Direction.DESC, "price.discountedPrice");
+            case PRICE_LOW -> sort = Sort.by(Sort.Direction.ASC, "price.discountedPrice");
+            case LATEST -> sort = Sort.by(Sort.Direction.DESC, "createdAt");
+            default -> sort = Sort.unsorted();
+        }
 
-        Pageable pageable = PageRequest.of(page, size + 1);
+        Pageable pageable = PageRequest.of(0, (page + 1) * size, sort);
 
         List<Deal> deals = dealRepository.searchDealsWithPaging(
                 dto.getCategoryId(),
@@ -193,32 +196,18 @@ public class DealService {
                 variousPrice,
                 discountIds,
                 storeIds,
-                sortPriceHigh,
-                sortPriceLow,
                 pageable
         );
 
-        boolean hasNext = deals.size() > size;
-        if (hasNext) {
-            deals = deals.subList(0, size);
-        }
-
+        // N+1 문제 해결: image, view, vote, comment 한번에 조회
         List<Long> dealIds = deals.stream().map(Deal::getDealId).toList();
 
-        List<String> redisKeys = dealIds.stream().map(id -> "deal:view:" + id).toList();
-        List<Object> redisResults = redisTemplate.opsForValue().multiGet(redisKeys);
-        Map<Long, Long> viewCountMap = new HashMap<>();
-        for (int i = 0; i < dealIds.size(); i++) {
-            Object val = redisResults.get(i);
-            long viewCount = 0L;
-            if (val != null) {
-                try {
-                    viewCount = Long.parseLong(val.toString());
-                } catch (NumberFormatException ignored) {
-                }
-            }
-            viewCountMap.put(dealIds.get(i), viewCount);
-        }
+        Map<Long, Long> viewCountMap = redisTemplate.opsForValue()
+                .multiGet(dealIds.stream().map(id -> "deal:view:" + id).toList())
+                .stream().collect(HashMap::new, (m, v) -> {
+                    int i = m.size();
+                    m.put(dealIds.get(i), v != null ? Long.parseLong(v.toString()) : 0L);
+                }, HashMap::putAll);
 
         Map<Long, Long> likeCountMap = voteRepository.countByDealIdsAndVoteTypeGrouped(dealIds, VoteType.TRUE);
         Map<Long, Long> commentCountMap = commentRepository.countByDealIdsGrouped(dealIds);
@@ -227,36 +216,30 @@ public class DealService {
 
         if (dto.getSortType() == SortType.POPULARITY
                 || dto.getSortType() == SortType.VIEWS
-                || dto.getSortType() == SortType.VOTES
                 || dto.getSortType() == SortType.DISCOUNT_RATE) {
             deals = sortDeals(deals, dto.getSortType(), viewCountMap, likeCountMap);
         }
 
-        List<DealSearchResponseDTO> responseList = deals.stream().map(deal -> {
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size + 1, deals.size());
+        List<Deal> pageContent = fromIndex >= deals.size() ? List.of() : deals.subList(fromIndex, toIndex);
+        boolean hasNext = pageContent.size() > size;
+        if (hasNext) pageContent = pageContent.subList(0, size);
+
+        List<DealSearchResponseDTO> responseList = pageContent.stream().map(deal -> {
             Long dealId = deal.getDealId();
-            long viewCount = viewCountMap.getOrDefault(dealId, 0L);
             long likeCount = likeCountMap.getOrDefault(dealId, 0L);
             long commentCount = commentCountMap.getOrDefault(dealId, 0L);
-
-            Image firstImage = imageMap.get(dealId);
-            ImageUrl imageUrl = null;
-            if (firstImage != null) {
-                imageUrl = new ImageUrl(
-                        firstImage.getImageId(),
-                        firstImage.getImageUrl(),
-                        firstImage.getImageIndex()
-                );
-            }
-
+            Image image = imageMap.get(dealId);
             return new DealSearchResponseDTO(
                     dealId,
-                    imageUrl,
+                    image != null ? new ImageUrl(image.getImageId(), image.getImageUrl(), image.getImageIndex()) : null,
                     deal.getTitle(),
                     deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
                     getInfoTags(deal),
                     deal.getPrice(),
                     deal.getCreatedAt().toString(),
-                    (int) deal.getDealScore(),
+                    (int) deal.getHeat(),
                     (int) likeCount,
                     (int) commentCount,
                     deal.isSoldOut()
@@ -360,7 +343,7 @@ public class DealService {
                 deal.getShipping(),
                 deal.getPrice(),
                 deal.getContent(),
-                (int) deal.getDealScore(),
+                (int) deal.getHeat(),
                 (int) totalViews,
                 (int) metrics[0], // likeCount
                 (int) metrics[1], // dislikeCount
@@ -402,7 +385,7 @@ public class DealService {
             deal.setOriginalUrl(dto.originalUrl());
         }
 
-        Store store = null;
+        Store store;
         if (dto.storeId() != null) {
             store = storeRepository.findById(dto.storeId())
                     .orElseThrow(() -> new BaseException(DealErrorCode.STORE_NOT_FOUND));
@@ -516,48 +499,41 @@ public class DealService {
     }
 
     // 정렬 함수
-    private List<Deal> sortDeals(List<Deal> deals, SortType sortType,
-                                 Map<Long, Long> viewCountMap,
-                                 Map<Long, Long> likeCountMap) {
-        if (sortType == null) return deals;
+    private List<Deal> sortDeals(List<Deal> deals, SortType sortType, Map<Long, Long> viewCountMap, Map<Long, Long> likeCountMap) {
+        Comparator<Deal> comparator = null;
 
-        return switch (sortType) {
-            case VIEWS -> deals.stream()
-                    .sorted((d1, d2) -> Long.compare(
-                            viewCountMap.getOrDefault(d2.getDealId(), 0L),
-                            viewCountMap.getOrDefault(d1.getDealId(), 0L)))
-                    .toList();
+        switch (sortType) {
+            case POPULARITY:
+                comparator = Comparator.comparingDouble(Deal::getHeat).reversed()
+                        .thenComparing(Deal::getCreatedAt, Comparator.reverseOrder());
+                break;
 
-            case VOTES -> deals.stream()
-                    .sorted((d1, d2) -> Long.compare(
-                            likeCountMap.getOrDefault(d2.getDealId(), 0L),
-                            likeCountMap.getOrDefault(d1.getDealId(), 0L)))
-                    .toList();
+            case VIEWS:
+                comparator = Comparator.<Deal>comparingLong(d -> viewCountMap.getOrDefault(d.getDealId(), 0L)).reversed()
+                        .thenComparing(Deal::getCreatedAt, Comparator.reverseOrder());
+                break;
 
-            case POPULARITY -> deals.stream()
-                    .sorted((d1, d2) -> Double.compare(d2.getDealScore(), d1.getDealScore()))
-                    .toList();
+            case DISCOUNT_RATE:
+                comparator = Comparator.comparingDouble(this::getDiscountRate).reversed()
+                        .thenComparing(Deal::getCreatedAt, Comparator.reverseOrder());
+                break;
 
-            case DISCOUNT_RATE -> deals.stream()
-                    .sorted((d1, d2) -> Double.compare(
-                            getDiscountRate(d2),
-                            getDiscountRate(d1)))
-                    .toList();
+            default:
+                return deals;
+        }
 
-            case LATEST -> deals.stream()
-                    .sorted((d1, d2) -> d2.getCreatedAt().compareTo(d1.getCreatedAt()))
-                    .toList();
-
-            default -> deals;
-        };
+        return deals.stream().sorted(comparator).toList();
     }
 
+    // 할인률 계산 함수
     private double getDiscountRate(Deal deal) {
-        double regular = deal.getPrice().regularPrice();
-        double discounted = deal.getPrice().discountedPrice();
-        return (regular > 0) ? (regular - discounted) / regular : 0;
-    }
+        if (deal.getPrice() == null) return 0.0;
+        Double regular = deal.getPrice().regularPrice();
+        Double discounted = deal.getPrice().discountedPrice();
+        if (regular == null || discounted == null || regular <= 0) return 0.0;
 
+        return (regular - discounted) / regular;
+    }
 
     // 시간 범위 정렬
     private LocalDateTime resolveStartDate(TimeRangeType timeRangeType) {
