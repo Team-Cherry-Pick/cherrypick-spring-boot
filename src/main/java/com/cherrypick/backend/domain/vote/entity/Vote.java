@@ -43,5 +43,5 @@ public class Vote {
     private LocalDateTime updatedAt;
 
     // 유저가 반영한 점수 (투표 취소 시 빼는 용)
-    private int score;
+    private double score;
 }

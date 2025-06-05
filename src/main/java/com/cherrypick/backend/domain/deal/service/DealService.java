@@ -256,7 +256,7 @@ public class DealService {
                     getInfoTags(deal),
                     deal.getPrice(),
                     deal.getCreatedAt().toString(),
-                    deal.getDealScore(),
+                    (int) deal.getDealScore(),
                     (int) likeCount,
                     (int) commentCount,
                     deal.isSoldOut()
@@ -360,7 +360,7 @@ public class DealService {
                 deal.getShipping(),
                 deal.getPrice(),
                 deal.getContent(),
-                deal.getDealScore(),
+                (int) deal.getDealScore(),
                 (int) totalViews,
                 (int) metrics[0], // likeCount
                 (int) metrics[1], // dislikeCount
