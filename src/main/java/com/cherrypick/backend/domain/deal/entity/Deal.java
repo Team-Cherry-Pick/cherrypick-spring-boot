@@ -73,7 +73,7 @@ public class Deal {
     private List<DealTag> dealTags = new ArrayList<>();
 
     @Column(nullable = false)
-    private double dealScore = 0.0;
+    private double heat = 0.0;
 
     @Builder.Default
     private Boolean isDelete = false;

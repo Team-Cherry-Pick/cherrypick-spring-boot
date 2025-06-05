@@ -14,9 +14,9 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
 
     @Query("""
 SELECT d FROM Deal d
-JOIN d.categoryId c
-LEFT JOIN d.discounts discount
-LEFT JOIN d.storeId store
+JOIN FETCH d.categoryId c
+LEFT JOIN FETCH d.discounts discount
+LEFT JOIN FETCH d.storeId store
 WHERE 
     d.isDelete = FALSE
     AND (:categoryId IS NULL OR c.categoryId = :categoryId OR c.parentId = :categoryId)
@@ -37,10 +37,6 @@ WHERE
     )
     AND (:discountIds IS NULL OR discount.discountId IN :discountIds)
     AND (:storeIds IS NULL OR store.storeId IN :storeIds)
-ORDER BY
-    CASE WHEN :sortPriceHigh = TRUE THEN d.price.discountedPrice END DESC,
-    CASE WHEN :sortPriceLow = TRUE THEN d.price.discountedPrice END ASC,
-    d.createdAt DESC
 """)
     List<Deal> searchDealsWithPaging(
             @Param("categoryId") Long categoryId,
@@ -55,11 +51,8 @@ ORDER BY
             @Param("variousPrice") boolean variousPrice,
             @Param("discountIds") List<Long> discountIds,
             @Param("storeIds") List<Long> storeIds,
-            @Param("sortPriceHigh") boolean sortPriceHigh,
-            @Param("sortPriceLow") boolean sortPriceLow,
             Pageable pageable
     );
-
 
     @Query(value = "SELECT b.* " +
             "FROM deal b " +

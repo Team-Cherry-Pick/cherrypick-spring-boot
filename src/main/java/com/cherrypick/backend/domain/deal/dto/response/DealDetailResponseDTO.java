@@ -20,7 +20,7 @@ public record DealDetailResponseDTO (
         Shipping shipping,
         Price price,
         String content,
-        int dealScore,
+        int heat,
         int totalViews,
         int totalLikes,
         int totalUnLikes,
