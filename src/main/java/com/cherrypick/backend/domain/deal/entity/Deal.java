@@ -68,6 +68,7 @@ public class Deal {
 
     private String storeName;
     private String discountName;
+    private String discountDescription;
 
     @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DealTag> dealTags = new ArrayList<>();
