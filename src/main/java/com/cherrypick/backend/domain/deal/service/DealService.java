@@ -344,6 +344,7 @@ public class DealService {
                 deal.getShipping(),
                 deal.getPrice(),
                 deal.getContent(),
+                deal.getDiscountDescription(),
                 (int) deal.getHeat(),
                 (int) totalViews,
                 (int) metrics[0], // likeCount
