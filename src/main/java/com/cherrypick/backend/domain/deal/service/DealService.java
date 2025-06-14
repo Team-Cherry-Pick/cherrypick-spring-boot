@@ -114,6 +114,7 @@ public class DealService {
                 .content(dto.content())
                 .discounts(discounts)
                 .discountName(discountName)
+                .discountDescription(dto.discountDescription())
                 .isSoldOut(false)
                 .build();
 

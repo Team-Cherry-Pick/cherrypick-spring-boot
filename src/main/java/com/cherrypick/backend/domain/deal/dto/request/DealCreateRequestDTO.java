@@ -20,6 +20,7 @@ public record DealCreateRequestDTO(
         Shipping shipping,
         String content,
         List<Long> discountIds,
-        List<String> discountNames
+        List<String> discountNames,
+        String discountDescription
 ) {
 }
