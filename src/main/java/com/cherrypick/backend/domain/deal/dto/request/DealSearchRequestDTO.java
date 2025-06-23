@@ -4,10 +4,7 @@ import com.cherrypick.backend.domain.deal.enums.SortType;
 import com.cherrypick.backend.domain.deal.enums.TimeRangeType;
 import com.cherrypick.backend.domain.deal.vo.Filter;
 import com.cherrypick.backend.domain.deal.vo.PriceFilter;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -15,6 +12,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class DealSearchRequestDTO {
 
     // 카테고리 ID
@@ -30,7 +28,8 @@ public class DealSearchRequestDTO {
     private TimeRangeType timeRange;
 
     // 정렬 기준
-    private SortType sortType;
+    @Builder.Default
+    private SortType sortType = SortType.LATEST;
 
     // 가격
     private PriceFilter priceFilter;
