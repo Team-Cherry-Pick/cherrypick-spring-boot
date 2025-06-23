@@ -267,6 +267,7 @@ public class RecommenderService
                     deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
                     DealService.getInfoTags(deal),
                     deal.getPrice(),
+                    deal.getUserId() != null ? deal.getUserId().getNickname() : null,
                     deal.getCreatedAt().toString(),
                     (int) deal.getHeat(),
                     (int) likeCount,
@@ -342,6 +343,7 @@ public class RecommenderService
                     deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
                     DealService.getInfoTags(deal),
                     deal.getPrice(),
+                    deal.getUserId() != null ? deal.getUserId().getNickname() : null,
                     deal.getCreatedAt().toString(),
                     (int) deal.getHeat(),
                     (int) likeCount,
@@ -362,9 +364,9 @@ public class RecommenderService
         public static class DealResponse extends DealSearchResponseDTO{
             List<String> tags;
 
-            public DealResponse(Long dealId, ImageUrl imageUrl, String title, String s, List<String> infoTags, Price price, String string, int heat, int likeCount, int commentCount, boolean soldOut, List<String> tags)
+            public DealResponse(Long dealId, ImageUrl imageUrl, String title, String s, List<String> infoTags, Price price, String nickname, String string, int heat, int likeCount, int commentCount, boolean soldOut, List<String> tags)
             {
-                super(dealId, imageUrl, title, s, infoTags, price, string, heat, likeCount, commentCount, soldOut);
+                super(dealId, imageUrl, title, s, infoTags, price, nickname, string, heat, likeCount, commentCount, soldOut);
                 this.tags = tags;
             }
         }
