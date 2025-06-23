@@ -19,6 +19,7 @@ public class DealSearchResponseDTO {
     private String store;
     private List<String> infoTags;
     private Price price;
+    private String nickname;
     private String createdAt;
     private int heat;
     private int totalLikes;

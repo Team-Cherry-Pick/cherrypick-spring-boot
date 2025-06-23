@@ -239,6 +239,7 @@ public class DealService {
                     deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
                     getInfoTags(deal),
                     deal.getPrice(),
+                    deal.getUserId() != null ? deal.getUserId().getNickname() : null,
                     deal.getCreatedAt().toString(),
                     (int) deal.getHeat(),
                     (int) likeCount,
