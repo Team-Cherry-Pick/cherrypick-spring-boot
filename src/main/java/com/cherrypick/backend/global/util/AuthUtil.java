@@ -20,15 +20,22 @@ public class AuthUtil
         return principal instanceof AuthenticationDetailDTO;
     }
 
-    public static AuthenticationDetailDTO getUserDetail(){
-        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public static AuthenticationDetailDTO getUserDetail() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        try{
-            return (AuthenticationDetailDTO) principal;
-        } catch (Exception e) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             throw new BaseException(UserErrorCode.SECURITY_AUTHENTICATION_REQUIRED);
         }
+
+        var principal = authentication.getPrincipal();
+
+        if (!(principal instanceof AuthenticationDetailDTO)) {
+            throw new BaseException(UserErrorCode.SECURITY_AUTHENTICATION_REQUIRED);
+        }
+
+        return (AuthenticationDetailDTO) principal;
     }
+
 
 
 }

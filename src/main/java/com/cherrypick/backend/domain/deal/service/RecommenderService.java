@@ -65,7 +65,7 @@ public class RecommenderService
     {
         try{
             var rId = redisTemplate.opsForStream().add(STREAM_NAME, behaviorDTO.toMap());
-            log.warn("::::: 행동 로그 삽입 : {}", behaviorDTO.toString());
+            System.out.println("::::: 행동 로그 삽입 : {}" + behaviorDTO.toString());
             return rId.getValue();
         }catch (Exception e) {
             log.warn(e.getMessage());
