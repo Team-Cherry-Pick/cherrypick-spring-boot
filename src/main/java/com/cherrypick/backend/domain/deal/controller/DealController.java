@@ -76,11 +76,7 @@ public class DealController {
             @PathVariable Long dealId,
             @RequestParam(value = "version", defaultValue = "v1") String version) {
 
-        // 유저 행동로그 삽입
-        if(AuthUtil.isAuthenticated()){
-            var userBehaviorDTO = new DealRequestDTOs.UserBehaviorDTO(AuthUtil.getUserDetail().userId(), dealId, UserBehaviorType.VIEW);
-            recommenderService.addUserBehaviorLog(userBehaviorDTO);
-        }
+
 
         return ResponseEntity.ok(dealService.getDealDetail(dealId));
     }
