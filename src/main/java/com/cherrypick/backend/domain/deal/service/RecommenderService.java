@@ -294,8 +294,8 @@ public class RecommenderService
 
     public DealSearchPageResponseDTO getInterestBoard()
     {
-        var userId = AuthUtil.getUserDetail().userId();
-        return getInterestBoard(userId);
+        //var userId = AuthUtil.getUserDetail().userId();
+        return getInterestBoard(8L);
     }
 
     public DealListResponse getAllList()
