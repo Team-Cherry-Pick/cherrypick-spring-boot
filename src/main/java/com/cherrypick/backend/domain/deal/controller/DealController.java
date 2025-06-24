@@ -16,6 +16,7 @@ import com.cherrypick.backend.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Deal", description = "핫딜 게시글 CRUD")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api") @Slf4j
 public class DealController {
 
     private final DealService dealService;
@@ -76,7 +77,11 @@ public class DealController {
             @PathVariable Long dealId,
             @RequestParam(value = "version", defaultValue = "v1") String version) {
 
-
+        // 유저 행동로그 삽입
+        if(AuthUtil.isAuthenticated()){
+            var userBehaviorDTO = new DealRequestDTOs.UserBehaviorDTO(AuthUtil.getUserDetail().userId(), dealId, UserBehaviorType.VIEW);
+            recommenderService.addUserBehaviorLog(userBehaviorDTO);
+        }
 
         return ResponseEntity.ok(dealService.getDealDetail(dealId));
     }
