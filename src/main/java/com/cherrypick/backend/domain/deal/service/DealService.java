@@ -62,7 +62,6 @@ public class DealService {
     private final ImageService imageService;
     private final ImageRepository imageRepository;
     private final HashTagService  hashTagService;
-    private final DealCrawlService dealCrawlService;
     private final RecommenderService recommenderService;
 
     // 게시글 생성
@@ -125,7 +124,7 @@ public class DealService {
         Deal saved = dealRepository.save(deal);
 
         // 해쉬태그 생성
-        hashTagService.saveHashTags(saved.getDealId(), dealCrawlService.getChatGPTResponse(saved.getTitle(), saved.getContent()));
+        hashTagService.saveHashTags(saved.getDealId(), hashTagService.getChatGPTResponse(saved.getTitle(), saved.getContent()));
 
         // 이미지랑 매핑
         if (dto.imageIds() != null && !dto.imageIds().isEmpty()) {

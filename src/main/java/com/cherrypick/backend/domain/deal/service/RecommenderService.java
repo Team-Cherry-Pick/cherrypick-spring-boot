@@ -18,12 +18,16 @@ import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.cherrypick.backend.domain.vote.repository.VoteRepository;
 import com.cherrypick.backend.global.util.AuthUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.Record;
@@ -31,7 +35,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StreamOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Range;
+import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -52,6 +58,7 @@ public class RecommenderService
     private final CommentRepository commentRepository;
 
     final String STREAM_NAME = "USER_BEHAVIOR_STREAM";
+
 
     // 유저 행동 로그 생성
     public String addUserBehaviorLog(DealRequestDTOs.UserBehaviorDTO behaviorDTO)
