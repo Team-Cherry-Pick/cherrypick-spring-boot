@@ -124,6 +124,7 @@ public class DealService {
 
         Deal saved = dealRepository.save(deal);
 
+        // 해쉬태그 생성
         hashTagService.saveHashTags(saved.getDealId(), dealCrawlService.getChatGPTResponse(saved.getTitle(), saved.getContent()));
 
         // 이미지랑 매핑
@@ -339,12 +340,6 @@ public class DealService {
                         image.getImageIndex()
                 ))
                 .toList();
-
-        // 유저 행동로그 삽입
-        if(AuthUtil.isAuthenticated()){
-            var userBehaviorDTO = new DealRequestDTOs.UserBehaviorDTO(AuthUtil.getUserDetail().userId(), dealId, UserBehaviorType.VIEW);
-            recommenderService.addUserBehaviorLog(userBehaviorDTO);
-        }
 
 
         return new DealDetailResponseDTO(
