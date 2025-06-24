@@ -63,10 +63,15 @@ public class RecommenderService
     // 유저 행동 로그 생성
     public String addUserBehaviorLog(DealRequestDTOs.UserBehaviorDTO behaviorDTO)
     {
-        var rId = redisTemplate.opsForStream().add(STREAM_NAME, behaviorDTO.toMap());
-        log.warn("::::: 행동 로그 삽입 : {}", behaviorDTO.toString());
+        try{
+            var rId = redisTemplate.opsForStream().add(STREAM_NAME, behaviorDTO.toMap());
+            log.warn("::::: 행동 로그 삽입 : {}", behaviorDTO.toString());
+            return rId.getValue();
+        }catch (Exception e) {
+            log.warn(e.getMessage());
+            return "nooooooooo";
+        }
 
-        return rId.getValue();
     }
 
     // 모든 로그를 읽어와 유저의 것으로 정제 후 반환

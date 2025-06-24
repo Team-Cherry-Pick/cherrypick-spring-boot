@@ -88,8 +88,6 @@ public class DealController {
             log.warn("미로그인 유저");
         }
 
-
-
         return ResponseEntity.ok(dealService.getDealDetail(dealId));
     }
 
