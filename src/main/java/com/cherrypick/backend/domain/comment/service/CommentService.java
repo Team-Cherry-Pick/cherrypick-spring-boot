@@ -27,9 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -277,5 +275,60 @@ public class CommentService {
                 List.of()
         );
     }
+
+    public void dummyDataSetting(){
+        var dummy_contents = List.of(
+                "와 대박짱 맛있어보여요 완전 킹대박",
+                "정말 어떻게 이런 가격이지? 정말 핫딜은 왕빵킹슈퍼대박이다.",
+                "아~~~~~~~~~~~~~~~ 오늘은 아낀 돈으로 치킨 사먹어야지 다 죽었다 ㅋㅋㅋ",
+                "헐 진짜 웃기는 짬뽕이야 ~ 이런 가격이면 누가 믿어요 !",
+                "핫딜을 보면 웃는 개 : 왈왈왈왈왈왈왈왈왈왈왈왈!!!",
+                "와 달다 정말 무등산수박만큼 달다.",
+                "아 얼마 전에 샀었는데 ... 좀 늦게 살걸",
+                "이거 또 올라왔어요? 저번보다 싸네",
+                "와 좋은 정보 감사함당 ~",
+                "ㅎㅎㅎㅎㅎ 오늘도 좋은 정보 고마워요",
+                "아 지갑 얇아지는 소리 들린다 ㅠ 그래두 감사합니다",
+                "이거 근데 왜 이렇게 싸요? 남는게 있나",
+                "좋은데요? 근데 마진이 남나? 조금 의심스럽지 않아요?",
+                "금방 나가겠네 얼른 사야겠다",
+                "근데 이분 되게 자주 올리시네?ㅋㅋㅋ",
+                "이거 정말 싸네요 !! 고수분들은 어떻게 생각하세요?",
+                "오 카드 할인도 있네요 ~~ 다들 참고하세요",
+                "아침부터 굳 핫딜이당 ~~ 굳굳",
+                "나가기 전에 얼른 사세오!",
+                "야호",
+                "나도 사야겠다",
+                "사고 싶은데 .. 흠...",
+                "이번달도 적자네 ;",
+                "앗 마침 필요했는데",
+                "좋다좋아",
+                "금방 나가겠는데 다들 언능 들여가세요",
+                "와 ~~~ 울 마눌 사줘야겠어요 ~~~",
+                "그이 몰래 들였네요 저 혼자 먹으려구요",
+                "헉 아주 죠와 !!!!!!!!!",
+                "이런 핫딜은 추천이야 진짜로"
+        );
+
+        var deals = dealRepository.findAll();
+        var dealIds = deals.stream().map(Deal::getDealId).toList();
+
+        var comments = new ArrayList<Comment>();
+        for(var id : dealIds){
+            int count = new Random().nextInt(20);
+            for (int i = 0; i < count; i++) {
+                var c = new Comment();
+                c.setDealId(Deal.builder().dealId(id).build());
+                c.setParentId(null);
+                c.setUserId(User.builder().userId(2L).build());
+                c.setContent(dummy_contents.get(new Random().nextInt(dummy_contents.size())));
+                c.setDelete(false);
+                comments.add(c);
+            }
+        }
+
+        commentRepository.saveAll(comments);
+    }
+
 
 }
