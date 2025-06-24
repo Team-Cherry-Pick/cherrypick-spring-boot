@@ -79,11 +79,16 @@ public class DealController {
 
         // 유저 행동로그 삽입
         log.warn("행동로그 진입점");
-        if(AuthUtil.isAuthenticated()){
+
+        try{
             log.warn("행동로그 진입");
             var userBehaviorDTO = new DealRequestDTOs.UserBehaviorDTO(AuthUtil.getUserDetail().userId(), dealId, UserBehaviorType.VIEW);
             recommenderService.addUserBehaviorLog(userBehaviorDTO);
+        }catch (Exception e){
+            log.warn("미로그인 유저");
         }
+
+
 
         return ResponseEntity.ok(dealService.getDealDetail(dealId));
     }
