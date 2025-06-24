@@ -85,4 +85,12 @@ public class CommentController {
             @RequestParam(value = "version", defaultValue = "v1") String version) {
         return ResponseEntity.ok(commentService.likeComment(request));
     }
+
+    @PostMapping("/comment/dummy")
+    public String createDummyComment(){
+        commentService.dummyDataSetting();
+        return "yesssssssss";
+    }
+
+
 }
