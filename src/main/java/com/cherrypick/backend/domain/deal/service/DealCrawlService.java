@@ -167,7 +167,7 @@ public class DealCrawlService {
     }
 
     // OpenAI API 호출
-    private Set<String> getChatGPTResponse(String title, String content) {
+    public Set<String> getChatGPTResponse(String title, String content) {
 
         RestTemplate restTemplate = new RestTemplate();
 
