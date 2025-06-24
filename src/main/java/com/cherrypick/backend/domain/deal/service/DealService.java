@@ -4,6 +4,7 @@ import com.cherrypick.backend.domain.category.repository.CategoryRepository;
 import com.cherrypick.backend.domain.category.entity.Category;
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
+import com.cherrypick.backend.domain.deal.dto.request.DealRequestDTOs;
 import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
@@ -11,13 +12,12 @@ import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchResponseDTO;
 import com.cherrypick.backend.domain.deal.entity.Deal;
-import com.cherrypick.backend.domain.deal.enums.PriceType;
-import com.cherrypick.backend.domain.deal.enums.ShippingType;
-import com.cherrypick.backend.domain.deal.enums.SortType;
-import com.cherrypick.backend.domain.deal.enums.TimeRangeType;
+import com.cherrypick.backend.domain.deal.enums.*;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.discount.entity.Discount;
 import com.cherrypick.backend.domain.discount.repository.DiscountRepository;
+import com.cherrypick.backend.domain.hashtag.repository.HashTagRepository;
+import com.cherrypick.backend.domain.hashtag.service.HashTagService;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
@@ -33,6 +33,7 @@ import com.cherrypick.backend.domain.vote.repository.VoteRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
+import com.cherrypick.backend.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -60,6 +61,9 @@ public class DealService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ImageService imageService;
     private final ImageRepository imageRepository;
+    private final HashTagService  hashTagService;
+    private final DealCrawlService dealCrawlService;
+    private final RecommenderService recommenderService;
 
     // 게시글 생성
     @Transactional
@@ -119,6 +123,9 @@ public class DealService {
                 .build();
 
         Deal saved = dealRepository.save(deal);
+
+        // 해쉬태그 생성
+        hashTagService.saveHashTags(saved.getDealId(), dealCrawlService.getChatGPTResponse(saved.getTitle(), saved.getContent()));
 
         // 이미지랑 매핑
         if (dto.imageIds() != null && !dto.imageIds().isEmpty()) {
@@ -333,6 +340,7 @@ public class DealService {
                         image.getImageIndex()
                 ))
                 .toList();
+
 
         return new DealDetailResponseDTO(
                 deal.getDealId(),

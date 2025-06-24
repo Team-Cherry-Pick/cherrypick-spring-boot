@@ -20,6 +20,7 @@ public class HashTagService
     public void saveHashTags(Long targetDealId, Set<String> tagSet)
     {
         var dealTagList = new ArrayList<DealTag>();
+        log.info("::::: 새로운 글 감지");
         for (String hashTag : tagSet) {
 
             var tagOp = hashTagRepository.findByName(hashTag);
@@ -36,6 +37,7 @@ public class HashTagService
             dealTagList.add(dealTag);
 
         }
+        log.info("해시태그 연결 : {}", dealTagList);
 
         dealTagRepository.saveAll(dealTagList);
 

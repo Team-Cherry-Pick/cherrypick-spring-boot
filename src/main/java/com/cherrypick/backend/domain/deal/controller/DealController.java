@@ -1,15 +1,18 @@
 package com.cherrypick.backend.domain.deal.controller;
 
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
+import com.cherrypick.backend.domain.deal.dto.request.DealRequestDTOs;
 import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchResponseDTO;
+import com.cherrypick.backend.domain.deal.enums.UserBehaviorType;
 import com.cherrypick.backend.domain.deal.service.DealCrawlService;
 import com.cherrypick.backend.domain.deal.service.DealService;
 import com.cherrypick.backend.domain.deal.service.RecommenderService;
+import com.cherrypick.backend.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +42,7 @@ public class DealController {
             @RequestBody DealCreateRequestDTO dealCreateRequestDTO) {
 
         DealResponseDTOs.Create response = dealService.createDeal(dealCreateRequestDTO);
+
         return ResponseEntity.ok(response);
     }
 
@@ -71,6 +75,12 @@ public class DealController {
     public ResponseEntity<DealDetailResponseDTO> getDealDetail(
             @PathVariable Long dealId,
             @RequestParam(value = "version", defaultValue = "v1") String version) {
+
+        // 유저 행동로그 삽입
+        if(AuthUtil.isAuthenticated()){
+            var userBehaviorDTO = new DealRequestDTOs.UserBehaviorDTO(AuthUtil.getUserDetail().userId(), dealId, UserBehaviorType.VIEW);
+            recommenderService.addUserBehaviorLog(userBehaviorDTO);
+        }
 
         return ResponseEntity.ok(dealService.getDealDetail(dealId));
     }

@@ -2,6 +2,7 @@ package com.cherrypick.backend.domain.vote.service;
 
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
+import com.cherrypick.backend.domain.deal.service.RecommenderService;
 import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
@@ -29,6 +30,7 @@ public class VoteService {
     private final VoteRepository voteRepository;
     private final DealRepository dealRepository;
     private final UserRepository userRepository;
+    private final RecommenderService recommenderService;
 
     @Transactional
     public VoteResponseDTO createVote(Long dealId, VoteRequestDTO request) {
