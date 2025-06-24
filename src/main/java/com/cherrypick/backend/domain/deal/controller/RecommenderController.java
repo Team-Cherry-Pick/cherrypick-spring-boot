@@ -5,12 +5,13 @@ import com.cherrypick.backend.domain.deal.service.RecommenderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller@RequiredArgsConstructor
-@RequestMapping("/api") @Tag(name="Recommender System", description = "추천 시스템 관련 API")
+@RequestMapping("/api") @Tag(name="Recommender System", description = "추천 시스템 관련 API") @Slf4j
 public class RecommenderController {
     private final RecommenderService recommenderService;
 
@@ -23,7 +24,7 @@ public class RecommenderController {
     @ResponseBody
     public ResponseEntity<?> createLog(@RequestBody DealRequestDTOs.UserBehaviorDTO logDto)
     {
-
+        log.warn("행동로그 생성");
         return ResponseEntity.ok(recommenderService.addUserBehaviorLog(logDto));
     }
 
