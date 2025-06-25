@@ -1,11 +1,19 @@
 package com.cherrypick.backend.domain.oauth.service;
 
+import com.cherrypick.backend.domain.image.enums.ImageType;
+import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.oauth.dto.OAuth2UserDTO;
+import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
+import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.entity.User;
+import com.cherrypick.backend.domain.user.enums.Gender;
+import com.cherrypick.backend.domain.user.enums.Role;
+import com.cherrypick.backend.domain.user.enums.UserStatus;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
+import com.cherrypick.backend.global.util.AuthUtil;
 import com.cherrypick.backend.global.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +24,11 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +39,7 @@ public class AuthService extends DefaultOAuth2UserService
     private final UserRepository userRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final JWTUtil jwtUtil;
+    private final ImageService imageService;
 
     private final String REFRESH_TOKEN_KEY_NAME = "RT:user:";
 
@@ -71,6 +83,40 @@ public class AuthService extends DefaultOAuth2UserService
 
     }
 
+    // 유저를 등록 완료시키는 로직
+    @Transactional
+    public String userRegistComplete(UserUpdateRequestDTO dto){
+
+        // 인증된 유저의 ID를 찾음, 인증되지 않았다면 오류.
+        var userId = AuthUtil.getUserDetail().userId();
+        var userRole = AuthUtil.getUserDetail().role();
+
+        if(userRole != Role.CLIENT_PENDING) throw new BaseException(UserErrorCode.ALREADY_REGISTERED_USER);
+
+        // 유저 정보 수정, 활성 유저로 전환하고 입력된 정보를 저장함.
+        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+        user.setStatus(UserStatus.ACTIVE);
+        user.setRole(Role.CLIENT_PENDING);
+        user.setNickname(dto.nickname());
+        user.setEmail(dto.email());
+        user.setGender(Gender.valueOf(dto.gender()));
+        user.setBirthday(LocalDate.parse(dto.birthday()));
+
+        // 기존 이미지 삭제, 새 이미지 등록
+        imageService.deleteImageByUserId(userId);
+        imageService.attachImage(userId, List.of(dto.imageId()), ImageType.USER);
+
+        // 유저 업데이트
+        var updatedUser = userRepository.save(user);
+        var profileImage = imageService.getImageByUserId(userId);
+
+        // 권한을 바꿔준다.
+        AuthUtil.changeAuthority(Role.CLIENT);
+
+        // 엑세스 토큰을 전달.
+        return jwtUtil.createAccessToken(updatedUser.getUserId(), updatedUser.getRole(), updatedUser.getNickname());
+    }
+
     // 닉네임을 좀 더 까리하게 만들어줍니다.
     public String getRandomNickname(String originalNickname)
     {
@@ -91,7 +137,6 @@ public class AuthService extends DefaultOAuth2UserService
         return newNickName;
     }
 
-    // TODO : 토큰 관련 로직 JWTUtil로 이관
     public void saveResfreshToken(Long userId, String refreshToken)
     {
         // 토큰의 지속시간은 1주일

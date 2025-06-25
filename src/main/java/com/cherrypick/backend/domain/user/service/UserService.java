@@ -29,6 +29,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final ImageService imageService;
 
+
+    // 유저 업데이트
     @Transactional
     public UserDetailResponseDTO userUpdate(UserUpdateRequestDTO dto){
 

@@ -59,8 +59,8 @@ public class User {
                 .oauthId(userAttr.get("id").toString())
                 .nickname(Optional.ofNullable((HashMap<String, String>)userAttr.get("properties")).map(p -> p.get("nickname")).get().toString())
                 .email(Optional.ofNullable((HashMap<String, String>)userAttr.get("properties")).map(p -> p.get("account_email")).get().toString())
-                .birthday(null)
-                .gender(null)
+                .birthday(null)         // 이후에 등록됨.
+                .gender(null)           // 이후에 등록됨
                 .provider("kakao")
                 .status(UserStatus.PENDING)
                 .role(Role.CLIENT_PENDING)
