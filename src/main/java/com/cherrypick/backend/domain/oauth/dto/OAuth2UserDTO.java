@@ -20,6 +20,8 @@ public record OAuth2UserDTO(
 ) implements OAuth2User
 {
 
+    // TODO : 다중 권한 구조로 전환 필요
+
     // 엔티티로부터 DTO를 만든다.
     public static OAuth2UserDTO from(User user, boolean isNewUser) {
         return OAuth2UserDTO.builder()

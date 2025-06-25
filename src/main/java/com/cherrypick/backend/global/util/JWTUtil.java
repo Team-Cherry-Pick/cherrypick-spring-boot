@@ -41,6 +41,7 @@ public class JWTUtil
         return Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
     }
 
+    // TODO : 다중 권한 구조로 전환 필요
     private String getRole(String token) {
 
         return Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
@@ -84,6 +85,7 @@ public class JWTUtil
     }
 
     // 엑세스 토큰 생성
+    // TODO : 다중 권한 구조로 전환 필요
     public String createAccessToken(Long userId, Role role, String nickname) {
 
         return Jwts.builder()

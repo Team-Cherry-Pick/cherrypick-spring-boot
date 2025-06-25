@@ -38,6 +38,7 @@ public class User {
     private String provider;          // 업체명 ex) kakao
     @Enumerated(EnumType.STRING)
     private UserStatus status;        // 소프트 딜리트 (삭제 상태면
+    // TODO : 다중 권한 구조로 전환 필요
     @Enumerated(EnumType.STRING)
     private Role role;
 
