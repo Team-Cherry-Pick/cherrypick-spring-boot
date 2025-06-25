@@ -61,10 +61,9 @@ public class User {
                 .email(Optional.ofNullable((HashMap<String, String>)userAttr.get("properties")).map(p -> p.get("account_email")).get().toString())
                 .birthday(null)
                 .gender(null)
-                .provider(null)
                 .provider("kakao")
-                .status(UserStatus.ACTIVE)
-                .role(Role.CLIENT)
+                .status(UserStatus.PENDING)
+                .role(Role.CLIENT_PENDING)
                 .build();
     }
 

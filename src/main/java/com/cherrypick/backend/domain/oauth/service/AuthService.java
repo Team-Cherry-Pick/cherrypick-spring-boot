@@ -43,7 +43,6 @@ public class AuthService extends DefaultOAuth2UserService
 
         User loginUser = null;
         if(user.isPresent()){
-            log.info("흠1");
             // 저장된 유저 불러오기
             loginUser = user.get();
 
@@ -75,7 +74,11 @@ public class AuthService extends DefaultOAuth2UserService
     // 닉네임을 좀 더 까리하게 만들어줍니다.
     public String getRandomNickname(String originalNickname)
     {
-        var adjectiveList = List.of("멋있는 ", "대단한 ", "알뜰한 ", "네모난 ", "귀여운 ", "깜찍한 ", "듬직한 ", "깔롱한 ", "늠름한 ", "살뜰한 ", "짜릿한 ", "행복한 ", "소중한 ", "유능한 ", "강력한 ", "유연한 ", "쌈뽕한 ");
+        var adjectiveList = List.of(
+                "멋있는 ", "대단한 ", "알뜰한 ", "네모난 ", "귀여운 ", "깜찍한 ",
+                "듬직한 ", "깔롱한 ", "늠름한 ", "살뜰한 ", "짜릿한 ", "행복한 ", "소중한 ",
+                "유능한 ", "강력한 ", "유연한 ", "쌈뽕한 ", "재미난 ", "성실한 ", "날렵한 ");
+
         int randomAdj = (int) Math.round(Math.random() * adjectiveList.size());
 
         // 닉네임 만들기, 존재하는 닉네임이라면 다시 만들어줌.
@@ -88,6 +91,7 @@ public class AuthService extends DefaultOAuth2UserService
         return newNickName;
     }
 
+    // TODO : 토큰 관련 로직 JWTUtil로 이관
     public void saveResfreshToken(Long userId, String refreshToken)
     {
         // 토큰의 지속시간은 1주일

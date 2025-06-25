@@ -45,7 +45,6 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
             return OAuth2AuthorizationRequest.from(authRequest)
                     .state(redirect)
                     .build();
-
-        return authRequest;
+        else return authRequest;
     }
 }

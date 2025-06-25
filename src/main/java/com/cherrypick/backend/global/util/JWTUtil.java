@@ -61,6 +61,7 @@ public class JWTUtil
 
     }
 
+    // 엑세스 토큰에서 데이터를 추출
     public AuthenticationDetailDTO getUserDetailDTOFromAccessToken(String accessToken) {
 
         accessToken = removeBearer(accessToken);
@@ -82,6 +83,7 @@ public class JWTUtil
         return token.replace("Bearer ", "");
     }
 
+    // 엑세스 토큰 생성
     public String createAccessToken(Long userId, Role role, String nickname) {
 
         return Jwts.builder()
@@ -96,6 +98,7 @@ public class JWTUtil
 
     }
 
+    // 리프레시 토큰 생성
     public String createRefreshToken(long userId) {
         return Jwts.builder()
                 .claim("userId", userId)
@@ -107,10 +110,12 @@ public class JWTUtil
                 .compact();
     }
 
+    // TODO : https로 전환 시 sameSite를 바꿔줘야함.
     public ResponseCookie createRefreshCookie(String value){
         return ResponseCookie.from("refreshToken", value)
                 .httpOnly(true)
                 .secure(true)
+                //.sameSite("Strict")
                 .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ofDays(14))
