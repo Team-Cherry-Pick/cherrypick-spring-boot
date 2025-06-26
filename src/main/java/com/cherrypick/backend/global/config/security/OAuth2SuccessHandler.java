@@ -54,7 +54,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String frontendUrl = UriComponentsBuilder
                 .fromUriString("http://localhost:3000/login-success/")
                 .queryParam("accessToken", accessToken)
-                .queryParam("userId", userInfo.userId())
                 .queryParam("isNewUser", userInfo.isNewUser())
                 .queryParam("redirectUrl", redirectUrl)
                 .build()

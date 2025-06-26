@@ -4,7 +4,6 @@ import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.oauth.dto.OAuth2UserDTO;
-import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
 import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Gender;
@@ -28,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -85,7 +83,7 @@ public class AuthService extends DefaultOAuth2UserService
 
     // 유저를 등록 완료시키는 로직
     @Transactional
-    public String userRegistComplete(UserUpdateRequestDTO dto){
+    public AuthResponseDTOs.AccessToken userRegisterComplete(UserUpdateRequestDTO dto){
 
         // 인증된 유저의 ID를 찾음, 인증되지 않았다면 오류.
         var userId = AuthUtil.getUserDetail().userId();
@@ -96,7 +94,7 @@ public class AuthService extends DefaultOAuth2UserService
         // 유저 정보 수정, 활성 유저로 전환하고 입력된 정보를 저장함.
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
         user.setStatus(UserStatus.ACTIVE);
-        user.setRole(Role.CLIENT_PENDING);
+        user.setRole(Role.CLIENT);
         user.setNickname(dto.nickname());
         user.setEmail(dto.email());
         user.setGender(Gender.valueOf(dto.gender()));
@@ -114,7 +112,8 @@ public class AuthService extends DefaultOAuth2UserService
         AuthUtil.changeAuthority(Role.CLIENT);
 
         // 엑세스 토큰을 전달.
-        return jwtUtil.createAccessToken(updatedUser.getUserId(), updatedUser.getRole(), updatedUser.getNickname());
+        String newToken = jwtUtil.createAccessToken(updatedUser.getUserId(), updatedUser.getRole(), updatedUser.getNickname());
+        return new AuthResponseDTOs.AccessToken(newToken);
     }
 
     // 닉네임을 좀 더 까리하게 만들어줍니다.
@@ -160,7 +159,6 @@ public class AuthService extends DefaultOAuth2UserService
 
         return AuthResponseDTOs.AccessToken.builder()
                 .accessToken(jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname()))
-                .forYou("null값")
                 .build();
     }
 

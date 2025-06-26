@@ -6,8 +6,7 @@ public class AuthResponseDTOs {
 
     @Builder
     public record AccessToken(
-            String accessToken,
-            String forYou
+            String accessToken
     ){}
 
 }

@@ -2,6 +2,7 @@ package com.cherrypick.backend.domain.oauth.controller;
 
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.oauth.service.AuthService;
+import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 
-@RestController @Tag(name = "Auth", description = "인증 두과장")
+@RestController @Tag(name = "Auth", description = "유저 인증 로직")
 @RequiredArgsConstructor @Slf4j
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -124,6 +125,25 @@ public class AuthController {
         authService.saveResfreshToken(userId, newRefreshToken);
 
         return ResponseEntity.ok(accessToken);
+    }
+
+    @Operation(
+            summary = "최종 회원가입 완료",
+            description = "유저가 정보를 입력하면 해당 데이터를 저장하고, CLIENT_PENDING 상태를 CLIENT 로 전환합니다." +
+                    "새로운 권한이 담긴 AccessToken을 재발급합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "유저 최종 회원가입 성공 + JWT 토큰 생성 성공"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 유저입니다."),
+            @ApiResponse(responseCode = "403", description = "이미 등록된 유저입니다."),
+            @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PostMapping("/register-completion")
+    public ResponseEntity<AuthResponseDTOs.AccessToken> userInfo(@RequestBody UserUpdateRequestDTO updateDTO, HttpServletRequest request, HttpServletResponse response) {
+
+        updateDTO.validate();
+        return ResponseEntity.ok(authService.userRegisterComplete(updateDTO));
     }
 
     @Operation(

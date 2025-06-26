@@ -13,7 +13,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 public class AuthUtil
@@ -47,19 +49,31 @@ public class AuthUtil
     // 유저의 권한을 전환.
     // TODO : 다중 권한 구조로 바꿔야함.
     public static void changeAuthority(Role role) {
+
         Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+        // 기존의 저장된 유저 정보
+        AuthenticationDetailDTO principal = (AuthenticationDetailDTO)currentAuth.getPrincipal();
+
 
         List<GrantedAuthority> updatedAuthorities = List.of(
                 new SimpleGrantedAuthority(role.name()) // 바꿀 권한
         );
 
+        // 새로운 유저 정보
+        var newPrincipal = AuthenticationDetailDTO.builder()
+                .userId(principal.userId())
+                .nickname(principal.nickname())
+                .role(role)
+                .build();
+
         Authentication newAuth = new UsernamePasswordAuthenticationToken(
-                currentAuth.getPrincipal(),          // 기존 principal 그대로 사용
-                currentAuth.getCredentials(),        // 패스워드 등 그대로
+                newPrincipal,                        // 변경된 Role을 가진 DTO
+                currentAuth.getCredentials(),
                 updatedAuthorities                   // 갱신된 권한 목록
         );
 
         SecurityContextHolder.getContext().setAuthentication(newAuth);
     }
+
 
 }

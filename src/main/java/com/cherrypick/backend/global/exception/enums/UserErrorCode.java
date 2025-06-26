@@ -21,10 +21,11 @@ public enum UserErrorCode implements BaseErrorCode {
 
     // 401 UNAUTHORIZED
     SECURITY_AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
-    ALREADY_REGISTERED_USER(HttpStatus.UNAUTHORIZED,"이미 등록이 완료된 유저입니다."),
+
 
     // 403 FORBIDDEN
     ADMIN_AUTHENTICATION_REQUIRED(HttpStatus.FORBIDDEN, "관리자 인증이 필요합니다."),
+    ALREADY_REGISTERED_USER(HttpStatus.FORBIDDEN,"이미 등록이 완료된 유저입니다."),
 
     // 404 NOT_FOUND
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다."),
