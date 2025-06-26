@@ -14,6 +14,7 @@ import java.util.Map;
 public record OAuth2UserDTO(
         Long userId,
         String oauthId,
+        String provider,
         String nickname,
         Role role,
         boolean isNewUser
@@ -27,6 +28,7 @@ public record OAuth2UserDTO(
         return OAuth2UserDTO.builder()
                 .userId(user.getUserId())
                 .oauthId(user.getOauthId())
+                .provider(user.getProvider())
                 .nickname(user.getNickname())
                 .role(user.getRole())
                 .isNewUser(isNewUser)
