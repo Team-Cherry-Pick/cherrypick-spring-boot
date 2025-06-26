@@ -188,7 +188,7 @@ public class DealService {
             default -> sort = Sort.unsorted();
         }
 
-        Pageable pageable = PageRequest.of(0, (page + 1) * size, sort);
+        Pageable pageable = PageRequest.of(page, size + 1, sort);
 
         List<Deal> deals = dealRepository.searchDealsWithPaging(
                 dto.getCategoryId(),
@@ -227,11 +227,8 @@ public class DealService {
             deals = sortDeals(deals, dto.getSortType(), viewCountMap, likeCountMap);
         }
 
-        int fromIndex = page * size;
-        int toIndex = Math.min(fromIndex + size + 1, deals.size());
-        List<Deal> pageContent = fromIndex >= deals.size() ? List.of() : deals.subList(fromIndex, toIndex);
-        boolean hasNext = pageContent.size() > size;
-        if (hasNext) pageContent = pageContent.subList(0, size);
+        boolean hasNext = deals.size() > size;
+        List<Deal> pageContent = hasNext ? deals.subList(0, size) : deals;
 
         List<DealSearchResponseDTO> responseList = pageContent.stream().map(deal -> {
             Long dealId = deal.getDealId();
