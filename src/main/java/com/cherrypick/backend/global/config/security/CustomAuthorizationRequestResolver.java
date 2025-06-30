@@ -46,7 +46,7 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
 
         // 사용자에게서 얻어낸 데이터를 추출.
         String redirect = request.getParameter("redirect"); // redirect : 유저가 이전에 방문했던 페이지. 로그인 성공 시 해당 URL 로 리다이렉트
-        String deviceId = Optional.ofNullable(request.getParameter("deviceId")).orElse(""); // 기기 식별용 Id, nullable
+        String deviceId = Optional.ofNullable(request.getParameter("deviceId")).orElse("base"); // 기기 식별용 Id, nullable
         String os = Optional.ofNullable(request.getParameter("os")).orElse(""); // 해당 기기의 OS, nullable
         String browser = Optional.ofNullable(request.getParameter("browser")).orElse(""); // 브라우저 정보, nullable
         String version = Optional.ofNullable(request.getParameter("version")).orElse(""); // 브라우저의 버전, nullable

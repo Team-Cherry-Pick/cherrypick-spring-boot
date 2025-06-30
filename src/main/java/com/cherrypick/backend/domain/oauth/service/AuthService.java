@@ -4,6 +4,7 @@ import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.oauth.dto.OAuth2UserDTO;
+import com.cherrypick.backend.domain.oauth.dto.RegisterDTO;
 import com.cherrypick.backend.domain.oauth.dto.UserEnvDTO;
 import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.entity.User;
@@ -15,6 +16,7 @@ import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
 import com.cherrypick.backend.global.util.JWTUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
@@ -57,21 +59,14 @@ public class AuthService extends DefaultOAuth2UserService
             // 저장된 유저 불러오기
             loginUser = user.get();
 
-            log.info(":::: 기존 유저가 로그인 하였습니다 : " + user.toString());
             return OAuth2UserDTO.from(loginUser, false);
         }
         else{
-            // 신규 유저 만들기, 추후 로그인 방법이 늘어나면 ENUM으로 처리하는 것도 고려.
-            // oauth2.0 응답에서 데이터를 추출한다.
-            if(provider.equals("kakao")) loginUser = User.fromKakao(oauth2User);
-            else throw new BaseException(UserErrorCode.UNDEFINED_OAUTH_PROVIDER);
-
-            // 닉네임 달아주기
-            loginUser.setNickname(getRandomNickname(loginUser.getNickname()));
-            // 신규 유저 저장
-            userRepository.save(loginUser);
-            log.info(":::: 신규 유저입니다. 로그인되었습니다. : " + user.toString());
-            return OAuth2UserDTO.from(loginUser, true);
+            // DB에 저장하지 않는다. 때문에 OAuth2UserDTO 에 oauthId와 provider만 담는다.
+            return OAuth2UserDTO.builder()
+                    .oauthId(oauthId)
+                    .provider(provider)
+                    .build();
         }
 
     }
@@ -84,37 +79,47 @@ public class AuthService extends DefaultOAuth2UserService
 
     // 유저를 등록 완료시키는 로직
     @Transactional
-    public AuthResponseDTOs.AccessToken userRegisterComplete(UserUpdateRequestDTO dto){
+    public AuthResponseDTOs.AccessToken userRegisterComplete(RegisterDTO dto, HttpServletResponse response){
 
-        // 인증된 유저의 ID를 찾음, 인증되지 않았다면 오류.
-        var userId = AuthUtil.getUserDetail().userId();
-        var userRole = AuthUtil.getUserDetail().role();
+        var registerToken = jwtUtil.getRegisterTokenPayload(dto.registerToken());
+        var updateDTO = dto.updateDTO();
 
-        if(userRole != Role.CLIENT_PENDING) throw new BaseException(UserErrorCode.ALREADY_REGISTERED_USER);
+        // 신규 유저 만들기, 추후 로그인 방법이 늘어나면 ENUM으로 처리하는 것도 고려.
+        // oauth2.0 응답에서 데이터를 추출한다.
+        User user = null;
+        if(registerToken.provider().equals("kakao")) {
+            user = User.builder()
+                    .oauthId(registerToken.oauthId())
+                    .provider(registerToken.provider())
+                    .nickname(updateDTO.nickname())
+                    .email(updateDTO.email())
+                    .gender(Gender.valueOf(updateDTO.gender()))
+                    .birthday(LocalDate.parse(updateDTO.birthday()))
+                    .status(UserStatus.ACTIVE)
+                    .role(Role.CLIENT)
+                    .build();
+        }
+        else throw new BaseException(UserErrorCode.UNDEFINED_OAUTH_PROVIDER);
 
-        // 유저 정보 수정, 활성 유저로 전환하고 입력된 정보를 저장함.
-        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
-        user.setStatus(UserStatus.ACTIVE);
-        user.setRole(Role.CLIENT);
-        user.setNickname(dto.nickname());
-        user.setEmail(dto.email());
-        user.setGender(Gender.valueOf(dto.gender()));
-        user.setBirthday(LocalDate.parse(dto.birthday()));
+        // 신규 유저 저장
+        var savedUser = userRepository.save(user);
 
         // 기존 이미지 삭제, 새 이미지 등록
-        imageService.deleteImageByUserId(userId);
-        imageService.attachImage(userId, List.of(dto.imageId()), ImageType.USER);
+        imageService.deleteImageByUserId(savedUser.getUserId());
+        imageService.attachImage(savedUser.getUserId(), List.of(updateDTO.imageId()), ImageType.USER);
 
-        // 유저 업데이트
-        var updatedUser = userRepository.save(user);
-        var profileImage = imageService.getImageByUserId(userId);
-
-        // 권한을 바꿔준다.
-        AuthUtil.changeAuthority(Role.CLIENT);
+        // 사진 업데이트
+        var profileImage = imageService.getImageByUserId(savedUser.getUserId());
 
         // 엑세스 토큰을 전달.
-        String newToken = jwtUtil.createAccessToken(updatedUser.getUserId(), updatedUser.getRole(), updatedUser.getNickname());
-        return new AuthResponseDTOs.AccessToken(newToken);
+        String accessToken = jwtUtil.createAccessToken(savedUser.getUserId(), savedUser.getRole(), savedUser.getNickname());
+
+        // 리프레시 토큰 심어주기
+        var refreshToken = jwtUtil.createRefreshToken(savedUser.getUserId());
+        initializeResfreshToken(savedUser.getUserId(), UserEnvDTO.fromJson(registerToken.userEnv()), refreshToken);
+        response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(refreshToken).toString());
+
+        return new AuthResponseDTOs.AccessToken(accessToken);
     }
 
     // 닉네임을 좀 더 까리하게 만들어줍니다.

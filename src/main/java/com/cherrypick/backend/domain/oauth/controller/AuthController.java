@@ -2,6 +2,7 @@ package com.cherrypick.backend.domain.oauth.controller;
 
 import com.cherrypick.backend.domain.oauth.dto.AuthRequestDTOs;
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.oauth.dto.RegisterDTO;
 import com.cherrypick.backend.domain.oauth.service.AuthService;
 import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.entity.User;
@@ -110,7 +111,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponseDTOs.AccessToken> auth(@RequestBody AuthRequestDTOs.DeviceIdDTO deviceIdDto, HttpServletRequest request, HttpServletResponse response)
     {
-        String deviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("");
+        String deviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("base");
 
         // 쿠키에서 refresh를 찾아낸다.
         var cookies = Arrays.stream(request.getCookies()).toList();
@@ -145,10 +146,10 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/register-completion")
-    public ResponseEntity<AuthResponseDTOs.AccessToken> userInfo(@RequestBody UserUpdateRequestDTO updateDTO, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDTOs.AccessToken> userInfo(@RequestBody RegisterDTO registerDTO, HttpServletRequest request, HttpServletResponse response) {
 
-        updateDTO.validate();
-        return ResponseEntity.ok(authService.userRegisterComplete(updateDTO));
+        registerDTO.updateDTO().validate();
+        return ResponseEntity.ok(authService.userRegisterComplete(registerDTO, response));
     }
 
     @Operation(
