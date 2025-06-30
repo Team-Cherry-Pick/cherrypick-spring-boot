@@ -5,7 +5,6 @@ import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
 import io.jsonwebtoken.Jwts;
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -58,12 +57,12 @@ public class JWTUtil
     }
 
     // 레지스터 토큰에서 데이터를 추출
-    public AuthResponseDTOs.RegisterTokenPayloadDTO getRegisterTokenPayload(String registerToken) {
+    public AuthResponseDTOs.RegisterTokenDTO getRegisterTokenPayload(String registerToken) {
 
         var oauthId = Jwts.parser().verifyWith(registerSecretKey).build().parseSignedClaims(registerToken).getPayload().get("oauthId", String.class);;
         var provider = Jwts.parser().verifyWith(registerSecretKey).build().parseSignedClaims(registerToken).getPayload().get("provider", String.class);
 
-        return AuthResponseDTOs.RegisterTokenPayloadDTO.builder()
+        return AuthResponseDTOs.RegisterTokenDTO.builder()
                 .oauthId(oauthId)
                 .provider(provider)
                 .build()
@@ -91,11 +90,11 @@ public class JWTUtil
     }
 
     // 레지스터 토큰 생성
-    public String createRegisterToken(AuthResponseDTOs.RegisterTokenPayloadDTO dto) {
+    public String createRegisterToken(AuthResponseDTOs.RegisterTokenDTO dto) {
         return Jwts.builder()
                 .claim("oauthId", dto.oauthId())
                 .claim("provider", dto.provider())
-                .claim("type", "register")
+                .claim("userEnv", dto.userEnv())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + registerValidPeriod))
                 .signWith(registerSecretKey)

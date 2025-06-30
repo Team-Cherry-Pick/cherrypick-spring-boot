@@ -12,9 +12,10 @@ public class AuthResponseDTOs {
 
     @Builder
     // 내부적으로 사용하는 레지스터 토큰 DTO
-    public record RegisterTokenPayloadDTO(
+    public record RegisterTokenDTO(
             String oauthId,
-            String provider
+            String provider,
+            String userEnv // UserEnvDTO 를 JSON으로 직렬화한 필드
     ) {}
 
 }

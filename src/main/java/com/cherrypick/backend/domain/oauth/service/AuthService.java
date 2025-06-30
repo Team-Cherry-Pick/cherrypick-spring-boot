@@ -4,6 +4,7 @@ import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.oauth.dto.OAuth2UserDTO;
+import com.cherrypick.backend.domain.oauth.dto.UserEnvDTO;
 import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Gender;
@@ -39,7 +40,7 @@ public class AuthService extends DefaultOAuth2UserService
     private final JWTUtil jwtUtil;
     private final ImageService imageService;
 
-    private final String REFRESH_TOKEN_KEY_NAME = "RT:user:";
+    private final String REFRESH_TOKEN_KEY_NAME = "user:token:refresh";
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -136,10 +137,18 @@ public class AuthService extends DefaultOAuth2UserService
         return newNickName;
     }
 
-    public void saveResfreshToken(Long userId, String refreshToken)
+    public void saveResfreshToken(Long userId, String deviceId, String refreshToken)
     {
         // 토큰의 지속시간은 1주일
-        redisTemplate.opsForValue().set(REFRESH_TOKEN_KEY_NAME+userId.toString() , refreshToken, Duration.ofMinutes(7 * 24 * 60));
+        redisTemplate.opsForValue().set(REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId , refreshToken, Duration.ofMinutes(7 * 24 * 60));
+    }
+
+    // 최초
+    public void initializeResfreshToken(Long userId, UserEnvDTO userEnvDTO, String refreshToken)
+    {
+        // 토큰의 지속시간은 1주일
+        String deviceId = userEnvDTO.deviceId();
+        redisTemplate.opsForValue().set(REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId , refreshToken, Duration.ofMinutes(7 * 24 * 60));
     }
 
     public String loadRefreshToken(Long userId)
