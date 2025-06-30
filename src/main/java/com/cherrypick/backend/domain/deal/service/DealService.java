@@ -36,6 +36,7 @@ import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -188,9 +189,7 @@ public class DealService {
             default -> sort = Sort.unsorted();
         }
 
-        Pageable pageable = PageRequest.of(0, (page + 1) * size, sort);
-
-        List<Deal> deals = dealRepository.searchDealsWithPaging(
+        List<Deal> allFilteredDeals = dealRepository.searchDealsWithPaging(
                 dto.getCategoryId(),
                 dto.getKeyword(),
                 viewSoldOut,
@@ -203,49 +202,92 @@ public class DealService {
                 variousPrice,
                 discountIds,
                 storeIds,
-                pageable
+                PageRequest.of(0, Integer.MAX_VALUE, sort)
         );
 
-        // N+1 문제 해결: image, view, vote, comment 한번에 조회
-        List<Long> dealIds = deals.stream().map(Deal::getDealId).toList();
+        List<Long> allDealIds = allFilteredDeals.stream().map(Deal::getDealId).toList();
 
         Map<Long, Long> viewCountMap = redisTemplate.opsForValue()
-                .multiGet(dealIds.stream().map(id -> "deal:view:" + id).toList())
+                .multiGet(allDealIds.stream().map(id -> "deal:view:" + id).toList())
                 .stream().collect(HashMap::new, (m, v) -> {
                     int i = m.size();
-                    m.put(dealIds.get(i), v != null ? Long.parseLong(v.toString()) : 0L);
+                    m.put(allDealIds.get(i), v != null ? Long.parseLong(v.toString()) : 0L);
                 }, HashMap::putAll);
 
-        Map<Long, Long> likeCountMap = voteRepository.countByDealIdsAndVoteTypeGrouped(dealIds, VoteType.TRUE);
-        Map<Long, Long> commentCountMap = commentRepository.countByDealIdsGrouped(dealIds);
-        Map<Long, Image> imageMap = imageRepository.findTopImagesByDealIds(dealIds, ImageType.DEAL).stream()
-                .collect(Collectors.toMap(Image::getRefId, img -> img, (a, b) -> a));
+        Map<Long, Long> likeCountMap = voteRepository.countByDealIdsAndVoteTypeGrouped(allDealIds, VoteType.TRUE);
+        Map<Long, Long> commentCountMap = commentRepository.countByDealIdsGrouped(allDealIds);
 
         if (dto.getSortType() == SortType.POPULARITY
                 || dto.getSortType() == SortType.VIEWS
                 || dto.getSortType() == SortType.DISCOUNT_RATE) {
-            deals = sortDeals(deals, dto.getSortType(), viewCountMap, likeCountMap);
+            allFilteredDeals = sortDeals(allFilteredDeals, dto.getSortType(), viewCountMap, likeCountMap);
         }
 
+        // 정렬 후 페이징 적용
         int fromIndex = page * size;
-        int toIndex = Math.min(fromIndex + size + 1, deals.size());
-        List<Deal> pageContent = fromIndex >= deals.size() ? List.of() : deals.subList(fromIndex, toIndex);
-        boolean hasNext = pageContent.size() > size;
-        if (hasNext) pageContent = pageContent.subList(0, size);
+        int toIndex = Math.min(fromIndex + size, allFilteredDeals.size());
+        List<Deal> pageContent = fromIndex >= allFilteredDeals.size() ? List.of() : allFilteredDeals.subList(fromIndex, toIndex);
+        boolean hasNext = toIndex < allFilteredDeals.size();
+
+        List<Long> pageDealIds = pageContent.stream().map(Deal::getDealId).toList();
+
+        // 카테고리 정보 조회 (N+1 방지)
+        Map<Long, Category> categoryMap = new HashMap<>();
+        if (!pageContent.isEmpty()) {
+            List<Long> categoryIds = pageContent.stream()
+                    .map(deal -> deal.getCategoryId().getCategoryId())
+                    .distinct()
+                    .toList();
+            categoryRepository.findAllById(categoryIds).forEach(category ->
+                    categoryMap.put(category.getCategoryId(), category));
+        }
+
+        // 스토어 정보 조회 (N+1 방지)
+        Map<Long, Store> storeMap = new HashMap<>();
+        if (!pageContent.isEmpty()) {
+            List<Long> storeIdsFromDeals = pageContent.stream()
+                    .map(deal -> deal.getStoreId())
+                    .filter(store -> store != null)
+                    .map(Store::getStoreId)
+                    .distinct()
+                    .toList();
+            if (!storeIdsFromDeals.isEmpty()) {
+                storeRepository.findAllById(storeIdsFromDeals).forEach(store ->
+                        storeMap.put(store.getStoreId(), store));
+            }
+        }
+
+        // 사용자 정보 조회 (N+1 방지)
+        Map<Long, User> userMap = new HashMap<>();
+        if (!pageContent.isEmpty()) {
+            List<Long> userIds = pageContent.stream()
+                    .map(deal -> deal.getUserId().getUserId())
+                    .distinct()
+                    .toList();
+            userRepository.findAllById(userIds).forEach(user ->
+                    userMap.put(user.getUserId(), user));
+        }
+
+        Map<Long, Image> imageMap = imageRepository.findTopImagesByDealIds(pageDealIds, ImageType.DEAL).stream()
+                .collect(Collectors.toMap(Image::getRefId, img -> img, (a, b) -> a));
 
         List<DealSearchResponseDTO> responseList = pageContent.stream().map(deal -> {
             Long dealId = deal.getDealId();
             long likeCount = likeCountMap.getOrDefault(dealId, 0L);
             long commentCount = commentCountMap.getOrDefault(dealId, 0L);
             Image image = imageMap.get(dealId);
+
+            User user = userMap.get(deal.getUserId().getUserId());
+            Store store = deal.getStoreId() != null ? storeMap.get(deal.getStoreId().getStoreId()) : null;
+
             return new DealSearchResponseDTO(
                     dealId,
                     image != null ? new ImageUrl(image.getImageId(), image.getImageUrl(), image.getImageIndex()) : null,
                     deal.getTitle(),
-                    deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
+                    store != null ? store.getName() : deal.getStoreName(),
                     getInfoTags(deal),
                     deal.getPrice(),
-                    deal.getUserId() != null ? deal.getUserId().getNickname() : null,
+                    user != null ? user.getNickname() : null,
                     deal.getCreatedAt().toString(),
                     (int) deal.getHeat(),
                     (int) likeCount,
