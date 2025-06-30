@@ -36,6 +36,7 @@ import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -188,9 +189,9 @@ public class DealService {
             default -> sort = Sort.unsorted();
         }
 
-        Pageable pageable = PageRequest.of(page, size + 1, sort);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        List<Deal> deals = dealRepository.searchDealsWithPaging(
+        Page<Deal> dealPage  = dealRepository.searchDealsWithPaging(
                 dto.getCategoryId(),
                 dto.getKeyword(),
                 viewSoldOut,
@@ -206,8 +207,47 @@ public class DealService {
                 pageable
         );
 
-        // N+1 문제 해결: image, view, vote, comment 한번에 조회
+        List<Deal> deals = dealPage.getContent();
+
+        // N+1 문제 해결: 필요한 연관 엔티티들을 별도로 조회
         List<Long> dealIds = deals.stream().map(Deal::getDealId).toList();
+
+        // 카테고리 정보 조회 (N+1 방지)
+        Map<Long, Category> categoryMap = new HashMap<>();
+        if (!deals.isEmpty()) {
+            List<Long> categoryIds = deals.stream()
+                    .map(deal -> deal.getCategoryId().getCategoryId())
+                    .distinct()
+                    .toList();
+            categoryRepository.findAllById(categoryIds).forEach(category ->
+                    categoryMap.put(category.getCategoryId(), category));
+        }
+
+        // 사용자 정보 조회 (N+1 방지)
+        Map<Long, User> userMap = new HashMap<>();
+        if (!deals.isEmpty()) {
+            List<Long> userIds = deals.stream()
+                    .map(deal -> deal.getUserId().getUserId())
+                    .distinct()
+                    .toList();
+            userRepository.findAllById(userIds).forEach(user ->
+                    userMap.put(user.getUserId(), user));
+        }
+
+        // 스토어 정보 조회 (N+1 방지)
+        Map<Long, Store> storeMap = new HashMap<>();
+        if (!deals.isEmpty()) {
+            List<Long> storeIdsFromDeals = deals.stream()
+                    .map(deal -> deal.getStoreId())
+                    .filter(store -> store != null)
+                    .map(Store::getStoreId)
+                    .distinct()
+                    .toList();
+            if (!storeIdsFromDeals.isEmpty()) {
+                storeRepository.findAllById(storeIdsFromDeals).forEach(store ->
+                        storeMap.put(store.getStoreId(), store));
+            }
+        }
 
         Map<Long, Long> viewCountMap = redisTemplate.opsForValue()
                 .multiGet(dealIds.stream().map(id -> "deal:view:" + id).toList())
@@ -235,15 +275,17 @@ public class DealService {
             long likeCount = likeCountMap.getOrDefault(dealId, 0L);
             long commentCount = commentCountMap.getOrDefault(dealId, 0L);
             Image image = imageMap.get(dealId);
+
+            User user = userMap.get(deal.getUserId().getUserId());
+            Store store = deal.getStoreId() != null ? storeMap.get(deal.getStoreId().getStoreId()) : null;
+
             return new DealSearchResponseDTO(
                     dealId,
                     image != null ? new ImageUrl(image.getImageId(), image.getImageUrl(), image.getImageIndex()) : null,
                     deal.getTitle(),
-                    deal.getStoreId() != null ? deal.getStoreId().getName() : deal.getStoreName(),
-                    getInfoTags(deal),
+                    store != null ? store.getName() : deal.getStoreName(),                    getInfoTags(deal),
                     deal.getPrice(),
-                    deal.getUserId() != null ? deal.getUserId().getNickname() : null,
-                    deal.getCreatedAt().toString(),
+                    user != null ? user.getNickname() : null,                    deal.getCreatedAt().toString(),
                     (int) deal.getHeat(),
                     (int) likeCount,
                     (int) commentCount,
@@ -251,7 +293,7 @@ public class DealService {
             );
         }).toList();
 
-        return new DealSearchPageResponseDTO(responseList, hasNext);
+        return new DealSearchPageResponseDTO(responseList, dealPage.hasNext());
     }
 
     // 게시글 상세조회

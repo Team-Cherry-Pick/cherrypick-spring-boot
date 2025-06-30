@@ -2,6 +2,7 @@ package com.cherrypick.backend.domain.deal.repository;
 
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.enums.PriceType;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,7 +20,7 @@ LEFT JOIN FETCH d.discounts discount
 LEFT JOIN FETCH d.storeId store
 WHERE 
     d.isDelete = FALSE
-    AND (:categoryId IS NULL OR c.categoryId = :categoryId OR c.parentId = :categoryId)
+    AND (:categoryId IS NULL OR d.categoryId.categoryId = :categoryId OR d.categoryId.parentId = :categoryId)
     AND (:keyword IS NULL OR 
          LOWER(d.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR 
          LOWER(d.content) LIKE LOWER(CONCAT('%', :keyword, '%')))
@@ -35,10 +36,12 @@ WHERE
             AND (:maxPrice IS NULL OR d.price.discountedPrice <= :maxPrice)
         )
     )
-    AND (:discountIds IS NULL OR discount.discountId IN :discountIds)
-    AND (:storeIds IS NULL OR store.storeId IN :storeIds)
+    AND (:discountIds IS NULL OR EXISTS (
+        SELECT 1 FROM d.discounts discount WHERE discount.discountId IN :discountIds
+    ))
+    AND (:storeIds IS NULL OR d.storeId.storeId IN :storeIds)
 """)
-    List<Deal> searchDealsWithPaging(
+    Page<Deal> searchDealsWithPaging(
             @Param("categoryId") Long categoryId,
             @Param("keyword") String keyword,
             @Param("viewSoldOut") boolean viewSoldOut,
