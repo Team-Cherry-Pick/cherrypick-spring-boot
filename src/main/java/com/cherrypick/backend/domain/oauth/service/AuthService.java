@@ -139,8 +139,10 @@ public class AuthService extends DefaultOAuth2UserService
 
     public void saveResfreshToken(Long userId, String deviceId, String refreshToken)
     {
-        // 토큰의 지속시간은 1주일
-        redisTemplate.opsForValue().set(REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId , refreshToken, Duration.ofMinutes(7 * 24 * 60));
+        String key = REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId;
+
+        redisTemplate.opsForHash().put( key, "token", refreshToken);
+        redisTemplate.expire(key, Duration.ofMinutes(jwtUtil.refreshValidPeriod));
     }
 
     // 최초
@@ -148,20 +150,32 @@ public class AuthService extends DefaultOAuth2UserService
     {
         // 토큰의 지속시간은 1주일
         String deviceId = userEnvDTO.deviceId();
-        redisTemplate.opsForValue().set(REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId , refreshToken, Duration.ofMinutes(7 * 24 * 60));
+        String key = REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId;
+
+        redisTemplate.opsForHash().put( key, "token", refreshToken);
+        redisTemplate.opsForHash().put( key, "userEnv", userEnvDTO.toJson());
+        redisTemplate.expire(key, Duration.ofMinutes(jwtUtil.refreshValidPeriod));
     }
 
-    public String loadRefreshToken(Long userId)
+    public String loadRefreshToken(Long userId, String deviceId)
     {
-        return Optional.ofNullable(redisTemplate.opsForValue().get(REFRESH_TOKEN_KEY_NAME+userId.toString()))
+        String key = REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId;
+
+        return Optional.ofNullable(redisTemplate.opsForHash().get(key, "token"))
                 .map(Object::toString)
                 .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_EXPIRED)) ;
     }
 
-    public AuthResponseDTOs.AccessToken refreshAccessToken(Long userId, String refreshToken)
+    public UserEnvDTO loadUserEnv(Long userId, String deviceId){
+        String key = REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId;
+        var userEnv = (String) redisTemplate.opsForHash().get( key, "userEnv");
+        return UserEnvDTO.fromJson(userEnv);
+    }
+
+    public AuthResponseDTOs.AccessToken refreshAccessToken(Long userId, String deviceId, String refreshToken)
     {
         // 서버에 갖고 있는 토큰과 쿠키의 토큰이 다르다면
-        if(!refreshToken.equals(loadRefreshToken(userId)))
+        if(!refreshToken.equals(loadRefreshToken(userId,deviceId)))
             throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
 
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));

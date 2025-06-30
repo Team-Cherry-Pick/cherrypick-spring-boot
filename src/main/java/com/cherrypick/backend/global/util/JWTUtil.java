@@ -24,9 +24,9 @@ public class JWTUtil
     private final SecretKey refreshSecretKey;
     private final SecretKey registerSecretKey;
 
-    private final Long accessValidPeriod;
-    private final Long refreshValidPeriod;
-    private final Long registerValidPeriod;
+    public final Long accessValidPeriod;
+    public final Long refreshValidPeriod;
+    public final Long registerValidPeriod;
 
     public JWTUtil(@Value("${spring.jwt.access.key}") String accessSecret ,
                    @Value("${spring.jwt.refresh.key}") String refreshSecret,

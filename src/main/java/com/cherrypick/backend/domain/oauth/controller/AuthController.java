@@ -1,5 +1,6 @@
 package com.cherrypick.backend.domain.oauth.controller;
 
+import com.cherrypick.backend.domain.oauth.dto.AuthRequestDTOs;
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.oauth.service.AuthService;
 import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
@@ -21,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
 import java.util.Arrays;
+import java.util.Optional;
 
 @RestController @Tag(name = "Auth", description = "유저 인증 로직")
 @RequiredArgsConstructor @Slf4j
@@ -82,14 +85,14 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/test/authorization")
-    public String accessToken(@Parameter(description = "유저번호") Long userId, HttpServletRequest request, HttpServletResponse response) {
+    public String accessToken(@Parameter(description = "유저번호") Long userId, String deviceId, HttpServletRequest request, HttpServletResponse response) {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
         var newRefreshToken = jwtUtil.createRefreshToken(userId);
         response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
-        authService.saveResfreshToken(userId, newRefreshToken);
+        authService.saveResfreshToken(userId, deviceId, newRefreshToken);
 
         return jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname());
     }
@@ -105,8 +108,10 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponseDTOs.AccessToken> auth(HttpServletRequest request, HttpServletResponse response)
+    public ResponseEntity<AuthResponseDTOs.AccessToken> auth(@RequestBody AuthRequestDTOs.DeviceIdDTO deviceIdDto, HttpServletRequest request, HttpServletResponse response)
     {
+        String deviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("");
+
         // 쿠키에서 refresh를 찾아낸다.
         var cookies = Arrays.stream(request.getCookies()).toList();
         String refreshToken = cookies.stream()
@@ -117,12 +122,12 @@ public class AuthController {
 
         // 토큰 검증과 발급이 선행.
         Long userId = jwtUtil.getUserIdFromRefreshToken(refreshToken);
-        var accessToken = authService.refreshAccessToken(userId, refreshToken);
+        var accessToken = authService.refreshAccessToken(userId, deviceId, refreshToken);
 
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
         var newRefreshToken = jwtUtil.createRefreshToken(userId);
         response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
-        authService.saveResfreshToken(userId, newRefreshToken);
+        authService.saveResfreshToken(userId, deviceId, newRefreshToken);
 
         return ResponseEntity.ok(accessToken);
     }
