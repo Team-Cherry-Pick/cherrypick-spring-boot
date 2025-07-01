@@ -70,7 +70,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         var token = AuthResponseDTOs.RegisterTokenDTO.builder()
                         .oauthId(oAuth2UserDTO.oauthId())
                         .provider(oAuth2UserDTO.provider())
-                        .userEnv(userEnvDTO.toJson())
+                        .userEnv(userEnvDTO)
                         .build();
 
         return jwtUtil.createRegisterToken(token);

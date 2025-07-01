@@ -80,6 +80,8 @@ aws:
     secret-key: ${S3_SECRET_KEY}
     bucket: ${BUCKET_NAME}
 
+
+
 #logging:
 #  level:
 #    org.hibernate.SQL: debug

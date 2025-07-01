@@ -15,7 +15,7 @@ public class AuthResponseDTOs {
     public record RegisterTokenDTO(
             String oauthId,
             String provider,
-            String userEnv // UserEnvDTO 를 JSON으로 직렬화한 필드
+            UserEnvDTO userEnv
     ) {}
 
 }

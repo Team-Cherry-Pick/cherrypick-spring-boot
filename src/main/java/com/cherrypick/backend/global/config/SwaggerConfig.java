@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,8 +37,13 @@ public class SwaggerConfig {
                 .title("Repik API")
                 .description("Repik API");
 
+        Server server = new Server()
+                .url("https://api.repik.kr")
+                .description("Production Server");
+
         return new OpenAPI().info(info)
                 .addSecurityItem(securityRequirement)  // Security Requirement 추가
-                .schemaRequirement("BearerAuth", securityScheme);  // Security Scheme 추가
+                .schemaRequirement("BearerAuth", securityScheme) // Security Scheme 추가
+                .servers(List.of(server));
     }
 }

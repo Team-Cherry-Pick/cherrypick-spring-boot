@@ -150,7 +150,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponseDTOs.AccessToken> auth(@RequestBody AuthRequestDTOs.DeviceIdDTO deviceIdDto, HttpServletRequest request, HttpServletResponse response)
     {
-        String deviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("base");
+        String deviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("default");
 
         // 쿠키에서 refresh를 찾아낸다.
         var cookies = Arrays.stream(request.getCookies()).toList();

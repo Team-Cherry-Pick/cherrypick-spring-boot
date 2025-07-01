@@ -2,6 +2,8 @@ package com.cherrypick.backend.global.util;
 
 
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.oauth.dto.UserEnvDTO;
+import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
 import io.jsonwebtoken.Jwts;
@@ -61,10 +63,12 @@ public class JWTUtil
 
         var oauthId = Jwts.parser().verifyWith(registerSecretKey).build().parseSignedClaims(registerToken).getPayload().get("oauthId", String.class);;
         var provider = Jwts.parser().verifyWith(registerSecretKey).build().parseSignedClaims(registerToken).getPayload().get("provider", String.class);
+        var userEnv = Jwts.parser().verifyWith(registerSecretKey).build().parseSignedClaims(registerToken).getPayload().get("userEnv", String.class);
 
         return AuthResponseDTOs.RegisterTokenDTO.builder()
                 .oauthId(oauthId)
                 .provider(provider)
+                .userEnv(UserEnvDTO.fromJson(userEnv))
                 .build()
                 ;
     }
@@ -94,7 +98,7 @@ public class JWTUtil
         return Jwts.builder()
                 .claim("oauthId", dto.oauthId())
                 .claim("provider", dto.provider())
-                .claim("userEnv", dto.userEnv())
+                .claim("userEnv", dto.userEnv().toJson())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + registerValidPeriod))
                 .signWith(registerSecretKey)
