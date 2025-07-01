@@ -83,6 +83,11 @@ public class AuthService extends DefaultOAuth2UserService
     public AuthResponseDTOs.AccessToken userRegisterComplete(RegisterDTO dto, HttpServletResponse response){
 
         var registerToken = jwtUtil.getRegisterTokenPayload(dto.registerToken());
+        if(userRepository.findUserByOauthId(registerToken.oauthId()).isPresent())
+        {
+            throw new BaseException(UserErrorCode.ALREADY_REGISTERED_USER);
+        }
+
         var updateDTO = dto.updateDTO();
 
         // 신규 유저 만들기, 추후 로그인 방법이 늘어나면 ENUM으로 처리하는 것도 고려.
