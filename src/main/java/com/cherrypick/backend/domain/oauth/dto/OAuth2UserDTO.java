@@ -42,7 +42,8 @@ public record OAuth2UserDTO(
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(role);
+        if (role == null) return List.of();
+        else return List.of(role);
     }
 
     @Override
