@@ -4,10 +4,10 @@ import org.springframework.security.core.GrantedAuthority;
 
 public enum Role implements GrantedAuthority {
 
-    ADMIN, CLIENT;
+    ADMIN, CLIENT, CLIENT_PENDING;
 
     @Override
     public String getAuthority() {
-        return "";
+        return "ROLE" + this.name();
     }
 }

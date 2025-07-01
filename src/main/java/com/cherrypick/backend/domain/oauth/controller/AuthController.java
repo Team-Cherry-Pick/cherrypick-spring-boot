@@ -1,7 +1,10 @@
 package com.cherrypick.backend.domain.oauth.controller;
 
+import com.cherrypick.backend.domain.oauth.dto.AuthRequestDTOs;
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.oauth.dto.RegisterDTO;
 import com.cherrypick.backend.domain.oauth.service.AuthService;
+import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -20,9 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
 import java.util.Arrays;
+import java.util.Optional;
 
-@RestController @Tag(name = "Auth", description = "인증 두과장")
+@RestController @Tag(name = "Auth", description = "유저 인증 로직")
 @RequiredArgsConstructor @Slf4j
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -81,14 +86,14 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/test/authorization")
-    public String accessToken(@Parameter(description = "유저번호") Long userId, HttpServletRequest request, HttpServletResponse response) {
+    public String accessToken(@Parameter(description = "유저번호") Long userId, String deviceId, HttpServletRequest request, HttpServletResponse response) {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
         var newRefreshToken = jwtUtil.createRefreshToken(userId);
         response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
-        authService.saveResfreshToken(userId, newRefreshToken);
+        authService.saveResfreshToken(userId, deviceId, newRefreshToken);
 
         return jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname());
     }
@@ -104,8 +109,10 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponseDTOs.AccessToken> auth(HttpServletRequest request, HttpServletResponse response)
+    public ResponseEntity<AuthResponseDTOs.AccessToken> auth(@RequestBody AuthRequestDTOs.DeviceIdDTO deviceIdDto, HttpServletRequest request, HttpServletResponse response)
     {
+        String deviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("base");
+
         // 쿠키에서 refresh를 찾아낸다.
         var cookies = Arrays.stream(request.getCookies()).toList();
         String refreshToken = cookies.stream()
@@ -116,14 +123,33 @@ public class AuthController {
 
         // 토큰 검증과 발급이 선행.
         Long userId = jwtUtil.getUserIdFromRefreshToken(refreshToken);
-        var accessToken = authService.refreshAccessToken(userId, refreshToken);
+        var accessToken = authService.refreshAccessToken(userId, deviceId, refreshToken);
 
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
         var newRefreshToken = jwtUtil.createRefreshToken(userId);
         response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
-        authService.saveResfreshToken(userId, newRefreshToken);
+        authService.saveResfreshToken(userId, deviceId, newRefreshToken);
 
         return ResponseEntity.ok(accessToken);
+    }
+
+    @Operation(
+            summary = "최종 회원가입 완료",
+            description = "유저가 정보를 입력하면 해당 데이터를 저장하고, CLIENT_PENDING 상태를 CLIENT 로 전환합니다." +
+                    "새로운 권한이 담긴 AccessToken을 재발급합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "유저 최종 회원가입 성공 + JWT 토큰 생성 성공"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 유저입니다."),
+            @ApiResponse(responseCode = "403", description = "이미 등록된 유저입니다."),
+            @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PostMapping("/register-completion")
+    public ResponseEntity<AuthResponseDTOs.AccessToken> userInfo(@RequestBody RegisterDTO registerDTO, HttpServletRequest request, HttpServletResponse response) {
+
+        registerDTO.updateDTO().validate();
+        return ResponseEntity.ok(authService.userRegisterComplete(registerDTO, response));
     }
 
     @Operation(
