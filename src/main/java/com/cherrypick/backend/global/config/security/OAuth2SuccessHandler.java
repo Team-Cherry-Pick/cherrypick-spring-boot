@@ -58,6 +58,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .queryParam("token", token)
                 .queryParam("isNewUser", userInfo.isNewUser())
                 .queryParam("redirect", redirect)
+                .queryParam("email", userInfo.email())
                 .build()
                 .toUriString();
 
