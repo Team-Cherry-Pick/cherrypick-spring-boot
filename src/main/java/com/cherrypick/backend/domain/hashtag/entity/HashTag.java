@@ -21,7 +21,7 @@ public class HashTag
     @Unique
     String name;
 
-    @OneToMany(mappedBy = "hashTag", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "hashTag", orphanRemoval = true)
     private List<DealTag> dealTags = new ArrayList<>();
 
 }
