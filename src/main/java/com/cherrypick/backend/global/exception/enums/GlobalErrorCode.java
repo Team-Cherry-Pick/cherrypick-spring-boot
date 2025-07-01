@@ -14,6 +14,7 @@ public enum GlobalErrorCode implements BaseErrorCode {
     // ✅ 400 BAD REQUEST
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다."),
+    NO_COOKIES_TO_READ(HttpStatus.BAD_REQUEST, "읽을 수 있는 쿠키가 존재하지 않습니다."),
 
     // ✅ 401 UNAUTHORIZED (인증 관련 오류)
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),

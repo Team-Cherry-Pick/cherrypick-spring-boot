@@ -37,13 +37,9 @@ public class SwaggerConfig {
                 .title("Repik API")
                 .description("Repik API");
 
-        Server server = new Server()
-                .url("https://api.repik.kr")
-                .description("Production Server");
-
         return new OpenAPI().info(info)
                 .addSecurityItem(securityRequirement)  // Security Requirement 추가
                 .schemaRequirement("BearerAuth", securityScheme) // Security Scheme 추가
-                .servers(List.of(server));
+                ;
     }
 }
