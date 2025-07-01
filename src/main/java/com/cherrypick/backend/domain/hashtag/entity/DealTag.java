@@ -22,11 +22,11 @@ public class DealTag
 
 
     // 쿼리 최적화를 위해 객체는 분리.
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "deal_id", insertable = false, updatable = false)
     private Deal deal;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "hash_tag_id", insertable = false, updatable = false)
     private HashTag hashTag;
 

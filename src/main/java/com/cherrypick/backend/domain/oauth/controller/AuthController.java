@@ -37,34 +37,73 @@ public class AuthController {
     private final AuthService authService;
 
     String HTML = """
-                <!DOCTYPE html>
-                <html>
-                <head>
-                  <meta charset="UTF-8">
-                  <title>카카오 로그인</title>
-                </head>
-                <body>
-
-                  <input type="text" id="redirectInput" placeholder="/mypage" />
-                  <button onclick="redirectToKakao()">카카오 로그인</button>
-
-                  <script>
-                    function redirectToKakao() {
-                      const input = document.getElementById("redirectInput").value.trim();
-
-                      // 기본값이나 안전성 검증
-                      const safeRedirect = input.startsWith("/") ? input : "/";
-
-                      // 인코딩해서 redirect 파라미터에 붙임
-                      const encoded = encodeURIComponent(safeRedirect);
-                      const url = `https://api.repik.kr/oauth2/authorization/kakao?redirect=${encoded}`;
-
-                      window.location.href = url;
-                    }
-                  </script>
-
-                </body>
-                </html>
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>카카오 로그인</title>
+            </head>
+            <body>
+            
+              <input type="text" id="redirectInput" placeholder="/mypage" />
+              <button onclick="redirectToKakao()">카카오 로그인</button>
+            
+              <script>
+                function getClientInfo() {
+                  const ua = navigator.userAgent;
+                  let os = "Unknown";
+                  let browser = "Unknown";
+                  let version = "Unknown";
+            
+                  // OS 추출
+                  if (/windows nt/i.test(ua)) os = "Windows";
+                  else if (/macintosh|mac os x/i.test(ua)) os = "macOS";
+                  else if (/android/i.test(ua)) os = "Android";
+                  else if (/iphone|ipad|ipod/i.test(ua)) os = "iOS";
+                  else if (/linux/i.test(ua)) os = "Linux";
+            
+                  // 브라우저 및 버전 추출
+                  if (/chrome\\/(\\d+)/i.test(ua) && !/edg/i.test(ua)) {
+                    browser = "Chrome";
+                    version = ua.match(/chrome\\/([\\d.]+)/i)[1];
+                  } else if (/safari/i.test(ua) && !/chrome/i.test(ua)) {
+                    browser = "Safari";
+                    version = ua.match(/version\\/([\\d.]+)/i)?.[1] || "Unknown";
+                  } else if (/firefox/i.test(ua)) {
+                    browser = "Firefox";
+                    version = ua.match(/firefox\\/([\\d.]+)/i)[1];
+                  } else if (/edg/i.test(ua)) {
+                    browser = "Edge";
+                    version = ua.match(/edg\\/([\\d.]+)/i)[1];
+                  }
+            
+                  return { os, browser, version };
+                }
+            
+                function redirectToKakao() {
+                  const input = document.getElementById("redirectInput").value.trim();
+                  const safeRedirect = input.startsWith("/") ? input : "/";
+                  const encodedRedirect = encodeURIComponent(safeRedirect);
+            
+                  const { os, browser, version } = getClientInfo();
+                  const encodedOs = encodeURIComponent(os);
+                  const encodedBrowser = encodeURIComponent(browser);
+                  const encodedVersion = encodeURIComponent(version);
+            
+                  const url = `https://api.repik.kr/oauth2/authorization/kakao` +
+                              `?redirect=${encodedRedirect}` +
+                              `&os=${encodedOs}` +
+                              `&browser=${encodedBrowser}` +
+                              `&deviceId=local-cached-device-uuid` +
+                              `&version=${encodedVersion}`;
+            
+                  window.location.href = url;
+                  alert(url);
+                }
+              </script>
+            
+            </body>
+            </html>
             """;
 
     @Operation(

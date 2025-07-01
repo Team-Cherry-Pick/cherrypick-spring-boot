@@ -24,7 +24,6 @@ public class User {
     /// 확장 가능성
     /// 유저 등급제 ,로그인 매서드 , 선호 해시태그/카테고리
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -63,8 +62,8 @@ public class User {
                 .birthday(null)         // 이후에 등록됨.
                 .gender(null)           // 이후에 등록됨
                 .provider("kakao")
-                .status(UserStatus.PENDING)
-                .role(Role.CLIENT_PENDING)
+                .status(UserStatus.ACTIVE)
+                .role(Role.CLIENT)
                 .build();
     }
 
