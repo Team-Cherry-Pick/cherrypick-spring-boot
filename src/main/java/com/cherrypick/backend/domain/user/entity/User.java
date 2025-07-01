@@ -38,6 +38,7 @@ public class User {
     private String provider;          // 업체명 ex) kakao
     @Enumerated(EnumType.STRING)
     private UserStatus status;        // 소프트 딜리트 (삭제 상태면
+    // TODO : 다중 권한 구조로 전환 필요
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -59,12 +60,11 @@ public class User {
                 .oauthId(userAttr.get("id").toString())
                 .nickname(Optional.ofNullable((HashMap<String, String>)userAttr.get("properties")).map(p -> p.get("nickname")).get().toString())
                 .email(Optional.ofNullable((HashMap<String, String>)userAttr.get("properties")).map(p -> p.get("account_email")).get().toString())
-                .birthday(null)
-                .gender(null)
-                .provider(null)
+                .birthday(null)         // 이후에 등록됨.
+                .gender(null)           // 이후에 등록됨
                 .provider("kakao")
-                .status(UserStatus.ACTIVE)
-                .role(Role.CLIENT)
+                .status(UserStatus.PENDING)
+                .role(Role.CLIENT_PENDING)
                 .build();
     }
 
