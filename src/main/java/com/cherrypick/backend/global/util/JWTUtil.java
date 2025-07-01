@@ -6,6 +6,8 @@ import com.cherrypick.backend.domain.oauth.dto.UserEnvDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
+import com.cherrypick.backend.global.exception.BaseException;
+import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,7 +92,6 @@ public class JWTUtil
 
     public Long getUserIdFromRefreshToken(String token) {
 
-        return Jwts.parser().verifyWith(refreshSecretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
         try{
             return Jwts.parser().verifyWith(refreshSecretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
         } catch (Exception e) {
