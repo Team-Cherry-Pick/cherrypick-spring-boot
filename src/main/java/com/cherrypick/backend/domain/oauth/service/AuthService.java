@@ -66,6 +66,7 @@ public class AuthService extends DefaultOAuth2UserService
             return OAuth2UserDTO.builder()
                     .oauthId(oauthId)
                     .provider(provider)
+                    .isNewUser(true)
                     .build();
         }
 
