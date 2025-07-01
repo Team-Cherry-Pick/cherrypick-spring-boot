@@ -15,12 +15,12 @@ public class CommentLike {
     @EmbeddedId
     private CommentLikeId commentLikeId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @MapsId("commentId")
     @JoinColumn(name = "comment_id")
     private Comment commentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User userId;
