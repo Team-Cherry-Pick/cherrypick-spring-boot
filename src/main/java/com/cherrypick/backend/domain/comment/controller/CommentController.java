@@ -86,11 +86,6 @@ public class CommentController {
         return ResponseEntity.ok(commentService.likeComment(request));
     }
 
-    @PostMapping("/comment/dummy")
-    public String createDummyComment(){
-        commentService.dummyDataSetting();
-        return "yesssssssss";
-    }
 
 
 }

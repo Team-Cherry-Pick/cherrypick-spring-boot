@@ -112,14 +112,4 @@ public class DealController {
         return ResponseEntity.ok(dealService.deleteDeal(dealId));
     }
 
-    // 크롤링 API
-    @GetMapping("/crawl-board")
-    public String crawlBoard(String count) {
-        try {
-            dealCrawlService.crawlAndSaveBoard(Integer.parseInt(count));
-            return "게시글 크롤링 및 저장 완료";
-        } catch (Exception e) {
-            return "오류 발생: " + e.getMessage();
-        }
-    }
 }
