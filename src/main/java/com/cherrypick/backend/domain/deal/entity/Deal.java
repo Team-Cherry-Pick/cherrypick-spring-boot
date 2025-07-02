@@ -32,7 +32,7 @@ public class Deal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long dealId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id")
     private User userId;
@@ -73,7 +73,7 @@ public class Deal {
     private String discountName;
     private String discountDescription;
 
-    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "deal", orphanRemoval = true)
     private List<DealTag> dealTags = new ArrayList<>();
 
     @Column(nullable = false)

@@ -320,7 +320,7 @@ public class CommentService {
                 var c = new Comment();
                 c.setDealId(Deal.builder().dealId(id).build());
                 c.setParentId(null);
-                c.setUserId(User.builder().userId(2L).build());
+                c.setUserId(User.builder().userId(1L).build());
                 c.setContent(dummy_contents.get(new Random().nextInt(dummy_contents.size())));
                 c.setDelete(false);
                 comments.add(c);
