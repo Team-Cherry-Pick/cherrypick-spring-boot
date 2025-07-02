@@ -58,13 +58,13 @@ spring:
 
   jwt:
     access:
-      key: ohvenatorbeatussantustuamfadipardiatcortuusnevictusfiatmorte
-      period: 360000000
+      key: ${ACCESS_SECRET_KEY}
+      period: ${ACCESS_TOKEN_PERIOD}
     refresh:
-      key: telllmegoodhunterofthechurchhaveyouseenthelightaremychurchhunterswerehonorablespartansihopetobe
-      period: 604800000
+      key: ${REFRESH_SECRET_KEY}
+      period: ${REFRESH_TOKEN_PERIOD}
     register:
-      key: MayLudwigsBlessingBeUponAllWhoReceiveThisTokenmytruementormyguidingmoonlight
+      key: ${RESISTER_SECRET_KEY}
       period: 604800000
 
 slack:
