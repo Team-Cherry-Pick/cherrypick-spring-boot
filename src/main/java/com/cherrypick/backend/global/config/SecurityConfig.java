@@ -42,10 +42,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/user/test/jwt-filter").authenticated()
                         .requestMatchers("/").permitAll()
-                        .anyRequest().permitAll())
-                        .exceptionHandling(ex -> ex.authenticationEntryPoint(filterChainExceptionHandler));
+                        .anyRequest().denyAll())
+                        ;
 
 
+        http
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(filterChainExceptionHandler));
 
         //csrf disable
         http
