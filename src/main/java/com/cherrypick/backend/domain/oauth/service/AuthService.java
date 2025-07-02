@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,6 +49,7 @@ public class AuthService extends DefaultOAuth2UserService
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         var oauth2User = super.loadUser(userRequest);
+        System.out.println(oauth2User.getAttributes().toString());
         String provider = userRequest.getClientRegistration().getRegistrationId(); // kakao 등
 
         // oauthId를 찾아냄.
@@ -63,13 +65,14 @@ public class AuthService extends DefaultOAuth2UserService
         }
         else{
             // DB에 저장하지 않는다. 때문에 OAuth2UserDTO 에 oauthId와 provider만 담는다.
+            var userAttr = oauth2User.getAttributes();
             return OAuth2UserDTO.builder()
                     .oauthId(oauthId)
                     .provider(provider)
                     .isNewUser(true)
+                    .email(Optional.ofNullable((HashMap<String, String>)userAttr.get("kakao_account")).map(p -> p.get("email")).get().toString())
                     .build();
         }
-
     }
 
     @Override
@@ -174,7 +177,7 @@ public class AuthService extends DefaultOAuth2UserService
 
         return Optional.ofNullable(redisTemplate.opsForHash().get(key, "token"))
                 .map(Object::toString)
-                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_EXPIRED)) ;
+                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_EXPIRED));
     }
 
     public UserEnvDTO loadUserEnv(Long userId, String deviceId){

@@ -47,7 +47,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         else{
             // 리프레시 토큰
             var refreshToken = registeredUserRefreshToken(userInfo, userEnvDTO);
-            response.setHeader("Set-Cookie", refreshToken.toString());
+            response.addHeader("Set-Cookie", refreshToken.toString());
 
             // 엑세스 토큰
             token =  jwtUtil.createAccessToken(userInfo.userId(), userInfo.role(), userInfo.nickname());
@@ -58,6 +58,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .queryParam("token", token)
                 .queryParam("isNewUser", userInfo.isNewUser())
                 .queryParam("redirect", redirect)
+                .queryParam("email", userInfo.email())
                 .build()
                 .toUriString();
 

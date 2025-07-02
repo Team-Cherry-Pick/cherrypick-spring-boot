@@ -16,6 +16,7 @@ public record OAuth2UserDTO(
         String oauthId,
         String provider,
         String nickname,
+        String email,
         Role role,
         boolean isNewUser
 ) implements OAuth2User
@@ -30,6 +31,7 @@ public record OAuth2UserDTO(
                 .oauthId(user.getOauthId())
                 .provider(user.getProvider())
                 .nickname(user.getNickname())
+                .email(user.getEmail())
                 .role(user.getRole())
                 .isNewUser(isNewUser)
                 .build();

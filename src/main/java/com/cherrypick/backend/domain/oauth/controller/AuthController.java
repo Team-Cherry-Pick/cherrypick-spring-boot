@@ -90,7 +90,6 @@ public class AuthController {
                   const encodedBrowser = encodeURIComponent(browser);
                   const encodedVersion = encodeURIComponent(version);
             
-                  const url = `https://api.repik.kr/oauth2/authorization/kakao` +
                               `?redirect=${encodedRedirect}` +
                               `&os=${encodedOs}` +
                               `&browser=${encodedBrowser}` +

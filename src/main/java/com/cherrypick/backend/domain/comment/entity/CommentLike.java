@@ -17,13 +17,13 @@ public class CommentLike {
     @EmbeddedId
     private CommentLikeId commentLikeId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @MapsId("commentId")
     @JoinColumn(name = "comment_id")
     private Comment commentId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @MapsId("userId")
     @JoinColumn(name = "user_id")
