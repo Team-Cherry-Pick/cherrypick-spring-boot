@@ -76,7 +76,7 @@ public class SecurityConfig {
         http
                 .logout(logout -> logout
                         .logoutUrl("/logout")  // 로그아웃 요청 URL
-                        .deleteCookies("refresh")  // 쿠키 삭제
+                        .deleteCookies("refreshToken")  // 쿠키 삭제
                 );
 
 
@@ -99,13 +99,27 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("*")); // or List.of("http://localhost:3000")
-        config.setAllowedMethods(List.of("*"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedOrigins(List.of(
+                "https://repik.kr",
+                "https://www.repik.kr",
+                "https://api.repik.kr",
+                "http://localhost:3000",
+                "http://localhost:8080"
+        ));
+
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin"
+        ));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
+
         return source;
     }
 }
