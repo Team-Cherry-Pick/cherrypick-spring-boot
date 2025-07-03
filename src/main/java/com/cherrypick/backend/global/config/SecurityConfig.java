@@ -8,6 +8,7 @@ import com.cherrypick.backend.global.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,11 +41,38 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/user/test/jwt-filter").authenticated()
-                        .requestMatchers("/").permitAll()
-                        .anyRequest().denyAll())
-                        ;
+                        .requestMatchers(    "/v3/api-docs/**",      // OpenAPI 문서 JSON
+                                            "/swagger-ui/**",        // Swagger UI 리소스
+                                            "/swagger-ui.html"       // Swagger UI 진입점
+                        ).permitAll()
+                        // 게시글 관련 일체
+                        .requestMatchers("/api/search/deal").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/deal/recommend", "/api/deal/*",                                     // 게시글 추천 시스템 조회 요청
+                                "/api/category", "/api/store", "/api/discount",                         // 관련 리소스 조회 요청
+                                "/api/best-comment/*", "/api/comment/*"                                   // 댓글 조회 요청
 
+                        ).permitAll()
+                        .requestMatchers("/api/deal/**").authenticated()                                     // 게시글 생성/수정/삭제 및 투표 등은 권한이 있어야함.
+                        .requestMatchers("/api/comment/*").authenticated()                                   // 댓글 생성 / 삭제는 인증된 유저만 가능
+
+                        // 이미지
+                        .requestMatchers("/api/image").permitAll()                                           // 이미지 게시는 누구나 가능
+                        .requestMatchers(HttpMethod.DELETE,"/api/image/*").authenticated()                   // 이미지 삭제는 인증된 유저만 가능
+
+                        // 유저
+                        .requestMatchers(HttpMethod.GET,"/api/user").authenticated()                         // 인증 유저 정보 조회 부분은 인증 유저만 가능.
+                        .requestMatchers(HttpMethod.GET, "/api/user/*").permitAll()                          // 닉네임 유효성 판단 , 타겟 유저 정보 조회는 모두 가능
+                        .requestMatchers("/api/user").authenticated()                                        // 삭제 / 수정은 인증 유저만 가능.
+
+                        // 인증
+                        .requestMatchers(
+                                "/login/oauth2/code/**", "/api/auth/register-completion").anonymous()      // 회원가입은 미인증 유저만 가능
+                        .requestMatchers("/api/auth/refresh").permitAll()                                    // 액세스 토큰이 만료된 상태에서도 재발급은 받을 수 있어야함.
+                        // 테스트 코드
+                        .requestMatchers("/api/test/**").permitAll()
+                        .anyRequest().denyAll()
+                );
 
         http
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(filterChainExceptionHandler));
