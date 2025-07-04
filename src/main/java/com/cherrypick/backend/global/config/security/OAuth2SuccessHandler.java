@@ -25,8 +25,6 @@ import java.util.Base64;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JWTUtil jwtUtil;
-    @Value("${spring.userInfoUrl}")
-    String userInfoUpdateURL;
     private final ObjectMapper objectMapper;
     private final AuthService authService;
 
