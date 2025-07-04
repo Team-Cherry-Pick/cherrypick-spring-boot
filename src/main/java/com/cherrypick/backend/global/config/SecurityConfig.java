@@ -54,7 +54,7 @@ public class SecurityConfig {
                         // 게시글 관련 일체
                         .requestMatchers("/api/search/deal").permitAll()
                         .requestMatchers(HttpMethod.GET,
-                                "/api/deal/recommend", "/api/deal/**",                                     // 게시글 추천 시스템 조회 요청
+                                "/api/deal/recommend", "/api/deal/*",                                     // 게시글 추천 시스템 조회 요청
                                 "/api/category", "/api/store", "/api/discount",                         // 관련 리소스 조회 요청
                                 "/api/best-comment/*", "/api/comment/*"                                   // 댓글 조회 요청
 
