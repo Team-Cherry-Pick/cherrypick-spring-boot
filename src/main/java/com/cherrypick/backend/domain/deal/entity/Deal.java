@@ -80,6 +80,9 @@ public class Deal {
     private double heat = 0.0;
 
     @Builder.Default
+    private Long totalViews = 0L;
+
+    @Builder.Default
     private Boolean isDelete = false;
 
     @CreatedDate

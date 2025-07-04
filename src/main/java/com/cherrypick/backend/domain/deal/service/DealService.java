@@ -207,12 +207,12 @@ public class DealService {
 
         List<Long> allDealIds = allFilteredDeals.stream().map(Deal::getDealId).toList();
 
-        Map<Long, Long> viewCountMap = redisTemplate.opsForValue()
-                .multiGet(allDealIds.stream().map(id -> "deal:view:" + id).toList())
-                .stream().collect(HashMap::new, (m, v) -> {
-                    int i = m.size();
-                    m.put(allDealIds.get(i), v != null ? Long.parseLong(v.toString()) : 0L);
-                }, HashMap::putAll);
+        // 조회수 가져오는 부분
+        Map<Long, Long> viewCountMap = allFilteredDeals.stream()
+                .collect(Collectors.toMap(
+                        Deal::getDealId,
+                        deal -> deal.getTotalViews() != null ? deal.getTotalViews() : 0L
+                ));
 
         Map<Long, Long> likeCountMap = voteRepository.countByDealIdsAndVoteTypeGrouped(allDealIds, VoteType.TRUE);
         Map<Long, Long> commentCountMap = commentRepository.countByDealIdsGrouped(allDealIds);
@@ -356,18 +356,8 @@ public class DealService {
         List<String> infoTags = getInfoTags(deal);
 
         // 조회수 증가
-        String viewKey = "deal:view:" + deal.getDealId();
-        redisTemplate.opsForValue().increment(viewKey, 1);
-        Object redisVal = redisTemplate.opsForValue().get(viewKey);
-
-        long totalViews = 0L;
-        if (redisVal != null) {
-            try {
-                totalViews = Long.parseLong(redisVal.toString());
-            } catch (NumberFormatException e) {
-                totalViews = 0L; // 파싱 실패하면 안전하게 0으로 처리
-            }
-        }
+        deal.setTotalViews(deal.getTotalViews() + 1);
+        long totalViews = deal.getTotalViews();
 
         // 매트릭스 조회 (조회수, 좋아요 수, 싫어요 수, 댓글 수)
         long[] metrics = getDealMetrics(deal);
