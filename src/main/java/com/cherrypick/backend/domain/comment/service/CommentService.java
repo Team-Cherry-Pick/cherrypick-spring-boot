@@ -92,6 +92,15 @@ public class CommentService {
             throw new BaseException(DealErrorCode.DEAL_NOT_FOUND);
         }
 
+        // 로그인 사용자 ID 추출
+        final Long loginUserId;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof AuthenticationDetailDTO userDetails) {
+            loginUserId = userDetails.userId();
+        } else {
+            loginUserId = null;
+        }
+
         // 댓글이 없는 경우
         List<Comment> allComments = commentRepository.findAllByDealId(dealId);
         if (allComments.isEmpty()) {
@@ -110,10 +119,10 @@ public class CommentService {
                     List<Comment> replies = commentRepository.findReplies(parent.getCommentId());
 
                     List<CommentListResponseDTO> replyDtos = replies.stream()
-                            .map(this::toCommentDtoWithoutReplies)
+                            .map(reply -> toCommentDtoWithoutReplies(reply, loginUserId))
                             .toList();
 
-                    return toCommentDtoWithReplies(parent, replyDtos);
+                    return toCommentDtoWithReplies(parent, replyDtos, loginUserId);
                 })
                 .toList();
     }
@@ -124,6 +133,15 @@ public class CommentService {
         boolean exists = dealRepository.existsById(dealId);
         if (!exists) {
             throw new BaseException(DealErrorCode.DEAL_NOT_FOUND);
+        }
+
+        // 로그인 사용자 ID 추출
+        final Long loginUserId;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof AuthenticationDetailDTO userDetails) {
+            loginUserId = userDetails.userId();
+        } else {
+            loginUserId = null;
         }
 
         List<Comment> comments = commentRepository.findAllByDealIdAndIsDeleteFalse(dealId);
@@ -142,6 +160,11 @@ public class CommentService {
                             comment.getUserId().getUserId()
                     );
 
+                    boolean isLike = false;
+                    if (loginUserId != null) {
+                        isLike = commentLikeRepository.existsById(new CommentLikeId(loginUserId, comment.getCommentId()));
+                    }
+
                     return new BestCommentResponseDTO(
                             comment.getCommentId(),
                             new com.cherrypick.backend.domain.user.vo.User(
@@ -150,7 +173,8 @@ public class CommentService {
                                     imageOpt.map(Image::getImageUrl).orElse(null)
                             ),
                             totalLikes,
-                            comment.getContent()
+                            comment.getContent(),
+                            isLike
                     );
                 })
                 .sorted(
@@ -230,13 +254,18 @@ public class CommentService {
     // DTO 변환 메소드들
 
     // 부모 댓글 + 대댓글 리스트까지 포함한 DTO 만들기
-    private CommentListResponseDTO toCommentDtoWithReplies(Comment comment, List<CommentListResponseDTO> replies) {
+    private CommentListResponseDTO toCommentDtoWithReplies(Comment comment, List<CommentListResponseDTO> replies, Long loginUserId) {
         int totalLikes = commentLikeRepository.countByCommentId(comment);
         int totalReplys = replies.size();
 
         Optional<Image> imageOpt = imageRepository.findByUserId(
                 comment.getUserId().getUserId()
         );
+
+        boolean isLike = false;
+        if (loginUserId != null) {
+            isLike = commentLikeRepository.existsById(new CommentLikeId(loginUserId, comment.getCommentId()));
+        }
 
         return new CommentListResponseDTO(
                 comment.getCommentId(),
@@ -251,13 +280,19 @@ public class CommentService {
                 totalReplys,
                 comment.getCreatedAt(),
                 comment.isDelete(),
-                replies
+                replies,
+                isLike
         );
     }
 
     // 대댓글 1개짜리 DTO 만들기
-    private CommentListResponseDTO toCommentDtoWithoutReplies(Comment comment) {
+    private CommentListResponseDTO toCommentDtoWithoutReplies(Comment comment, Long loginUserId) {
         int totalLikes = commentLikeRepository.countByCommentId(comment);
+
+        boolean isLike = false;
+        if (loginUserId != null) {
+            isLike = commentLikeRepository.existsById(new CommentLikeId(loginUserId, comment.getCommentId()));
+        }
 
         return new CommentListResponseDTO(
                 comment.getCommentId(),
@@ -272,7 +307,8 @@ public class CommentService {
                 0,
                 comment.getCreatedAt(),
                 comment.isDelete(),
-                List.of()
+                List.of(),
+                isLike
         );
     }
 
@@ -320,7 +356,7 @@ public class CommentService {
                 var c = new Comment();
                 c.setDealId(Deal.builder().dealId(id).build());
                 c.setParentId(null);
-                c.setUserId(User.builder().userId(1L).build());
+                c.setUserId(User.builder().userId(2L).build());
                 c.setContent(dummy_contents.get(new Random().nextInt(dummy_contents.size())));
                 c.setDelete(false);
                 comments.add(c);

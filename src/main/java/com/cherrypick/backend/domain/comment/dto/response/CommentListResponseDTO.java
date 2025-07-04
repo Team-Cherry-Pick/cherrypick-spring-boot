@@ -14,5 +14,6 @@ public record CommentListResponseDTO(
         int totalReplys,
         LocalDateTime createdAt,
         boolean isDelete,
-        List<CommentListResponseDTO> replies
+        List<CommentListResponseDTO> replies,
+        boolean isLike
 ) { }

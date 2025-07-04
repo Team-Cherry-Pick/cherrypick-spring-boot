@@ -6,6 +6,7 @@ public record BestCommentResponseDTO(
         Long commentId,
         User user,
         int totalLikes,
-        String content
+        String content,
+        boolean isLike
 ) {
 }
