@@ -5,7 +5,9 @@ import com.cherrypick.backend.domain.oauth.service.AuthService;
 import com.cherrypick.backend.global.config.security.OAuth2SuccessHandler;
 import com.cherrypick.backend.global.config.security.*;
 import com.cherrypick.backend.global.util.JWTUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,6 +19,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -34,6 +37,9 @@ public class SecurityConfig {
     private final FilterChainExceptionHandler filterChainExceptionHandler;
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
+
+    @Value("${spring.profiles.active}")
+    private String springProfilesActive;
 
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -115,6 +121,24 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
+
+        // 로컬 환경이 아니라면 https만 되도록.
+        // AWS ALB는 요청을 통과시킬때 X-Forwarded-Proto 라는 헤더를 붙여서 줌.
+        if(!springProfilesActive.equalsIgnoreCase("local"))
+        {
+            http
+                    .requiresChannel(channel ->
+                            channel
+                                    .requestMatchers(new RequestMatcher() {
+                                        @Override
+                                        public boolean matches(HttpServletRequest request) {
+                                            String proto = request.getHeader("X-Forwarded-Proto");
+                                            return proto == null || proto.equals("http");
+                                        }
+                                    })
+                                    .requiresSecure()
+                    );
+        }
 
         return http.build();
     }
