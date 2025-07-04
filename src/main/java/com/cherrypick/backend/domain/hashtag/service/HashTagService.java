@@ -10,10 +10,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,8 @@ public class HashTagService
 {
     private final HashTagRepository hashTagRepository;
     private final DealTagRepository dealTagRepository;
+    private final RedisTemplate<String, Object> restTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Value("${openai.api-key}")
     private String openAiApiKey;
@@ -60,11 +64,6 @@ public class HashTagService
 
         RestTemplate restTemplate = new RestTemplate();
 
-        //String prompt = title + "\n 이 제목을 보고 가격과 해시태그 10개를 뽑아줘. " +
-        //        "해시태그는 전자기기, 가전제품, 패션, 뷰티/헬스, 홈/리빙, 식품, 스포츠/레저, 자동차, 책/문구, 취미/완구, 게임, 영화, 음악, 여행, 애완동물, 유아용품, 정원용품, 세차용품, 컴퓨터 부품, 사진/영상, 오피스 용품, 의료기기, DIY 용품, 시계, 쥬얼리, 음향기기, 스마트홈, 교육용품, 선물, 공구, 텔레비전, 스마트폰 액세서리, 인테리어 소품, 화장품 중에서 최대한 골라서." +
-        //        "특가, 무료배송 이런거 말고 제목을 보고 최대한 포괄적인 단어로만 해시태그 뽑아줘." +
-        //        "가격이나 해시태그를 못 뽑겠으면 정확히 '유추 불가'라고 답해줘." +
-        //        "형식: 가격:10000, 해시태그: 과일, 식품, 사과, 유기농, 건강식품, 선물";
 
         String prompt = String.format("""
                 {제목 : %s  내용 : %s} \n
@@ -75,7 +74,7 @@ public class HashTagService
                 형식 : {과일 식품 사과 유기농 건강식품 선물}
                 문자열을 분리할때는 반드시 띄워쓰기를 사용해줘.
                 """, title, content);
-
+        System.out.println(prompt);
         Map<String, Object> requestMap = new HashMap<>();
         requestMap.put("model", "gpt-4-turbo");
         requestMap.put("max_tokens", 300);
@@ -104,7 +103,24 @@ public class HashTagService
                 String response = responseEntity.getBody();
                 JsonNode rootNode = objectMapper.readTree(response);
                 var rawText = rootNode.path("choices").get(0).path("message").path("content").asText();
-                return Arrays.stream(rawText.replaceAll("[{}]", "").split(" ")).collect(Collectors.toSet());
+
+                JsonNode usage = rootNode.path("usage");
+                int promptTokens = usage.path("prompt_tokens").asInt();
+                int completionTokens = usage.path("completion_tokens").asInt();
+                int totalTokens = usage.path("total_tokens").asInt();
+
+// Redis Stream 로그 추가
+                Map<String, String> usageLog = new HashMap<>();
+                usageLog.put("prompt_tokens", String.valueOf(promptTokens));
+                usageLog.put("completion_tokens", String.valueOf(completionTokens));
+                usageLog.put("total_tokens", String.valueOf(totalTokens));
+                usageLog.put("timestamp", Instant.now().toString());
+
+                redisTemplate.opsForStream().add("openai:usage", usageLog);
+
+// 결과 반환
+                return Arrays.stream(rawText.replaceAll("[{}]", "").split(" "))
+                        .collect(Collectors.toSet());
 
             } else {
                 System.err.println("OpenAI 요청 실패: " + responseEntity.getStatusCode());
