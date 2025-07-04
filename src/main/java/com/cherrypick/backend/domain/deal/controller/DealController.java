@@ -79,7 +79,7 @@ public class DealController {
 
         // 유저 행동로그 삽입
         System.out.println("::::: 행동로그 진입점");
-        var userBehaviorDTO = new DealRequestDTOs.UserBehaviorDTO(8L, dealId, UserBehaviorType.VIEW);
+        var userBehaviorDTO = new DealRequestDTOs.UserBehaviorDTO(AuthUtil.getUserDetail().userId(), dealId, UserBehaviorType.VIEW);
         recommenderService.addUserBehaviorLog(userBehaviorDTO);
 
 
