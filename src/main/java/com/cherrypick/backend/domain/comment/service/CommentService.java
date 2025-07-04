@@ -93,13 +93,7 @@ public class CommentService {
         }
 
         // 로그인 사용자 ID 추출
-        final Long loginUserId;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof AuthenticationDetailDTO userDetails) {
-            loginUserId = userDetails.userId();
-        } else {
-            loginUserId = null;
-        }
+        final Long loginUserId = com.cherrypick.backend.global.util.AuthUtil.isAuthenticated() ? com.cherrypick.backend.global.util.AuthUtil.getUserDetail().userId() : null;
 
         // 댓글이 없는 경우
         List<Comment> allComments = commentRepository.findAllByDealId(dealId);
@@ -136,13 +130,7 @@ public class CommentService {
         }
 
         // 로그인 사용자 ID 추출
-        final Long loginUserId;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof AuthenticationDetailDTO userDetails) {
-            loginUserId = userDetails.userId();
-        } else {
-            loginUserId = null;
-        }
+        final Long loginUserId = com.cherrypick.backend.global.util.AuthUtil.isAuthenticated() ? com.cherrypick.backend.global.util.AuthUtil.getUserDetail().userId() : null;
 
         List<Comment> comments = commentRepository.findAllByDealIdAndIsDeleteFalse(dealId);
 
@@ -252,7 +240,6 @@ public class CommentService {
     }
 
     // DTO 변환 메소드들
-
     // 부모 댓글 + 대댓글 리스트까지 포함한 DTO 만들기
     private CommentListResponseDTO toCommentDtoWithReplies(Comment comment, List<CommentListResponseDTO> replies, Long loginUserId) {
         int totalLikes = commentLikeRepository.countByCommentId(comment);
