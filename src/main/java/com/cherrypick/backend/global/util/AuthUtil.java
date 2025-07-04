@@ -24,11 +24,14 @@ public class AuthUtil
 
     }
 
-    public static boolean isAuthenticated()
-    {
-        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public static boolean isAuthenticated() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) return false;
+
+        var principal = authentication.getPrincipal();
         return principal instanceof AuthenticationDetailDTO;
     }
+
 
     public static AuthenticationDetailDTO getUserDetail() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();

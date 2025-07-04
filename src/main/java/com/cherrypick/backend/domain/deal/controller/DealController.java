@@ -78,9 +78,11 @@ public class DealController {
             @RequestParam(value = "version", defaultValue = "v1") String version) {
 
         // 유저 행동로그 삽입
-        System.out.println("::::: 행동로그 진입점");
-        var userBehaviorDTO = new DealRequestDTOs.UserBehaviorDTO(AuthUtil.getUserDetail().userId(), dealId, UserBehaviorType.VIEW);
-        recommenderService.addUserBehaviorLog(userBehaviorDTO);
+        if(AuthUtil.isAuthenticated()){
+            var userBehaviorDTO = new DealRequestDTOs.UserBehaviorDTO(AuthUtil.getUserDetail().userId(), dealId, UserBehaviorType.VIEW);
+            recommenderService.addUserBehaviorLog(userBehaviorDTO);
+        }
+
 
 
         return ResponseEntity.ok(dealService.getDealDetail(dealId));
