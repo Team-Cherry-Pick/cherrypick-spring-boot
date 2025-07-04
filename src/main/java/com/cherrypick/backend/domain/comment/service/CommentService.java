@@ -224,7 +224,7 @@ public class CommentService {
         User user = userRepository.findById(userDetails.userId())
                 .orElseThrow(() -> new BaseException(GlobalErrorCode.UNAUTHORIZED));
 
-        Comment comment = commentRepository.findById(request.commentID())
+        Comment comment = commentRepository.findById(request.commentId())
                 .orElseThrow(() -> new BaseException(CommentErrorCode.COMMENT_NOT_FOUND));
 
         CommentLikeId likeId = new CommentLikeId(user.getUserId(), comment.getCommentId());
