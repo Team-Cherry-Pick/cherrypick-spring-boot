@@ -124,7 +124,7 @@ public class SecurityConfig {
 
         // 로컬 환경이 아니라면 https만 되도록.
         // AWS ALB는 요청을 통과시킬때 X-Forwarded-Proto 라는 헤더를 붙여서 줌.
-        if(!springProfilesActive.equalsIgnoreCase("local"))
+        if(springProfilesActive.equalsIgnoreCase("local"))
         {
             http
                     .requiresChannel(channel ->

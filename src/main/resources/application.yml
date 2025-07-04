@@ -1,3 +1,7 @@
+server:
+  forward-headers-strategy: framework
+  port: 8080
+
 spring:
   config:
     import: optional:file:.env[.properties]
@@ -54,7 +58,6 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-  userInfoUrl: /api/user # 관심사 분리를 위해 유저 회원정보 수정 URL 분리, OAuth2SuccessHandler에서 신규 유저를 리다이렉트하는데 쓰임.
 
   jwt:
     access:
