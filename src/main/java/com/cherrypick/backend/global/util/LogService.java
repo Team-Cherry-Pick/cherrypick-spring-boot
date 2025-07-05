@@ -1,0 +1,72 @@
+package com.cherrypick.backend.global.util;
+
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+
+@Slf4j @Component @RequiredArgsConstructor
+public class LogService {
+
+
+    private final ObjectMapper mapper;
+
+    @Value("${spring.profiles.active}")
+    private String env;
+
+    @Value("${version:unknown}")
+    private String version;
+
+    @PostConstruct
+    public void init() {
+
+        MDC.put("env", env);
+        MDC.put("version", version);
+        MDC.put("logType", "SERVER_START_LOG");
+
+        log.info("Starting Server Application");
+
+        MDC.remove("logType");
+    }
+
+    public void requestLog(long durationTime, String uriPattern, Long userId, String method, String clientIp, String queryString) {
+
+        MDC.put("logType", "REQUEST_FILTER_LOG");
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("duration", String.valueOf(durationTime));
+        map.put("uriPattern", uriPattern);
+        map.put("userId", String.valueOf(userId));
+        map.put("method", method);
+        map.put("clientIp", clientIp);
+        map.put("queryString", queryString);
+
+        log.info(toJson(map));
+        MDC.remove("logType");
+
+    }
+
+    //public void errorLog()
+
+
+    private String toJson(HashMap<String, String> map) {
+
+        try{
+            return mapper.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            return map.toString();
+        }
+    }
+
+}
