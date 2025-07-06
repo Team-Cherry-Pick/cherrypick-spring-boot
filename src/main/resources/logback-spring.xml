@@ -12,7 +12,7 @@
         </encoder>
     </appender>
 
-    <springProfile name="prod,dev,local">
+    <springProfile name="prod,dev">
         <root level="INFO">
             <appender-ref ref="LOGSTASH"/>
             <appender-ref ref="CONSOLE"/>

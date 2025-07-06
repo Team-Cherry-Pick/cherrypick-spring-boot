@@ -140,7 +140,7 @@ public class TestController
     @GetMapping("/auth/jwt-filter")
     public String jwtFilter(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String Authorization) {
 
-        log.info(Authorization);
+        log.trace(Authorization);
         var userDetail = jwtUtil.getUserDetailDTOFromAccessToken(Authorization);
 
         return "JWT Authorized : " + userDetail.userId() + " " + userDetail.nickname() + " " + userDetail.role().toString();

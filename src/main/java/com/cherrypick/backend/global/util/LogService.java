@@ -35,7 +35,9 @@ public class LogService {
         MDC.put("version", version);
         MDC.put("logType", "SERVER_START_LOG");
 
-        log.info("Starting Server Application");
+        HashMap<String, String> map = new HashMap<>();
+        map.put("msg", "Starting Server Application");
+        log.info(toJson(map));
 
         MDC.remove("logType");
     }
@@ -56,9 +58,6 @@ public class LogService {
         MDC.remove("logType");
 
     }
-
-    //public void errorLog()
-
 
     private String toJson(HashMap<String, String> map) {
 
