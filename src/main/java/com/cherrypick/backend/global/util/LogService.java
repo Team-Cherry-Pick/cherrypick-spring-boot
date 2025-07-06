@@ -10,6 +10,7 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,19 @@ public class LogService {
         map.put("queryString", Optional.ofNullable(queryString).orElse("unknown"));
 
         log.info(toJson(map));
+        MDC.remove("logType");
+
+    }
+
+    public void errorLog(HttpStatus status, String msg) {
+        mdcInitialize();
+        MDC.put("logType", "ERROR_LOG");
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("msg", msg);
+        map.put("status", String.valueOf(status));
+
+        log.error(toJson(map));
         MDC.remove("logType");
 
     }
