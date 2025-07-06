@@ -32,8 +32,7 @@ public class LogService {
     @PostConstruct
     public void init() {
 
-        MDC.put("env", env);
-        MDC.put("version", version);
+        mdcInitialize();
         MDC.put("logType", "SERVER_START_LOG");
 
         HashMap<String, String> map = new HashMap<>();
@@ -45,15 +44,16 @@ public class LogService {
 
     public void requestLog(long durationTime, String uriPattern, Long userId, String method, String clientIp, String queryString) {
 
+        mdcInitialize();
         MDC.put("logType", "REQUEST_FILTER_LOG");
 
         HashMap<String, String> map = new HashMap<>();
         map.put("duration", String.valueOf(durationTime));
-        map.put("uriPattern", (String) Optional.ofNullable(uriPattern).orElse("unknown"));
+        map.put("uriPattern", Optional.ofNullable(uriPattern).orElse("unknown"));
         map.put("userId", String.valueOf(userId));
-        map.put("method", (String) Optional.ofNullable(method).orElse("unknown"));
-        map.put("clientIp",(String) Optional.ofNullable(clientIp).orElse("unknown"));
-        map.put("queryString", (String) Optional.ofNullable(queryString).orElse("unknown"));
+        map.put("method", Optional.ofNullable(method).orElse("unknown"));
+        map.put("clientIp", Optional.ofNullable(clientIp).orElse("unknown"));
+        map.put("queryString", Optional.ofNullable(queryString).orElse("unknown"));
 
         log.info(toJson(map));
         MDC.remove("logType");
@@ -67,6 +67,13 @@ public class LogService {
         } catch (JsonProcessingException e) {
             return map.toString();
         }
+    }
+
+    private void mdcInitialize()
+    {
+        MDC.clear();
+        MDC.put("env", env);
+        MDC.put("version", version);
     }
 
 }
