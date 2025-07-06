@@ -5,6 +5,7 @@ import com.cherrypick.backend.domain.oauth.service.AuthService;
 import com.cherrypick.backend.global.config.security.OAuth2SuccessHandler;
 import com.cherrypick.backend.global.config.security.*;
 import com.cherrypick.backend.global.util.JWTUtil;
+import com.cherrypick.backend.global.util.LogService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +43,7 @@ public class SecurityConfig {
     private String springProfilesActive;
 
     @Bean
-    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    protected SecurityFilterChain filterChain(HttpSecurity http, LogService logService) throws Exception {
 
         //경로별 인가 작업
         http
@@ -97,7 +98,8 @@ public class SecurityConfig {
         http
                 .formLogin(AbstractHttpConfigurer::disable);
 
-        http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new RequestLogFilter(logService), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JWTFilter(jwtUtil), RequestLogFilter.class);
         
         // oauth2
 	    http

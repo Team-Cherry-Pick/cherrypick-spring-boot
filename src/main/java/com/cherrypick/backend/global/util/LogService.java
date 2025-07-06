@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Slf4j @Component @RequiredArgsConstructor
 public class LogService {
@@ -48,11 +49,11 @@ public class LogService {
 
         HashMap<String, String> map = new HashMap<>();
         map.put("duration", String.valueOf(durationTime));
-        map.put("uriPattern", uriPattern);
+        map.put("uriPattern", (String) Optional.ofNullable(uriPattern).orElse("unknown"));
         map.put("userId", String.valueOf(userId));
-        map.put("method", method);
-        map.put("clientIp", clientIp);
-        map.put("queryString", queryString);
+        map.put("method", (String) Optional.ofNullable(method).orElse("unknown"));
+        map.put("clientIp",(String) Optional.ofNullable(clientIp).orElse("unknown"));
+        map.put("queryString", (String) Optional.ofNullable(queryString).orElse("unknown"));
 
         log.info(toJson(map));
         MDC.remove("logType");

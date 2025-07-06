@@ -13,6 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j
 @Component @RequiredArgsConstructor
@@ -30,10 +31,10 @@ public class RequestLogFilter extends OncePerRequestFilter {
 
         long duration = System.currentTimeMillis() - start;
 
-        String method = request.getMethod();
-        String uriPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         Long userId = AuthUtil.isAuthenticated() ?  AuthUtil.getUserDetail().userId() : -1;
+        String method = request.getMethod();
         String queryString = request.getQueryString();
+        String uriPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
         String ipAddress = getClientIp(request);
 
         logService.requestLog(duration, uriPattern, userId, method, ipAddress, queryString);
