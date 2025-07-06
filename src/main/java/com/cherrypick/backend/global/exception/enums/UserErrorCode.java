@@ -21,6 +21,7 @@ public enum UserErrorCode implements BaseErrorCode {
 
     // 401 UNAUTHORIZED
     SECURITY_AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
+    SECURITY_ACCESS_DENIED_BY_FILTER_CHAIN(HttpStatus.UNAUTHORIZED, "보안 필터 체인이 접근을 거부하였습니다."),
 
 
     // 403 FORBIDDEN
