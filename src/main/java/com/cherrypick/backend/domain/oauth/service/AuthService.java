@@ -177,7 +177,7 @@ public class AuthService extends DefaultOAuth2UserService
 
         return Optional.ofNullable(redisTemplate.opsForHash().get(key, "token"))
                 .map(Object::toString)
-                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_EXPIRED));
+                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_FOUND));
     }
 
     public UserEnvDTO loadUserEnv(Long userId, String deviceId){

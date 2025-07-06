@@ -37,7 +37,7 @@ public class LogService {
         MDC.put("logType", "SERVER_START_LOG");
 
         HashMap<String, String> map = new HashMap<>();
-        map.put("msg", "Starting Server Application");
+        map.put("start_msg", "Starting Server Application");
         log.info(toJson(map));
 
         MDC.remove("logType");
@@ -49,12 +49,12 @@ public class LogService {
         MDC.put("logType", "REQUEST_FILTER_LOG");
 
         HashMap<String, String> map = new HashMap<>();
-        map.put("duration", String.valueOf(durationTime));
-        map.put("uriPattern", Optional.ofNullable(uriPattern).orElse("unknown"));
-        map.put("userId", String.valueOf(userId));
-        map.put("method", Optional.ofNullable(method).orElse("unknown"));
-        map.put("clientIp", Optional.ofNullable(clientIp).orElse("unknown"));
-        map.put("queryString", Optional.ofNullable(queryString).orElse("unknown"));
+        map.put("rqst_duration", String.valueOf(durationTime));
+        map.put("rqst_uriPattern", Optional.ofNullable(uriPattern).orElse("unknown"));
+        map.put("rqst_userId", String.valueOf(userId));
+        map.put("rqst_method", Optional.ofNullable(method).orElse("unknown"));
+        map.put("rqst_clientIp", Optional.ofNullable(clientIp).orElse("unknown"));
+        map.put("rqst_queryString", Optional.ofNullable(queryString).orElse("unknown"));
 
         log.info(toJson(map));
         MDC.remove("logType");
@@ -66,8 +66,8 @@ public class LogService {
         MDC.put("logType", "ERROR_LOG");
 
         HashMap<String, String> map = new HashMap<>();
-        map.put("msg", msg);
-        map.put("status", String.valueOf(status));
+        map.put("error_msg", msg);
+        map.put("error_status", String.valueOf(status));
 
         log.error(toJson(map));
         MDC.remove("logType");

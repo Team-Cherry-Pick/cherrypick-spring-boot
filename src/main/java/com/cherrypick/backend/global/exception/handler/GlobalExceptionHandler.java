@@ -52,8 +52,8 @@ public class GlobalExceptionHandler {
         int port = request.getServerPort();
         if (port != 8080) {
             slackNotifier.sendErrorLog(ex, request);  // 슬랙 알림 전송
-            logService.errorLog(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
         }
+        logService.errorLog(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
 
         return ResponseEntity.status(500).body(errorResponse);
     }
