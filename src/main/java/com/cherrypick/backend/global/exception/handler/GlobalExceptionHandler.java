@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
         String fullPath = request.getMethod() + " " + request.getRequestURI();
 
         ErrorResponseDTO errorResponse = new ErrorResponseDTO(ex.getErrorCode(), fullPath);
-        logService.errorLog(ex.getErrorCode().getStatus(), ex.getMessage());
+        logService.errorLog(ex.getErrorCode().getStatus(), ex.getMessage(), ex.getStackTrace());
         return status(ex.getErrorCode().getStatus()).body(errorResponse);
     }
 
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
         if (port != 8080) {
             slackNotifier.sendErrorLog(ex, request);  // 슬랙 알림 전송
         }
-        logService.errorLog(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        logService.errorLog(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), ex.getStackTrace());
 
         return ResponseEntity.status(500).body(errorResponse);
     }
