@@ -16,10 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j @Component @RequiredArgsConstructor
 public class LogService {
@@ -92,13 +90,20 @@ public class LogService {
     }
 
     public void errorLog(HttpStatus status, String msg, StackTraceElement[] stackTrace) {
+
         mdcInitialize();
         MDC.put("logType", "ERROR_LOG");
+
+        var stackTraceList = Arrays.asList(stackTrace);
+        stackTraceList = stackTraceList.subList(Math.max(0, stackTraceList.size()-5), stackTraceList.size());
+        var stackTraceString = stackTraceList.stream().map(StackTraceElement::toString).collect(Collectors.joining("\n")) ;
+
+        System.out.println(stackTraceString);
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("error_msg", msg);
         map.put("error_status", String.valueOf(status));
-        map.put("error_trace", Arrays.toString(stackTrace));
+        map.put("error_trace", stackTraceString);
 
         log.error(toJson(map));
         MDC.remove("logType");

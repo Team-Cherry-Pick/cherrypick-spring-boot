@@ -28,7 +28,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ErrorResponseDTO> handleBaseException(BaseException ex, HttpServletRequest request) {
         String fullPath = request.getMethod() + " " + request.getRequestURI();
-
         ErrorResponseDTO errorResponse = new ErrorResponseDTO(ex.getErrorCode(), fullPath);
         logService.errorLog(ex.getErrorCode().getStatus(), ex.getMessage(), ex.getStackTrace());
         return status(ex.getErrorCode().getStatus()).body(errorResponse);
