@@ -24,12 +24,13 @@ public class CategoryService {
     // 비용이 크지는 않으나 Redis로 캐싱해줘도 좋을듯 함. (자주 바뀌는 요소가 아니니까, 쿼리 비용이 아까움.)
     public CategoryListDTO getCategories()
     {
-        var categories = categoryRepository.findAll();
+
         var categoriesDto = redisTemplate.opsForValue().get("cache:categories");
 
         if(categoriesDto == null)
         {
             ///  재귀함수
+            var categories = categoryRepository.findAll();
             var list = getCategoryListRecursive(0L, categories);
             categoriesDto = new CategoryListDTO(list);
             redisTemplate.opsForValue().set("cache:categories", categoriesDto, 1, TimeUnit.DAYS);
