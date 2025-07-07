@@ -2,10 +2,12 @@ package com.cherrypick.backend.global.exception.handler;
 
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.dto.response.ErrorResponseDTO;
+import com.cherrypick.backend.global.util.LogService;
 import com.cherrypick.backend.global.util.SlackNotifier;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -20,6 +22,7 @@ import static org.springframework.http.ResponseEntity.status;
 public class GlobalExceptionHandler {
 
     private final SlackNotifier slackNotifier;
+    private final LogService logService;
 
     // BaseException 핸들링 (ErrorCode 발생)
     @ExceptionHandler(BaseException.class)
@@ -27,6 +30,7 @@ public class GlobalExceptionHandler {
         String fullPath = request.getMethod() + " " + request.getRequestURI();
 
         ErrorResponseDTO errorResponse = new ErrorResponseDTO(ex.getErrorCode(), fullPath);
+        logService.errorLog(ex.getErrorCode().getStatus(), ex.getMessage());
         return status(ex.getErrorCode().getStatus()).body(errorResponse);
     }
 
@@ -44,10 +48,12 @@ public class GlobalExceptionHandler {
         );
 
         // 8080 포트에서 실행 중일 때 슬랙 알림을 보내지 않음
+        // TODO : Sprig Profile로 변경함으로써 일관성 획득.
         int port = request.getServerPort();
         if (port != 8080) {
             slackNotifier.sendErrorLog(ex, request);  // 슬랙 알림 전송
         }
+        logService.errorLog(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
 
         return ResponseEntity.status(500).body(errorResponse);
     }

@@ -42,7 +42,7 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
 
         if (authRequest == null) return null;
 
-        log.info(":::: 신규 로그인 요청이 발생하였습니다 ::::");
+        log.trace(":::: 신규 로그인 요청이 발생하였습니다 ::::");
 
         // 사용자에게서 얻어낸 데이터를 추출.
         String redirect = request.getParameter("redirect"); // redirect : 유저가 이전에 방문했던 페이지. 로그인 성공 시 해당 URL 로 리다이렉트

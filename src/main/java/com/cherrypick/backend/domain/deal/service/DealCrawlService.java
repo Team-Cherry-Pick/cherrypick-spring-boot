@@ -127,7 +127,7 @@ public class DealCrawlService {
                             .categoryId(1L)
                             .build();
 
-                    log.info(createDto.toString());
+                    log.trace(createDto.toString());
 
                     Long dealId = dealService.createDeal(createDto).dealId();
                     hashTagService.saveHashTags(dealId, getChatGPTResponse(createDto.title(), createDto.content()));

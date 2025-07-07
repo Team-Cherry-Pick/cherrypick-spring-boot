@@ -25,7 +25,7 @@ public class FilterChainExceptionHandler implements AuthenticationEntryPoint {
                          AuthenticationException authException) throws IOException {
 
         // 401 에러에 대해 다루는 클래스임.
-        UserErrorCode error = UserErrorCode.SECURITY_AUTHENTICATION_REQUIRED;
+        UserErrorCode error = UserErrorCode.SECURITY_ACCESS_DENIED_BY_FILTER_CHAIN;
 
         response.setStatus(error.getStatus().value()); // 401
         response.setContentType("application/json;charset=UTF-8");
