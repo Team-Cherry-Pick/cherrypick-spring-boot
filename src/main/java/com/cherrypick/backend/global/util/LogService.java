@@ -43,18 +43,20 @@ public class LogService {
         MDC.remove("logType");
     }
 
-    public void requestLog(long durationTime, String uriPattern, Long userId, String method, String clientIp, String queryString) {
+    // API 로그
+    public void accessLog(long durationTime, String uriPattern, Long userId, String method, String clientIp, String url, String queryString) {
 
         mdcInitialize();
-        MDC.put("logType", "REQUEST_FILTER_LOG");
+        MDC.put("logType", "ACCESS_LOG");
 
         HashMap<String, String> map = new HashMap<>();
-        map.put("rqst_duration", String.valueOf(durationTime));
-        map.put("rqst_uriPattern", Optional.ofNullable(uriPattern).orElse("unknown"));
-        map.put("rqst_userId", String.valueOf(userId));
-        map.put("rqst_method", Optional.ofNullable(method).orElse("unknown"));
-        map.put("rqst_clientIp", Optional.ofNullable(clientIp).orElse("unknown"));
-        map.put("rqst_queryString", Optional.ofNullable(queryString).orElse("unknown"));
+        map.put("access_duration", String.valueOf(durationTime));
+        map.put("access_uriPattern", Optional.ofNullable(uriPattern).orElse("unknown"));
+        map.put("access_userId", String.valueOf(userId));
+        map.put("access_method", Optional.ofNullable(method).orElse("unknown"));
+        map.put("access_clientIp", Optional.ofNullable(clientIp).orElse("unknown"));
+        map.put("access_queryString", Optional.ofNullable(queryString).orElse("unknown"));
+        map.put("access_url", Optional.ofNullable(url).orElse("unknown"));
 
         log.info(toJson(map));
         MDC.remove("logType");
@@ -73,6 +75,8 @@ public class LogService {
         MDC.remove("logType");
 
     }
+
+
 
     private String toJson(HashMap<String, String> map) {
 
