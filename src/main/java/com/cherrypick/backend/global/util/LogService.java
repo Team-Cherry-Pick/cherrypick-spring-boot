@@ -30,6 +30,13 @@ public class LogService {
     @Value("${version:unknown}")
     private String version;
 
+    /// 로그 스태시와 연결되어 로그를 찍는 주체
+    /// 로그가 늘어나면 ENUM으로 분리하여 키를 관리하는 것도 좋은 방법일 듯.
+    /// 필드명 변경은 가급적 , **절대로** 변경하지 말 것
+    /// null이 들어와도 대응할 수 있도록 로그 설계 필수.
+
+
+
     @PostConstruct
     public void init() {
 
@@ -43,20 +50,40 @@ public class LogService {
         MDC.remove("logType");
     }
 
-    // API 로그
-    public void accessLog(long durationTime, String uriPattern, Long userId, String method, String clientIp, String url, String queryString) {
+    // 엑세스 로그
+    public void accessLog(Long durationTime, String uriPattern, Long userId, String method, String clientIp, String url, String queryString) {
 
         mdcInitialize();
         MDC.put("logType", "ACCESS_LOG");
 
         HashMap<String, String> map = new HashMap<>();
-        map.put("access_duration", String.valueOf(durationTime));
+        map.put("access_duration", String.valueOf(Optional.ofNullable(durationTime).orElse(-1L)));
         map.put("access_uriPattern", Optional.ofNullable(uriPattern).orElse("unknown"));
-        map.put("access_userId", String.valueOf(userId));
+        map.put("access_userId", String.valueOf(Optional.ofNullable(userId).orElse(-1L)));
         map.put("access_method", Optional.ofNullable(method).orElse("unknown"));
         map.put("access_clientIp", Optional.ofNullable(clientIp).orElse("unknown"));
         map.put("access_queryString", Optional.ofNullable(queryString).orElse("unknown"));
         map.put("access_url", Optional.ofNullable(url).orElse("unknown"));
+
+        log.info(toJson(map));
+        MDC.remove("logType");
+
+    }
+
+    // 로그인 로그
+    public void loginLog(Boolean isNewUser, String provider, Long userId, String deviceId, String os, String browser, String version)
+    {
+        mdcInitialize();
+        MDC.put("logType", "LOGIN_LOG");
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("login_isNewUser", String.valueOf(Optional.ofNullable(isNewUser).orElse(false)));
+        map.put("login_provider", Optional.ofNullable(provider).orElse("unknown"));
+        map.put("login_userId", String.valueOf(Optional.ofNullable(userId).orElse(-1L)));
+        map.put("login_deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
+        map.put("login_os", Optional.ofNullable(os).orElse("unknown"));
+        map.put("login_browser", String.valueOf(browser));
+        map.put("login_version", Optional.ofNullable(version).orElse("unknown"));
 
         log.info(toJson(map));
         MDC.remove("logType");

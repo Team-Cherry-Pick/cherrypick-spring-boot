@@ -5,6 +5,7 @@ import com.cherrypick.backend.domain.oauth.dto.OAuth2UserDTO;
 import com.cherrypick.backend.domain.oauth.dto.UserEnvDTO;
 import com.cherrypick.backend.domain.oauth.service.AuthService;
 import com.cherrypick.backend.global.util.JWTUtil;
+import com.cherrypick.backend.global.util.LogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -27,6 +28,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
     private final AuthService authService;
+    private final LogService logService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -59,6 +61,16 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .queryParam("email", userInfo.email())
                 .build()
                 .toUriString();
+
+        logService.loginLog(
+                userInfo.isNewUser(),
+                userInfo.provider(),
+                userInfo.userId(),
+                userEnvDTO.deviceId(),
+                userEnvDTO.os(),
+                userEnvDTO.browser(),
+                userEnvDTO.version()
+        );
 
         response.sendRedirect(frontendUrl); // 클라이언트를 해당 주소로 리디렉트
 
