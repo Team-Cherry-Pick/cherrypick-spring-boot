@@ -98,7 +98,9 @@ public class LogService {
         stackTraceList = stackTraceList.subList(Math.max(0, stackTraceList.size()-5), stackTraceList.size());
         var stackTraceString = stackTraceList.stream().map(StackTraceElement::toString).collect(Collectors.joining("\n")) ;
 
-        System.out.println(stackTraceString);
+        if(env .equals("local")){
+            Arrays.stream(stackTrace).forEach(System.out::println);
+        }
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("error_msg", msg);
