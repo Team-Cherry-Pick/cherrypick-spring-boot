@@ -119,7 +119,7 @@ public class UserService {
 
         var userList = userRepository.findDeactivatedUsers();
         userRepository.deleteAll(userList);
-        log.info("{} ::::: 총 {}명의 유저 삭제", LocalDateTime.now(), userList.size());
+        log.trace("{} ::::: 총 {}명의 유저 삭제", LocalDateTime.now(), userList.size());
     }
 
 }

@@ -155,7 +155,7 @@ public class RecommenderService
         var response = new HashMap<String, Object>();
         var tags = new ArrayList<Map<String, Object>>();
         var list = hashTagRepository.findAllByName(name);
-        log.info(list.toString());
+        log.trace(list.toString());
 
         for(var tagId : list){
             var zSetOps = redisTemplate.opsForZSet();
@@ -178,7 +178,7 @@ public class RecommenderService
                 var price = priceMap.get(subTagId);
                 var title = titleMap.get(subTagId);
 
-                log.info(price.toString());
+                log.trace(price.toString());
 
                 var subTagName = hashTagRepository.findById(Long.valueOf(subTagId)).map(h -> h.getName()).orElse("subName");
 

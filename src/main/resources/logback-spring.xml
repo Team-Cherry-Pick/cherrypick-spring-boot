@@ -1,0 +1,26 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <springProperty name="LOGSTASH_HOST" source="logstash.host" defaultValue="logs.repik.kr"/>
+    <springProperty name="LOGSTASH_PORT" source="logstash.port" defaultValue="5044"/>
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${LOGSTASH_HOST}:${LOGSTASH_PORT}</destination>
+
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"app":"repik-backend"}</customFields>
+        </encoder>
+    </appender>
+
+    <springProfile name="prod,dev">
+        <root level="INFO">
+            <appender-ref ref="LOGSTASH"/>
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>
