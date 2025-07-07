@@ -46,7 +46,7 @@ public class RequestLogFilter extends OncePerRequestFilter {
         String ipAddress = getClientIp(request);
         String url = request.getRequestURI();
 
-        logService.accessLog(duration, uriPattern, userId, method, ipAddress, queryString, url);
+        logService.accessLog(duration, uriPattern, userId, method, ipAddress, url, queryString);
 
     }
 
