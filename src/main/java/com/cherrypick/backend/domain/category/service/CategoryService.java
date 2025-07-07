@@ -4,28 +4,38 @@ import com.cherrypick.backend.domain.category.dto.response.CategoryListDTO;
 import com.cherrypick.backend.domain.category.entity.Category;
 import com.cherrypick.backend.domain.category.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service @RequiredArgsConstructor
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     // 카테고리를 찾아서 리스트화해줌. 재귀함수 포함되어있음.
     // 비용이 크지는 않으나 Redis로 캐싱해줘도 좋을듯 함. (자주 바뀌는 요소가 아니니까, 쿼리 비용이 아까움.)
     public CategoryListDTO getCategories()
     {
         var categories = categoryRepository.findAll();
+        var categoriesDto = redisTemplate.opsForValue().get("cache:categories");
 
-        ///  재귀함수
-        var list = getCategoryListRecursive(0L, categories);
+        if(categoriesDto == null)
+        {
+            ///  재귀함수
+            var list = getCategoryListRecursive(0L, categories);
+            categoriesDto = new CategoryListDTO(list);
+            redisTemplate.opsForValue().set("cache:categories", categoriesDto, 1, TimeUnit.DAYS);
+        }
 
-        return new CategoryListDTO(list);
+        return (CategoryListDTO) categoriesDto;
     }
 
     // 계층을 타고 내려가서 각 카테고리를 리스트에 담음, 이후 상위 객체에 해당 리스트를 전달.
