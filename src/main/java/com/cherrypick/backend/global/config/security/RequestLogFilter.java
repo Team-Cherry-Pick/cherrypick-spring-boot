@@ -14,9 +14,9 @@ import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
-@Slf4j
-@Component @RequiredArgsConstructor
+@Slf4j @RequiredArgsConstructor
 public class RequestLogFilter extends OncePerRequestFilter {
 
     private final LogService logService;
