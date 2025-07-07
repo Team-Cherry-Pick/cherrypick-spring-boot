@@ -14,8 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j @Component @RequiredArgsConstructor
@@ -99,6 +101,22 @@ public class LogService {
         map.put("error_status", String.valueOf(status));
 
         log.error(toJson(map));
+        MDC.remove("logType");
+
+    }
+
+    public void openAiLog(Integer promptTokens, Integer completionTokens, Integer totalTokens)
+    {
+        mdcInitialize();
+        MDC.put("logType", "OPENAI_LOG");
+
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("prompt_tokens", String.valueOf(promptTokens));
+        map.put("completion_tokens", String.valueOf(completionTokens));
+        map.put("total_tokens", String.valueOf(totalTokens));
+        log.info(toJson(map));
+
         MDC.remove("logType");
 
     }
