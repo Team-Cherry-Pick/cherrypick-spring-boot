@@ -37,15 +37,13 @@ public class LogService {
     /// 필드명 변경은 가급적 , **절대로** 변경하지 말 것
     /// null이 들어와도 대응할 수 있도록 로그 설계 필수.
 
-
-
     @PostConstruct
     public void init() {
 
         mdcInitialize();
         MDC.put("logType", "SERVER_START_LOG");
 
-        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, Object> map = new HashMap<>();
         map.put("start_msg", "Starting Server Application");
         log.info(toJson(map));
 
@@ -58,10 +56,10 @@ public class LogService {
         mdcInitialize();
         MDC.put("logType", "ACCESS_LOG");
 
-        HashMap<String, String> map = new HashMap<>();
-        map.put("access_duration", String.valueOf(Optional.ofNullable(durationTime).orElse(-1L)));
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("access_duration", Optional.ofNullable(durationTime).orElse(-1L));
         map.put("access_uriPattern", Optional.ofNullable(uriPattern).orElse("unknown"));
-        map.put("access_userId", String.valueOf(Optional.ofNullable(userId).orElse(-1L)));
+        map.put("access_userId", Optional.ofNullable(userId).orElse(-1L));
         map.put("access_method", Optional.ofNullable(method).orElse("unknown"));
         map.put("access_clientIp", Optional.ofNullable(clientIp).orElse("unknown"));
         map.put("access_queryString", Optional.ofNullable(queryString).orElse("unknown"));
@@ -78,13 +76,13 @@ public class LogService {
         mdcInitialize();
         MDC.put("logType", "LOGIN_LOG");
 
-        HashMap<String, String> map = new HashMap<>();
-        map.put("login_isNewUser", String.valueOf(Optional.ofNullable(isNewUser).orElse(false)));
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("login_isNewUser", Optional.ofNullable(isNewUser).orElse(false));
         map.put("login_provider", Optional.ofNullable(provider).orElse("unknown"));
-        map.put("login_userId", String.valueOf(Optional.ofNullable(userId).orElse(-1L)));
+        map.put("login_userId", Optional.ofNullable(userId).orElse(-1L));
         map.put("login_deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
         map.put("login_os", Optional.ofNullable(os).orElse("unknown"));
-        map.put("login_browser", String.valueOf(browser));
+        map.put("login_browser", Optional.ofNullable(browser).orElse("unknown"));
         map.put("login_version", Optional.ofNullable(version).orElse("unknown"));
 
         log.info(toJson(map));
@@ -96,7 +94,7 @@ public class LogService {
         mdcInitialize();
         MDC.put("logType", "ERROR_LOG");
 
-        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, Object> map = new HashMap<>();
         map.put("error_msg", msg);
         map.put("error_status", String.valueOf(status));
 
@@ -110,20 +108,16 @@ public class LogService {
         mdcInitialize();
         MDC.put("logType", "OPENAI_LOG");
 
-
-        HashMap<String, String> map = new HashMap<>();
-        map.put("prompt_tokens", String.valueOf(promptTokens));
-        map.put("completion_tokens", String.valueOf(completionTokens));
-        map.put("total_tokens", String.valueOf(totalTokens));
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("prompt_tokens", Optional.ofNullable(promptTokens).orElse(-1) );
+        map.put("completion_tokens", Optional.ofNullable(completionTokens).orElse(-1));
+        map.put("total_tokens", Optional.ofNullable(totalTokens).orElse(-1));
         log.info(toJson(map));
 
         MDC.remove("logType");
-
     }
 
-
-
-    private String toJson(HashMap<String, String> map) {
+    private String toJson(HashMap<String, Object> map) {
 
         try{
             return mapper.writeValueAsString(map);
