@@ -156,7 +156,7 @@ public class AuthService extends DefaultOAuth2UserService
         String key = REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId;
 
         redisTemplate.opsForHash().put( key, "token", refreshToken);
-        redisTemplate.expire(key, Duration.ofMinutes(jwtUtil.refreshValidPeriod));
+        redisTemplate.expire(key, Duration.ofSeconds(jwtUtil.refreshValidPeriod));
     }
 
     // 최초
@@ -168,7 +168,7 @@ public class AuthService extends DefaultOAuth2UserService
 
         redisTemplate.opsForHash().put( key, "token", refreshToken);
         redisTemplate.opsForHash().put( key, "userEnv", userEnvDTO.toJson());
-        redisTemplate.expire(key, Duration.ofMinutes(jwtUtil.refreshValidPeriod));
+        redisTemplate.expire(key, Duration.ofSeconds(jwtUtil.refreshValidPeriod));
     }
 
     public String loadRefreshToken(Long userId, String deviceId)
