@@ -156,7 +156,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-        "*"
+                "https://repik.kr",
+                "https://www.repik.kr",
+                "https://api.repik.kr",
+                "http://localhost:3000",
+                "http://localhost:8080"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -167,7 +171,7 @@ public class SecurityConfig {
                 "Accept",
                 "Origin"
         ));
-        //config.setAllowCredentials(true);
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
