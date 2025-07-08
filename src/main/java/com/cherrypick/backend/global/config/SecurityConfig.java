@@ -156,6 +156,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
+                "*",
                 "https://repik.kr",
                 "https://www.repik.kr",
                 "https://api.repik.kr",
