@@ -59,7 +59,6 @@ public class DealService {
     private final UserRepository userRepository;
     private final VoteRepository voteRepository;
     private final CommentRepository commentRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final ImageService imageService;
     private final ImageRepository imageRepository;
     private final HashTagService  hashTagService;

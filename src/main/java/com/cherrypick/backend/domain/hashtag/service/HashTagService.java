@@ -4,6 +4,7 @@ import com.cherrypick.backend.domain.hashtag.entity.DealTag;
 import com.cherrypick.backend.domain.hashtag.entity.HashTag;
 import com.cherrypick.backend.domain.hashtag.repository.DealTagRepository;
 import com.cherrypick.backend.domain.hashtag.repository.HashTagRepository;
+import com.cherrypick.backend.global.util.LogService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,8 @@ public class HashTagService
     private final DealTagRepository dealTagRepository;
     private final RedisTemplate<String, Object> restTemplate;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final LogService logService;
+
 
     @Value("${openai.api-key}")
     private String openAiApiKey;
@@ -76,7 +79,7 @@ public class HashTagService
                 """, title, content);
         System.out.println(prompt);
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put("model", "gpt-4-turbo");
+        requestMap.put("model", "gpt-3.5-turbo");
         requestMap.put("max_tokens", 300);
         requestMap.put("messages", List.of(Map.of("role", "user", "content", prompt)));
 
@@ -109,14 +112,7 @@ public class HashTagService
                 int completionTokens = usage.path("completion_tokens").asInt();
                 int totalTokens = usage.path("total_tokens").asInt();
 
-// Redis Stream 로그 추가
-                Map<String, String> usageLog = new HashMap<>();
-                usageLog.put("prompt_tokens", String.valueOf(promptTokens));
-                usageLog.put("completion_tokens", String.valueOf(completionTokens));
-                usageLog.put("total_tokens", String.valueOf(totalTokens));
-                usageLog.put("timestamp", Instant.now().toString());
-
-                redisTemplate.opsForStream().add("openai:usage", usageLog);
+                logService.openAiLog(promptTokens, completionTokens, totalTokens);
 
 // 결과 반환
                 return Arrays.stream(rawText.replaceAll("[{}]", "").split(" "))
