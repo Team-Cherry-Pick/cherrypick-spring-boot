@@ -5,6 +5,7 @@ import com.cherrypick.backend.domain.deal.vo.Shipping;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.user.vo.User;
 import com.cherrypick.backend.domain.store.vo.Store;
+import com.cherrypick.backend.domain.vote.enums.VoteType;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public record DealDetailResponseDTO (
         int totalComments,
         String deepLink,
         String originalUrl,
-        boolean isSoldOut
+        boolean isSoldOut,
+        VoteType voteType
 ) {
 }
