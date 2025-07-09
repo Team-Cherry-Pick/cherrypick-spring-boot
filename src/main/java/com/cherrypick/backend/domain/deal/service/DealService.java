@@ -306,6 +306,19 @@ public class DealService {
         Deal deal = dealRepository.findById(dealId)
                 .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
 
+        // 로그인 사용자 ID 추출
+        final Long loginUserId = com.cherrypick.backend.global.util.AuthUtil.isAuthenticated() ? com.cherrypick.backend.global.util.AuthUtil.getUserDetail().userId() : null;
+        com.cherrypick.backend.domain.vote.enums.VoteType voteType = com.cherrypick.backend.domain.vote.enums.VoteType.NONE;
+        if (loginUserId != null) {
+            var user = userRepository.findById(loginUserId).orElse(null);
+            if (user != null) {
+                var voteOpt = voteRepository.findByUserIdAndDealId(user, deal);
+                if (voteOpt.isPresent()) {
+                    voteType = voteOpt.get().getVoteType();
+                }
+            }
+        }
+
         // 카테고리 정보
         List<String> categoryNames = new ArrayList<>();
         Long categoryId = deal.getCategoryId().getCategoryId();
@@ -391,7 +404,8 @@ public class DealService {
                 (int) metrics[2], // commentCount
                 deal.getDeepLink(),
                 deal.getOriginalUrl(),
-                deal.isSoldOut()
+                deal.isSoldOut(),
+                voteType
         );
     }
 
