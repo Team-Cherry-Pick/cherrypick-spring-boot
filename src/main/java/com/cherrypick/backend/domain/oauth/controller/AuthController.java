@@ -4,8 +4,6 @@ import com.cherrypick.backend.domain.oauth.dto.AuthRequestDTOs;
 import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.oauth.dto.RegisterDTO;
 import com.cherrypick.backend.domain.oauth.service.AuthService;
-import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
-import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
@@ -86,7 +84,7 @@ public class AuthController {
     @PostMapping("/register-completion")
     public ResponseEntity<AuthResponseDTOs.AccessToken> userInfo(@RequestBody RegisterDTO registerDTO, HttpServletRequest request, HttpServletResponse response) {
 
-        registerDTO.updateDTO().validate();
+        registerDTO.validate();
         return ResponseEntity.ok(authService.userRegisterComplete(registerDTO, response));
     }
 

@@ -91,8 +91,6 @@ public class AuthService extends DefaultOAuth2UserService
             throw new BaseException(UserErrorCode.ALREADY_REGISTERED_USER);
         }
 
-        var updateDTO = dto.updateDTO();
-
         // 신규 유저 만들기, 추후 로그인 방법이 늘어나면 ENUM으로 처리하는 것도 고려.
         // oauth2.0 응답에서 데이터를 추출한다.
         User user = null;
@@ -100,10 +98,10 @@ public class AuthService extends DefaultOAuth2UserService
             user = User.builder()
                     .oauthId(registerToken.oauthId())
                     .provider(registerToken.provider())
-                    .nickname(updateDTO.nickname())
-                    .email(updateDTO.email())
-                    .gender(Gender.valueOf(updateDTO.gender()))
-                    .birthday(LocalDate.parse(updateDTO.birthday()))
+                    .nickname(dto.nickname())
+                    .email(dto.email())
+                    .gender(Gender.valueOf(dto.gender()))
+                    .birthday(LocalDate.parse(dto.birthday()))
                     .status(UserStatus.ACTIVE)
                     .role(Role.CLIENT)
                     .build();
@@ -115,7 +113,7 @@ public class AuthService extends DefaultOAuth2UserService
 
         // 기존 이미지 삭제, 새 이미지 등록
         imageService.deleteImageByUserId(savedUser.getUserId());
-        imageService.attachImage(savedUser.getUserId(), List.of(updateDTO.imageId()), ImageType.USER);
+        imageService.attachImage(savedUser.getUserId(), List.of(dto.imageId()), ImageType.USER);
 
         // 사진 업데이트
         var profileImage = imageService.getImageByUserId(savedUser.getUserId());

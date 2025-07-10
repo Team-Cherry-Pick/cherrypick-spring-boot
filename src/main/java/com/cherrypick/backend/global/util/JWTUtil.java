@@ -55,6 +55,16 @@ public class JWTUtil
         }
     }
 
+    public Date getExpriationTime(String token) {
+        try{
+            return Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(token).getPayload().getExpiration();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+
     public String removeBearer(String token)
     {
         return token.replace("Bearer ", "");
