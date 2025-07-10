@@ -88,13 +88,13 @@ public class UserController {
 
     @Operation(
             summary = "유저 삭제 API V1",
-            description = "해당 유저의 status를 DEACTIVATED로 바꿔 일정 기간 이후 삭제합니다."
+            description = "해당 유저를 삭제합니다 (hard delete)"
     )
     @DeleteMapping("")
     public ResponseEntity<UserResponseDTOs.DeleteResponseDTO> deleteUser(@RequestParam(value = "version", defaultValue = "v1") String version, @RequestBody UserRequestDTOs.DeleteRequestDTO deleteRequestDTO)
     {
 
-        return ResponseEntity.ok(userService.softDelete(deleteRequestDTO));
+        return ResponseEntity.ok(userService.hardDelete(deleteRequestDTO));
     }
 
 }
