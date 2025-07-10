@@ -12,6 +12,7 @@ import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
+import com.cherrypick.backend.global.util.LogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ImageService imageService;
+    private final LogService logService;
 
 
     // 유저 업데이트
@@ -112,6 +114,9 @@ public class UserService {
 
         var userId = AuthUtil.getUserDetail().userId();
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+        logService.userDeleteLog(userId, user.getNickname(), user.getEmail(), user.getOauthId(), dto.reason());
+        
         userRepository.delete(user);
 
         return new UserResponseDTOs.DeleteResponseDTO(userId, "magic hot super delete success");
