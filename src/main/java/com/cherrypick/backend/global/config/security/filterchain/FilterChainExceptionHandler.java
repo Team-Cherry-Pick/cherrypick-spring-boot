@@ -1,4 +1,4 @@
-package com.cherrypick.backend.global.config.security;
+package com.cherrypick.backend.global.config.security.filterchain;
 
 import com.cherrypick.backend.global.exception.BaseErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
@@ -32,9 +32,10 @@ public class FilterChainExceptionHandler implements AuthenticationEntryPoint {
         BaseErrorCode error;
 
         // 매핑된 핸들러가 없으면 404
-        if (request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE) == null) {
+        Object handler = request.getAttribute("uri_pattern");
+        if (handler == null) {
             status = GlobalErrorCode.RESOURCE_NOT_FOUND.getStatus();
-            error = GlobalErrorCode.RESOURCE_NOT_FOUND; // 404용 정의 필요
+            error = GlobalErrorCode.RESOURCE_NOT_FOUND;
         } else {
             status = UserErrorCode.SECURITY_ACCESS_DENIED_BY_FILTER_CHAIN.getStatus();
             error = UserErrorCode.SECURITY_ACCESS_DENIED_BY_FILTER_CHAIN;

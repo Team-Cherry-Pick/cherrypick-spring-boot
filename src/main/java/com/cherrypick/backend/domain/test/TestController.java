@@ -1,12 +1,11 @@
 package com.cherrypick.backend.domain.test;
 
-import com.cherrypick.backend.domain.comment.controller.CommentController;
 import com.cherrypick.backend.domain.comment.service.CommentService;
 import com.cherrypick.backend.domain.deal.service.DealCrawlService;
 import com.cherrypick.backend.domain.oauth.service.AuthService;
+import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
-import com.cherrypick.backend.domain.user.service.UserService;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.JWTUtil;
@@ -20,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 @RestController @Profile({"local", "dev"})
 @RequiredArgsConstructor @Slf4j
@@ -166,5 +167,22 @@ public class TestController
         authService.saveResfreshToken(userId, deviceId, newRefreshToken);
 
         return jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname());
+    }
+
+    @Operation(
+            summary = "access 토큰 정보를 보여줍니다. ** 실 서비스에서는 사용하지 않습니다. **",
+            description = "인증 시 사용가능"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "JWT 토큰 생성 성공"),
+            @ApiResponse(responseCode = "404", description = "찾을 수 없는 유저입니다. userId를 다시 한번 확인해주세요."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PostMapping("/auth/jwt-info")
+    public String getTokenInfo(String accessToken) {
+
+
+        System.out.println(jwtUtil.getExpriationTime(accessToken));
+        return jwtUtil.getExpriationTime(accessToken).toString();
     }
 }

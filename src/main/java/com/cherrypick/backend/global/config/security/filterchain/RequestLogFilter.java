@@ -1,4 +1,4 @@
-package com.cherrypick.backend.global.config.security;
+package com.cherrypick.backend.global.config.security.filterchain;
 
 import com.cherrypick.backend.global.util.AuthUtil;
 import com.cherrypick.backend.global.util.LogService;
@@ -8,13 +8,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.IOException;
-import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j @RequiredArgsConstructor
 public class RequestLogFilter extends OncePerRequestFilter {
@@ -42,7 +39,7 @@ public class RequestLogFilter extends OncePerRequestFilter {
         Long userId = AuthUtil.isAuthenticated() ?  AuthUtil.getUserDetail().userId() : -1;
         String method = request.getMethod();
         String queryString = request.getQueryString();
-        String uriPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+        String uriPattern = (String) request.getAttribute("uri_pattern");
         String ipAddress = getClientIp(request);
         String url = request.getRequestURI();
 
