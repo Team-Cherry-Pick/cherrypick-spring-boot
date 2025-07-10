@@ -42,7 +42,6 @@ public class UserService {
         imageService.attachImage(userId, List.of(dto.imageId()), ImageType.USER);
 
         user.setNickname(dto.nickname());
-        user.setEmail(dto.email());
 
         var updatedUser = userRepository.save(user);
         var profileImage = imageService.getImageByUserId(userId);
