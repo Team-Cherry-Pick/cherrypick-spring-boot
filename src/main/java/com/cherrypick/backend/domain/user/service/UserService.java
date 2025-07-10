@@ -1,7 +1,6 @@
 package com.cherrypick.backend.domain.user.service;
 
 
-import com.cherrypick.backend.domain.deal.dto.request.DealRequestDTOs;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
@@ -13,13 +12,12 @@ import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
+import com.cherrypick.backend.global.util.LogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -28,6 +26,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ImageService imageService;
+    private final LogService logService;
 
 
     // 유저 업데이트
@@ -42,7 +41,6 @@ public class UserService {
         imageService.attachImage(userId, List.of(dto.imageId()), ImageType.USER);
 
         user.setNickname(dto.nickname());
-        user.setEmail(dto.email());
 
         var updatedUser = userRepository.save(user);
         var profileImage = imageService.getImageByUserId(userId);
@@ -112,14 +110,17 @@ public class UserService {
         return new UserResponseDTOs.DeleteResponseDTO(deletedUserId.getUserId(), "soft delete success");
     }
 
-    /// 매일 오전 4시 정각에 실행, 성능 생각하면 리펙토링 해야함.
-    /// 하드 딜리트하는 함수
-    @Scheduled(cron = "0 0 4 * * *")
-    public void hardDelete() {
+    public UserResponseDTOs.DeleteResponseDTO hardDelete(UserRequestDTOs.DeleteRequestDTO dto) {
 
-        var userList = userRepository.findDeactivatedUsers();
-        userRepository.deleteAll(userList);
-        log.trace("{} ::::: 총 {}명의 유저 삭제", LocalDateTime.now(), userList.size());
+        var userId = AuthUtil.getUserDetail().userId();
+        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+        logService.userDeleteLog(userId, user.getNickname(), user.getEmail(), user.getOauthId(), dto.reason());
+
+        userRepository.delete(user);
+
+        return new UserResponseDTOs.DeleteResponseDTO(userId, "magic hot super delete success");
+
     }
 
 }

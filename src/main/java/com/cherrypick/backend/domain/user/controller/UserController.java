@@ -49,7 +49,7 @@ public class UserController {
     })
     @PatchMapping("")
     public ResponseEntity<UserDetailResponseDTO> update(
-            @Parameter(description = "유효성을 검증 받을 닉네임을 입력합니다.(파라미터)") UserUpdateRequestDTO dto,
+            @Parameter(description = "유저 정보를 넘겨주십시오. (전부 넘겨주셔야함)") UserUpdateRequestDTO dto,
             @RequestParam(value = "version", defaultValue = "v1") String version) {
 
         dto.validate(); // 요구 조건에 맞지 않으면 오류를 일으킴.
@@ -88,13 +88,13 @@ public class UserController {
 
     @Operation(
             summary = "유저 삭제 API V1",
-            description = "해당 유저의 status를 DEACTIVATED로 바꿔 일정 기간 이후 삭제합니다."
+            description = "해당 유저를 삭제합니다 (hard delete)"
     )
     @DeleteMapping("")
     public ResponseEntity<UserResponseDTOs.DeleteResponseDTO> deleteUser(@RequestParam(value = "version", defaultValue = "v1") String version, @RequestBody UserRequestDTOs.DeleteRequestDTO deleteRequestDTO)
     {
 
-        return ResponseEntity.ok(userService.softDelete(deleteRequestDTO));
+        return ResponseEntity.ok(userService.hardDelete(deleteRequestDTO));
     }
 
 }

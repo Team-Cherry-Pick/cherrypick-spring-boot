@@ -3,11 +3,15 @@ package com.cherrypick.backend.global.config;
 import com.cherrypick.backend.global.config.security.CustomAuthorizationRequestResolver;
 import com.cherrypick.backend.domain.oauth.service.AuthService;
 import com.cherrypick.backend.global.config.security.OAuth2SuccessHandler;
-import com.cherrypick.backend.global.config.security.*;
+import com.cherrypick.backend.global.config.security.filterchain.FilterChainExceptionHandler;
+import com.cherrypick.backend.global.config.security.filterchain.JWTFilter;
+import com.cherrypick.backend.global.config.security.filterchain.RequestLogFilter;
+import com.cherrypick.backend.global.config.security.filterchain.UriPatterMatchingFilterChain;
 import com.cherrypick.backend.global.util.JWTUtil;
 import com.cherrypick.backend.global.util.LogService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +28,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.List;
 
@@ -38,6 +43,7 @@ public class SecurityConfig {
     private final FilterChainExceptionHandler filterChainExceptionHandler;
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
     @Value("${spring.profiles.active}")
     private String springProfilesActive;
@@ -98,8 +104,10 @@ public class SecurityConfig {
         http
                 .formLogin(AbstractHttpConfigurer::disable);
 
+
         http.addFilterBefore(new RequestLogFilter(logService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new JWTFilter(jwtUtil), RequestLogFilter.class);
+        http.addFilterBefore(new UriPatterMatchingFilterChain(requestMappingHandlerMapping), JWTFilter.class);
         
         // oauth2
 	    http

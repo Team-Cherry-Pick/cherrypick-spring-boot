@@ -112,6 +112,22 @@ public class LogService {
 
     }
 
+    public void userDeleteLog(Long userId, String name, String email, String oauthId, String message) {
+        mdcInitialize();
+        MDC.put("logType", "USER_DELETE_LOG");
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("deluser_msg", message);
+        map.put("deluser_id", Optional.ofNullable(userId).orElse(-1L));
+        map.put("deluser_name", name);
+        map.put("deluser_oauthid", oauthId);
+        map.put("deluser_email", email);
+        log.info(toJson(map));
+
+        MDC.remove("logType");
+
+    }
+
     public void openAiLog(Integer promptTokens, Integer completionTokens, Integer totalTokens)
     {
         mdcInitialize();

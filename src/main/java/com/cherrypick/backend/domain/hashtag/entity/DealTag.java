@@ -3,6 +3,8 @@ package com.cherrypick.backend.domain.hashtag.entity;
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity @Getter @Setter @ToString
 @AllArgsConstructor @NoArgsConstructor
@@ -22,11 +24,11 @@ public class DealTag
 
 
     // 쿼리 최적화를 위해 객체는 분리.
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "deal_id", insertable = false, updatable = false)
     private Deal deal;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "hash_tag_id", insertable = false, updatable = false)
     private HashTag hashTag;
 
