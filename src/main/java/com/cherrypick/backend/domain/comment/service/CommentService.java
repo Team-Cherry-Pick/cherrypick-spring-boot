@@ -95,12 +95,6 @@ public class CommentService {
         // 로그인 사용자 ID 추출
         final Long loginUserId = com.cherrypick.backend.global.util.AuthUtil.isAuthenticated() ? com.cherrypick.backend.global.util.AuthUtil.getUserDetail().userId() : null;
 
-        // 댓글이 없는 경우
-        List<Comment> allComments = commentRepository.findAllByDealId(dealId);
-        if (allComments.isEmpty()) {
-            throw new BaseException(CommentErrorCode.NO_COMMENTS_FOUND);
-        }
-
         // 부모 댓글 조회
         List<Comment> parentComments = switch (sortType) {
             case POPULAR -> commentRepository.findParentCommentsByLikes(dealId);
@@ -133,11 +127,6 @@ public class CommentService {
         final Long loginUserId = com.cherrypick.backend.global.util.AuthUtil.isAuthenticated() ? com.cherrypick.backend.global.util.AuthUtil.getUserDetail().userId() : null;
 
         List<Comment> comments = commentRepository.findAllByDealIdAndIsDeleteFalse(dealId);
-
-        // 댓글이 없는 경우
-        if (comments.isEmpty()) {
-            throw new BaseException(CommentErrorCode.NO_COMMENTS_FOUND);
-        }
 
         List<BestCommentResponseDTO> result = comments.stream()
                 .map(comment -> {
