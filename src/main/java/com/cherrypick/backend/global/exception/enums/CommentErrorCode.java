@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum CommentErrorCode implements BaseErrorCode {
 
+
+
     // ✅ 400 BAD REQUEST
     INVALID_COMMENT_REQUEST(HttpStatus.BAD_REQUEST, "댓글 요청이 올바르지 않습니다."),
     MISSING_COMMENT_CONTENT(HttpStatus.BAD_REQUEST, "댓글 내용이 누락되었습니다."),
