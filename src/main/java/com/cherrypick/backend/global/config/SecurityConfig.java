@@ -168,7 +168,8 @@ public class SecurityConfig {
                 "https://www.repik.kr",
                 "https://api.repik.kr",
                 "http://localhost:3000",
-                "http://localhost:8080"
+                "http://localhost:8080",
+                "https://cherrypick.cloud"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
