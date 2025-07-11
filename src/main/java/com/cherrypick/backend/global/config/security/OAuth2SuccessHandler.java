@@ -52,9 +52,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             // 엑세스 토큰
             token =  jwtUtil.createAccessToken(userInfo.userId(), userInfo.role(), userInfo.nickname());
         }
-
+        String scheme = request.getScheme();
+        String serverName = request.getServerName();
+        String port = scheme.equals("https") ? "" : ":" + request.getServerPort();
         String frontendUrl = UriComponentsBuilder
-                .fromUriString("http://localhost:3000/login-success/")
+                .fromUriString(scheme + "://" + serverName + port + "/login-success")
                 .queryParam("token", token)
                 .queryParam("isNewUser", userInfo.isNewUser())
                 .queryParam("redirect", redirect)

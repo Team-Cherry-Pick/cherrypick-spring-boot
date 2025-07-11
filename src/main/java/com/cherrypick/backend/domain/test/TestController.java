@@ -79,6 +79,7 @@ public class TestController
                 }
             
                 function redirectToKakao() {
+                
                   const input = document.getElementById("redirectInput").value.trim();
                   const safeRedirect = input.startsWith("/") ? input : "/";
                   const encodedRedirect = encodeURIComponent(safeRedirect);
@@ -88,6 +89,7 @@ public class TestController
                   const encodedBrowser = encodeURIComponent(browser);
                   const encodedVersion = encodeURIComponent(version);
             
+                  var url =  `http://localhost:8080`        +
                               `?redirect=${encodedRedirect}` +
                               `&os=${encodedOs}` +
                               `&browser=${encodedBrowser}` +
