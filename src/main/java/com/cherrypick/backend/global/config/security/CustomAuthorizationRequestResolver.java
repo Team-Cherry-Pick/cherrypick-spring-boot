@@ -52,6 +52,9 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
         String version = Optional.ofNullable(request.getParameter("version")).orElse(""); // 브라우저의 버전, nullable
         String uuid = UUID.randomUUID().toString();
 
+        String origin = request.getHeader("Origin");
+        for(int i = 0 ; i < 10; i++) log.info(origin);
+
         // 데이터를 조인해서 문자열 덩어리로 만들어줌.
         // 컴파일 단계에서 Stringbuilder로 전환되기 때문에 join보다 빠름.
         var infoStr = redirect + "|" + deviceId + "|" + os + "|" + browser + "|" + version + "|" + uuid;
