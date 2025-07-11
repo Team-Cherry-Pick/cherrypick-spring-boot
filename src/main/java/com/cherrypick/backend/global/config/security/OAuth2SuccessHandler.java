@@ -57,6 +57,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         }
 
         String origin = request.getHeader("Origin");
+        for(int i = 0 ; i < 10; i++) System.out.println(origin);
         String frontendUrl = UriComponentsBuilder
                 .fromUriString(origin + "/login-success")
                 .queryParam("token", token)
