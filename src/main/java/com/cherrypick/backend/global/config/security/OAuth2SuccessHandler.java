@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -29,6 +30,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final ObjectMapper objectMapper;
     private final AuthService authService;
     private final LogService logService;
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -52,11 +55,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             // 엑세스 토큰
             token =  jwtUtil.createAccessToken(userInfo.userId(), userInfo.role(), userInfo.nickname());
         }
-        String scheme = request.getScheme();
-        String serverName = request.getServerName();
-        String port = scheme.equals("https") ? "" : ":" + request.getServerPort();
+
+        String origin = request.getHeader("Origin");
         String frontendUrl = UriComponentsBuilder
-                .fromUriString(scheme + "://" + serverName + port + "/login-success")
+                .fromUriString(origin + "/login-success")
                 .queryParam("token", token)
                 .queryParam("isNewUser", userInfo.isNewUser())
                 .queryParam("redirect", redirect)
