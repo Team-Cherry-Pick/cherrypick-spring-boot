@@ -164,12 +164,13 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-                "https://repik.kr",
-                "https://www.repik.kr",
-                "https://api.repik.kr",
-                "http://localhost:3000",
-                "http://localhost:8080",
-                "https://cherrypick.cloud"
+                "https://repik.kr",                 // 프로덕트 서버
+                "https://www.repik.kr",             // 프로덕트 서버 2
+                "https://api.repik.kr",             // 프로덕트 API 서버
+                "https://cherrypick.cloud",         // 개발 서버
+                "https://api.cherrypick.cloud",     // 개발 API 서버
+                "http://localhost:3000",            // 로컬 프론트엔드
+                "http://localhost:8080"             // 로컬 백엔드
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -178,7 +179,8 @@ public class SecurityConfig {
                 "Content-Type",
                 "X-Requested-With",
                 "Accept",
-                "Origin"
+                "Origin",
+                "X-Forwarded-Proto"
         ));
         config.setAllowCredentials(true);
 

@@ -50,11 +50,12 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
         String os = Optional.ofNullable(request.getParameter("os")).orElse(""); // 해당 기기의 OS, nullable
         String browser = Optional.ofNullable(request.getParameter("browser")).orElse(""); // 브라우저 정보, nullable
         String version = Optional.ofNullable(request.getParameter("version")).orElse(""); // 브라우저의 버전, nullable
+        String origin = Optional.ofNullable(request.getParameter("origin")).orElse(""); // 브라우저의 버전, nullable
         String uuid = UUID.randomUUID().toString();
 
         // 데이터를 조인해서 문자열 덩어리로 만들어줌.
         // 컴파일 단계에서 Stringbuilder로 전환되기 때문에 join보다 빠름.
-        var infoStr = redirect + "|" + deviceId + "|" + os + "|" + browser + "|" + version + "|" + uuid;
+        var infoStr = origin + "|" +  redirect + "|" + deviceId + "|" + os + "|" + browser + "|" + version + "|" + uuid;
 
         // url을 Base64로 인코딩하여 state에 붙여줌.
         String encodedInfo = Base64.getUrlEncoder().encodeToString(infoStr.getBytes());

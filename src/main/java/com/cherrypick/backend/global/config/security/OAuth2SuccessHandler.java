@@ -39,8 +39,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String userEnvStr = new String(Base64.getUrlDecoder().decode(request.getParameter("state")));
         var userEnv = userEnvStr.split("\\|");
-        var redirect = userEnv[0];
-        UserEnvDTO userEnvDTO = new UserEnvDTO(userEnv[1], userEnv[2], userEnv[3], userEnv[4]);
+        var origin = userEnv[0];
+        var redirect = userEnv[1];
+        UserEnvDTO userEnvDTO = new UserEnvDTO(userEnv[2], userEnv[3], userEnv[4], userEnv[5]);
 
         String token = null;
         if(userInfo.isNewUser()) {
@@ -56,7 +57,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             token =  jwtUtil.createAccessToken(userInfo.userId(), userInfo.role(), userInfo.nickname());
         }
 
-        String origin = request.getHeader("Origin");
         String frontendUrl = UriComponentsBuilder
                 .fromUriString(origin + "/login-success")
                 .queryParam("token", token)
