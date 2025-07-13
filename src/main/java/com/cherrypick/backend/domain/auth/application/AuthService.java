@@ -1,5 +1,6 @@
 package com.cherrypick.backend.domain.auth.application;
 
+import com.cherrypick.backend.domain.auth.domain.vo.UserEnv;
 import com.cherrypick.backend.domain.auth.domain.vo.token.RefreshTokenPayload;
 import com.cherrypick.backend.domain.auth.infra.factory.RefreshCookieFactory;
 import com.cherrypick.backend.domain.auth.infra.factory.RegistUserFactory;
@@ -8,6 +9,7 @@ import com.cherrypick.backend.domain.auth.infra.jwt.RefreshTokenProvider;
 import com.cherrypick.backend.domain.auth.infra.jwt.RegisterTokenProvider;
 import com.cherrypick.backend.domain.auth.infra.store.RefreshTokenStore;
 import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.auth.presentation.dto.OAuth2UserDTO;
 import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.service.ImageService;
@@ -102,6 +104,26 @@ public class AuthService {
         return new AuthResponseDTOs.TokenResponse(accessToken, refreshCookie);
     }
 
+    // 로그인 시 토큰을 생성하는 로직
+    public AuthResponseDTOs.TokenResponse tokensForLoginUser(OAuth2UserDTO oauthDto, UserEnv userEnv)
+    {
+        // [0] 정보 추출 및 변수 초기화
+        var userId = oauthDto.userId();
+        var deviceId = userEnv.deviceId();
+
+        // [1] 액세스 / 리프레시 토큰 생성
+        String accessToken = accessTokenProvider.createToken(userId, oauthDto.role(), oauthDto.nickname());
+        String refreshToken = refreshTokenProvider.createToken(userId, deviceId);
+
+        // [2] 리프레시 토큰 저장
+        refreshTokenStore.initializeToken(userId, deviceId, refreshToken, userEnv);
+
+        // [3] 액세스 토큰 / 쿠키에 담긴 리프레시 토큰 문자열을 반환
+        String refreshCookie = refreshCookieFactory.createRefreshCookie(refreshToken);
+        return new AuthResponseDTOs.TokenResponse(accessToken, refreshCookie);
+    }
+
+
     // 로그아웃용 바로 만료되는 리프레시 토큰 쿠키
     public String createLogoutToken()
     {
@@ -109,6 +131,12 @@ public class AuthService {
         return refreshCookieFactory.createExpiringRefreshCookie();
     }
 
+    // 등록 토큰을 생성하는 로직
+    public String createRegisterToken(OAuth2UserDTO oauthDto, UserEnv userEnv)
+    {
+        // [0] 등록 토큰 생성 및 반환
+        return registerTokenProvider.createToken(oauthDto.oauthId(), oauthDto.provider(), userEnv.deviceId(), userEnv.os(), userEnv.browser(), userEnv.version());
+    }
 
 
     // 닉네임을 좀 더 까리하게 만들어줍니다.

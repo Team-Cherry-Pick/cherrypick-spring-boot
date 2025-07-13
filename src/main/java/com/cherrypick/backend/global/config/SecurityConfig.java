@@ -1,5 +1,6 @@
 package com.cherrypick.backend.global.config;
 
+import com.cherrypick.backend.domain.auth.infra.jwt.AccessTokenProvider;
 import com.cherrypick.backend.global.config.security.CustomAuthorizationRequestResolver;
 import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
 import com.cherrypick.backend.global.config.security.OAuth2SuccessHandler;
@@ -38,7 +39,7 @@ public class SecurityConfig {
     private final Oauth2ClientService oauthService;
     private final OAuth2SuccessHandler oauth2SuccessHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
-    private final JwtUtil jwtUtil;
+    private final AccessTokenProvider  accessTokenProvider;
     private final FilterChainExceptionHandler filterChainExceptionHandler;
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
@@ -105,7 +106,7 @@ public class SecurityConfig {
 
 
         http.addFilterBefore(new RequestLogFilter(logService), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(new JWTFilter(jwtUtil), RequestLogFilter.class);
+        http.addFilterBefore(new JWTFilter(accessTokenProvider), RequestLogFilter.class);
         http.addFilterBefore(new UriPatterMatchingFilterChain(requestMappingHandlerMapping), JWTFilter.class);
         
         // oauth2
