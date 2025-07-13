@@ -100,10 +100,20 @@ public class JWTUtil
                 .build();
     }
 
+
     public Long getUserIdFromRefreshToken(String token) {
 
         try{
             return Jwts.parser().verifyWith(refreshSecretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
+        } catch (Exception e) {
+            throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
+        }
+    }
+
+    public String getDeviceIdFromRefreshToken(String token) {
+
+        try{
+            return Jwts.parser().verifyWith(refreshSecretKey).build().parseSignedClaims(token).getPayload().get("deviceId", String.class);
         } catch (Exception e) {
             throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
         }

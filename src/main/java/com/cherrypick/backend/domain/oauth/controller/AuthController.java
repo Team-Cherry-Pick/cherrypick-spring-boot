@@ -67,7 +67,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponseDTOs.AccessToken> auth(@RequestBody AuthRequestDTOs.DeviceIdDTO deviceIdDto, HttpServletRequest request, HttpServletResponse response)
     {
-        String deviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("default");
+        String clientDeviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("default");
 
         // 쿠키에서 refresh를 찾아낸다.
         var cookies = Arrays.stream(
@@ -81,13 +81,16 @@ public class AuthController {
                 .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_REQUIRED));
 
         // 토큰 검증과 발급이 선행.
-        Long userId = jwtUtil.getUserIdFromRefreshToken(refreshToken);
-        var accessToken = authService.refreshAccessToken(userId, deviceId, refreshToken);
+        Long tokenUserId = jwtUtil.getUserIdFromRefreshToken(refreshToken);
+        String tokenDeviceId = jwtUtil.getDeviceIdFromRefreshToken(refreshToken);
+        if(!tokenDeviceId.equals(clientDeviceId)) throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
+
+        var accessToken = authService.refreshAccessToken(tokenUserId, tokenDeviceId, refreshToken);
 
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
-        var newRefreshToken = jwtUtil.createRefreshToken(userId, deviceId);
+        var newRefreshToken = jwtUtil.createRefreshToken(tokenUserId, tokenDeviceId);
         response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
-        authService.saveResfreshToken(userId, deviceId, newRefreshToken);
+        authService.saveResfreshToken(tokenUserId, tokenDeviceId, newRefreshToken);
 
         return ResponseEntity.ok(accessToken);
     }
