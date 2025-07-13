@@ -81,7 +81,7 @@ public class SecurityConfig {
                         // 인증
                         .requestMatchers(
                                 "/login/oauth2/code/**", "/api/auth/register-completion").anonymous()      // 회원가입은 미인증 유저만 가능
-                        .requestMatchers("/api/auth/refresh").permitAll()                                    // 액세스 토큰이 만료된 상태에서도 재발급은 받을 수 있어야함.
+                        .requestMatchers("/api/auth/refresh", "/api/auth/logout").permitAll()              // 액세스 토큰이 만료된 상태에서도 재발급은 받을 수 있어야함.
                         // 테스트 코드
                         .requestMatchers("/api/test/**").permitAll()
                         .anyRequest().denyAll()

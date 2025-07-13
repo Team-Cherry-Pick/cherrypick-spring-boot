@@ -6,6 +6,7 @@ import com.cherrypick.backend.domain.oauth.dto.RegisterDTO;
 import com.cherrypick.backend.domain.oauth.service.AuthService;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
+import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,13 +36,11 @@ public class AuthController {
     private final AuthService authService;
 
     @Operation(
-            summary = "access token 재발급",
-            description = "refresh 쿠키를 가진 채로 실행해주시면 access token을 재발급 합니다." +
-                    "이때 refresh token도 함께 재발급 되어 쿠키로 저장해드립니다."
+            summary = "로그아웃(refreshToken 파기)",
+            description = "refreshToken을 파기합니다. 이름이 refreshToken인 쿠키의 만료시간을 0으로 해서 심는 방식입니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "JWT 토큰 생성 성공"),
-            @ApiResponse(responseCode = "404", description = "리프레시 토큰 / 유저를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "200", description = "JWT 토큰 파기 성공"),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/logout")
@@ -51,7 +50,7 @@ public class AuthController {
         var dummyCookie = jwtUtil.createDummyRefreshCookie();
         response.addHeader("Set-Cookie", dummyCookie.toString());
 
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(new AuthResponseDTOs.LogoutResponseDTO(true));
     }
 
 
@@ -71,7 +70,10 @@ public class AuthController {
         String deviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("default");
 
         // 쿠키에서 refresh를 찾아낸다.
-        var cookies = Arrays.stream(request.getCookies()).toList();
+        var cookies = Arrays.stream(
+                Optional.ofNullable(request.getCookies()).orElseThrow(() -> new BaseException(GlobalErrorCode.NO_COOKIES_TO_READ))
+        ).toList();
+        
         String refreshToken = cookies.stream()
                 .filter(cookie -> cookie.getName().equals("refreshToken"))
                 .findFirst()
