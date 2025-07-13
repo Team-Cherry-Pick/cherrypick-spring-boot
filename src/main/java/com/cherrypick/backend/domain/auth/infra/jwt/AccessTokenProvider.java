@@ -2,7 +2,7 @@ package com.cherrypick.backend.domain.auth.infra.jwt;
 
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.user.enums.Role;
-import com.cherrypick.backend.global.util.JWTUtil;
+import com.cherrypick.backend.global.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,7 +63,7 @@ public class AccessTokenProvider
     // 엑세스 토큰에서 데이터를 추출
     public AuthenticatedUser getAuthenticatedUser(String accessToken) {
         // TODO : 다중 권한 구조로 전환 필요
-        accessToken = JWTUtil.removeBearer(accessToken);
+        accessToken = JwtUtil.removeBearer(accessToken);
 
         var userId = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("userId", Long.class);;
         var roles = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("role", String.class);

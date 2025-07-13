@@ -7,7 +7,7 @@ import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
-import com.cherrypick.backend.global.util.JWTUtil;
+import com.cherrypick.backend.global.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,7 +28,7 @@ public class TestController
     private final DealCrawlService dealCrawlService;
     private final Oauth2ClientService oauth2ClientService;
     private final UserRepository userRepository;
-    private final JWTUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
 
     String HTML = """

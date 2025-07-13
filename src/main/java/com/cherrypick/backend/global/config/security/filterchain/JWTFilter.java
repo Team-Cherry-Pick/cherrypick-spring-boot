@@ -1,6 +1,6 @@
 package com.cherrypick.backend.global.config.security.filterchain;
 
-import com.cherrypick.backend.global.util.JWTUtil;
+import com.cherrypick.backend.global.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +16,7 @@ import java.io.IOException;
 @RequiredArgsConstructor @Slf4j
 public class JWTFilter extends OncePerRequestFilter {
 
-    private final JWTUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

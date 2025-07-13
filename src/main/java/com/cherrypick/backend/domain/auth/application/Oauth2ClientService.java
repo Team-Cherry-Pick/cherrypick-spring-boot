@@ -1,36 +1,17 @@
 package com.cherrypick.backend.domain.auth.application;
 
-import com.cherrypick.backend.domain.image.enums.ImageType;
-import com.cherrypick.backend.domain.image.service.ImageService;
-import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.auth.presentation.dto.OAuth2UserDTO;
-import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
-import com.cherrypick.backend.domain.auth.presentation.dto.UserEnvDTO;
-import com.cherrypick.backend.domain.user.entity.User;
-import com.cherrypick.backend.domain.user.enums.Gender;
-import com.cherrypick.backend.domain.user.enums.Role;
-import com.cherrypick.backend.domain.user.enums.UserStatus;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
-import com.cherrypick.backend.global.exception.BaseException;
-import com.cherrypick.backend.global.exception.enums.UserErrorCode;
-import com.cherrypick.backend.global.util.CacheKeyUtil;
-import com.cherrypick.backend.global.util.JWTUtil;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 

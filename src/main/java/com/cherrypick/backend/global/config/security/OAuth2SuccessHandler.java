@@ -4,7 +4,7 @@ import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.auth.presentation.dto.OAuth2UserDTO;
 import com.cherrypick.backend.domain.auth.presentation.dto.UserEnvDTO;
 import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
-import com.cherrypick.backend.global.util.JWTUtil;
+import com.cherrypick.backend.global.util.JwtUtil;
 import com.cherrypick.backend.global.util.LogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -24,7 +24,7 @@ import java.util.Base64;
 @Component @Slf4j @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final JWTUtil jwtUtil;
+    private final JwtUtil jwtUtil;
     private final ObjectMapper objectMapper;
     private final Oauth2ClientService oauth2ClientService;
     private final LogService logService;

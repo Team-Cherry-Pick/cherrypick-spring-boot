@@ -7,7 +7,7 @@ import com.cherrypick.backend.global.config.security.filterchain.FilterChainExce
 import com.cherrypick.backend.global.config.security.filterchain.JWTFilter;
 import com.cherrypick.backend.global.config.security.filterchain.RequestLogFilter;
 import com.cherrypick.backend.global.config.security.filterchain.UriPatterMatchingFilterChain;
-import com.cherrypick.backend.global.util.JWTUtil;
+import com.cherrypick.backend.global.util.JwtUtil;
 import com.cherrypick.backend.global.util.LogService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class SecurityConfig {
     private final Oauth2ClientService oauthService;
     private final OAuth2SuccessHandler oauth2SuccessHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
-    private final JWTUtil jwtUtil;
+    private final JwtUtil jwtUtil;
     private final FilterChainExceptionHandler filterChainExceptionHandler;
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
