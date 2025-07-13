@@ -2,7 +2,7 @@ package com.cherrypick.backend.domain.test;
 
 import com.cherrypick.backend.domain.comment.service.CommentService;
 import com.cherrypick.backend.domain.deal.service.DealCrawlService;
-import com.cherrypick.backend.domain.auth.application.AuthService;
+import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -26,7 +26,7 @@ public class TestController
 {
     private final CommentService commentService;
     private final DealCrawlService dealCrawlService;
-    private final AuthService authService;
+    private final Oauth2ClientService oauth2ClientService;
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
 
@@ -163,7 +163,7 @@ public class TestController
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
         var newRefreshToken = jwtUtil.createRefreshToken(userId, deviceId);
         response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
-        authService.saveResfreshToken(userId, deviceId, newRefreshToken);
+        oauth2ClientService.saveResfreshToken(userId, deviceId, newRefreshToken);
 
         return jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname());
     }

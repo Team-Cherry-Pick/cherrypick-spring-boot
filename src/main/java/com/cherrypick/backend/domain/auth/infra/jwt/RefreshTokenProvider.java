@@ -27,7 +27,7 @@ public class RefreshTokenProvider
     }
 
     // 리프레시 토큰 문자열 생성
-    public String createRefreshToken(Long userId, String deviceId){
+    public String createToken(Long userId, String deviceId){
         return Jwts.builder()
                 .claim("userId", userId)
                 .claim("deviceId", deviceId)

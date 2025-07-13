@@ -26,9 +26,9 @@ public class RefreshTokenStore
     private Long refreshValidPeriod;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public void initializeToken(RefreshTokenPayload refreshToken, UserEnv userEnv)
+    public void initializeToken(Long userId, String deviceId, String refreshToken, UserEnv userEnv)
     {
-        String key = CacheKeyUtil.getRefreshTokenKey(refreshToken.userId(), refreshToken.deviceId());
+        String key = CacheKeyUtil.getRefreshTokenKey(userId, deviceId);
         redisTemplate.opsForHash().put(key, "token", refreshToken);
         redisTemplate.opsForHash().put(key, "deviceId", userEnv.deviceId());
         redisTemplate.opsForHash().put(key, "os", userEnv.os());
@@ -38,9 +38,9 @@ public class RefreshTokenStore
 
     }
 
-    public void saveToken(RefreshTokenPayload refreshToken)
+    public void saveToken(Long userId, String deviceId, String refreshToken)
     {
-        String key = CacheKeyUtil.getRefreshTokenKey(refreshToken.userId(), refreshToken.deviceId());
+        String key = CacheKeyUtil.getRefreshTokenKey(userId, deviceId);
         redisTemplate.opsForHash().put(key, "token", refreshToken);
         redisTemplate.expire(key, Duration.ofSeconds(refreshValidPeriod));
     }

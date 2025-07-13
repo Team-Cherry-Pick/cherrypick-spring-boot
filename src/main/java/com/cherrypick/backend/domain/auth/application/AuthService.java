@@ -1,130 +1,115 @@
 package com.cherrypick.backend.domain.auth.application;
 
+import com.cherrypick.backend.domain.auth.domain.vo.token.RefreshTokenPayload;
+import com.cherrypick.backend.domain.auth.infra.factory.RefreshCookieFactory;
+import com.cherrypick.backend.domain.auth.infra.factory.RegistUserFactory;
+import com.cherrypick.backend.domain.auth.infra.jwt.AccessTokenProvider;
+import com.cherrypick.backend.domain.auth.infra.jwt.RefreshTokenProvider;
+import com.cherrypick.backend.domain.auth.infra.jwt.RegisterTokenProvider;
+import com.cherrypick.backend.domain.auth.infra.store.RefreshTokenStore;
+import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.service.ImageService;
-import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
-import com.cherrypick.backend.domain.auth.presentation.dto.OAuth2UserDTO;
-import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
-import com.cherrypick.backend.domain.auth.presentation.dto.UserEnvDTO;
-import com.cherrypick.backend.domain.user.entity.User;
-import com.cherrypick.backend.domain.user.enums.Gender;
-import com.cherrypick.backend.domain.user.enums.Role;
-import com.cherrypick.backend.domain.user.enums.UserStatus;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
-import com.cherrypick.backend.global.util.CacheKeyUtil;
-import com.cherrypick.backend.global.util.JWTUtil;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-@Service @RequiredArgsConstructor @Slf4j
-public class AuthService extends DefaultOAuth2UserService
-{
-    private final UserRepository userRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final JWTUtil jwtUtil;
+@RequiredArgsConstructor @Service
+public class AuthService {
+
+    private final RegisterTokenProvider registerTokenProvider;
+    private final RefreshTokenProvider refreshTokenProvider;
+    private final AccessTokenProvider accessTokenProvider;
+
+    private final RefreshTokenStore refreshTokenStore;
+
     private final ImageService imageService;
+    private final UserRepository userRepository;
+    private final RefreshCookieFactory refreshCookieFactory;
 
-    @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-
-        var oauth2User = super.loadUser(userRequest);
-        System.out.println(oauth2User.getAttributes().toString());
-        String provider = userRequest.getClientRegistration().getRegistrationId(); // kakao 등
-
-        // oauthId를 찾아냄.
-        String oauthId = oauth2User.getAttribute("id").toString();
-        var user = userRepository.findUserByOauthId(oauthId);
-
-        User loginUser = null;
-        if(user.isPresent()){
-            // 저장된 유저 불러오기
-            loginUser = user.get();
-
-            return OAuth2UserDTO.from(loginUser, false);
-        }
-        else{
-            // DB에 저장하지 않는다. 때문에 OAuth2UserDTO 에 oauthId와 provider만 담는다.
-            var userAttr = oauth2User.getAttributes();
-            return OAuth2UserDTO.builder()
-                    .oauthId(oauthId)
-                    .provider(provider)
-                    .isNewUser(true)
-                    .email(Optional.ofNullable((HashMap<String, String>)userAttr.get("kakao_account")).map(p -> p.get("email")).get().toString())
-                    .build();
-        }
-    }
-
-    @Override
-    public void setAttributesConverter(Converter<OAuth2UserRequest, Converter<Map<String, Object>, Map<String, Object>>> attributesConverter) {
-        super.setAttributesConverter(attributesConverter);
-
-    }
 
     // 유저를 등록 완료시키는 로직
     @Transactional
-    public AuthResponseDTOs.AccessToken userRegisterComplete(RegisterDTO dto, HttpServletResponse response){
+    public AuthResponseDTOs.TokenResponse userRegisterComplete(RegisterDTO dto){
 
-        var registerToken = jwtUtil.getRegisterTokenPayload(dto.registerToken());
+        // [0] 레지스터 토큰 검증 및 변수 초기화
+        var registerToken = registerTokenProvider.getTokenPayload(dto.registerToken());
+        var deviceId = registerToken.userEnv().deviceId();
+
+        // [1] 중복 유저 검사
         if(userRepository.findUserByOauthId(registerToken.oauthId()).isPresent())
         {
             throw new BaseException(UserErrorCode.ALREADY_REGISTERED_USER);
         }
 
-        // 신규 유저 만들기, 추후 로그인 방법이 늘어나면 ENUM으로 처리하는 것도 고려.
-        // oauth2.0 응답에서 데이터를 추출한다.
-        User user = null;
-        if(registerToken.provider().equals("kakao")) {
-            user = User.builder()
-                    .oauthId(registerToken.oauthId())
-                    .provider(registerToken.provider())
-                    .nickname(dto.nickname())
-                    .email(dto.email())
-                    .gender(Gender.valueOf(dto.gender()))
-                    .birthday(LocalDate.parse(dto.birthday()))
-                    .status(UserStatus.ACTIVE)
-                    .role(Role.CLIENT)
-                    .build();
-        }
-        else throw new BaseException(UserErrorCode.UNDEFINED_OAUTH_PROVIDER);
+        // [2] 저장할 유저 객체 생성, 현재 kakao만 지원.
+        var user = RegistUserFactory.extractUser(registerToken.oauthId(), registerToken.oauthId(), dto);
 
-        // 신규 유저 저장
+        // [3] 신규 유저를 저장
         var savedUser = userRepository.save(user);
 
-        // 기존 이미지 삭제, 새 이미지 등록
-        imageService.deleteImageByUserId(savedUser.getUserId());
+        // [4] 유저의 사진을 등록
         imageService.attachImage(savedUser.getUserId(), List.of(dto.imageId()), ImageType.USER);
 
-        // 사진 업데이트
-        var profileImage = imageService.getImageByUserId(savedUser.getUserId());
+        // [5] 엑세스 토큰과 리프레시 토큰을 생성
+        String accessToken = accessTokenProvider.createToken(savedUser.getUserId(), savedUser.getRole(), savedUser.getNickname());
+        String refreshToken = refreshTokenProvider.createToken(savedUser.getUserId(), registerToken.userEnv().deviceId());
 
-        // 엑세스 토큰을 전달.
-        String accessToken = jwtUtil.createAccessToken(savedUser.getUserId(), savedUser.getRole(), savedUser.getNickname());
+        // [6] Refresh 토큰과 유저 환경을 저장
+        refreshTokenStore.initializeToken(savedUser.getUserId(), deviceId, refreshToken, registerToken.userEnv());
 
-        // 리프레시 토큰 심어주기
-        var refreshToken = jwtUtil.createRefreshToken(savedUser.getUserId(), registerToken.userEnv().deviceId());
-        initializeResfreshToken(savedUser.getUserId(), registerToken.userEnv(), refreshToken);
-        response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(refreshToken).toString());
-
-        return new AuthResponseDTOs.AccessToken(accessToken);
+        // [7] 액세스 토큰과 쿠키에 담긴 리프레시 토큰 문자열을 반환
+        String refreshCookie = refreshCookieFactory.createRefreshCookie(refreshToken);
+        return new AuthResponseDTOs.TokenResponse(accessToken, refreshCookie);
     }
+
+
+    // 액세스 토큰 재발급 로직
+    public AuthResponseDTOs.TokenResponse refreshAccessToken(String clientDeviceId, String clientRefreshToken)
+    {
+
+        // [0] 리프레시 토큰을 파싱, 변수 초기화
+        RefreshTokenPayload payload = refreshTokenProvider.getPayload(clientRefreshToken);
+        var userId = payload.userId();
+        var deviceId = payload.deviceId();
+
+        // [1] 리프레시 토큰의 deviceId와 수신 받은 deviceId가 같은지 검증. (다르다면 오류)
+        if(!deviceId.equals(clientDeviceId)) throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
+
+        // [2] userId / deviceId 를 기반으로 서버에 저장된 리프레시 토큰을 로드.
+        String storedToken = refreshTokenStore.loadToken(userId, deviceId);
+
+        // [3] 요청으로 받은 토큰과 저장되어 있던 토큰이 같은지 검증.
+        if(!clientRefreshToken.equals(storedToken)) throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
+
+        // [4] 토큰의 ID를 바탕으로 DB에서 유저 객체 로드.
+        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+        // [5] 엑세스 토큰과 리프레시 토큰을 발급.
+        var accessToken = accessTokenProvider.createToken(userId, user.getRole(), user.getNickname());
+        var refreshToken = refreshTokenProvider.createToken(userId, deviceId);
+
+        // [6] 리프레시 토큰은 저장.
+        refreshTokenStore.saveToken(userId, deviceId, refreshToken);
+
+        // [7] 액세스 토큰과 쿠키에 담긴 리프레시 토큰 문자열을 반환
+        String refreshCookie = refreshCookieFactory.createRefreshCookie(refreshToken);
+        return new AuthResponseDTOs.TokenResponse(accessToken, refreshCookie);
+    }
+
+    // 로그아웃용 바로 만료되는 리프레시 토큰 쿠키
+    public String createLogoutToken()
+    {
+        // [0] 바로 만료되는 리프레시 쿠키 문자열을 반환
+        return refreshCookieFactory.createExpiringRefreshCookie();
+    }
+
+
 
     // 닉네임을 좀 더 까리하게 만들어줍니다.
     public String getRandomNickname(String originalNickname)
@@ -146,52 +131,5 @@ public class AuthService extends DefaultOAuth2UserService
         return newNickName;
     }
 
-    public void saveResfreshToken(Long userId, String deviceId, String refreshToken)
-    {
-        String key = CacheKeyUtil.getRefreshTokenKey(userId, deviceId);
-
-        redisTemplate.opsForHash().put( key, "token", refreshToken);
-        redisTemplate.expire(key, Duration.ofSeconds(jwtUtil.refreshValidPeriod));
-    }
-
-    // 최초 리프레시 토큰 등록
-    public void initializeResfreshToken(Long userId, UserEnvDTO userEnvDTO, String refreshToken)
-    {
-        // 토큰의 지속시간은 1주일
-        String deviceId = userEnvDTO.deviceId();
-        String key = CacheKeyUtil.getRefreshTokenKey(userId, deviceId);
-
-        redisTemplate.opsForHash().put( key, "token", refreshToken);
-        redisTemplate.opsForHash().put( key, "userEnv", userEnvDTO.toJson());
-        redisTemplate.expire(key, Duration.ofSeconds(jwtUtil.refreshValidPeriod));
-    }
-
-    public String loadRefreshToken(Long userId, String deviceId)
-    {
-        String key = CacheKeyUtil.getRefreshTokenKey(userId, deviceId);
-
-        return Optional.ofNullable(redisTemplate.opsForHash().get(key, "token"))
-                .map(Object::toString)
-                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_FOUND));
-    }
-
-    public UserEnvDTO loadUserEnv(Long userId, String deviceId){
-        String key = CacheKeyUtil.getRefreshTokenKey(userId, deviceId);
-        var userEnv = (String) redisTemplate.opsForHash().get( key, "userEnv");
-        return UserEnvDTO.fromJson(userEnv);
-    }
-
-    public AuthResponseDTOs.AccessToken refreshAccessToken(Long userId, String deviceId, String refreshToken)
-    {
-        // 서버에 갖고 있는 토큰과 쿠키의 토큰이 다르다면
-        if(!refreshToken.equals(loadRefreshToken(userId,deviceId)))
-            throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
-
-        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
-
-        return AuthResponseDTOs.AccessToken.builder()
-                .accessToken(jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname()))
-                .build();
-    }
 
 }

@@ -3,7 +3,7 @@ package com.cherrypick.backend.global.config.security;
 import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.auth.presentation.dto.OAuth2UserDTO;
 import com.cherrypick.backend.domain.auth.presentation.dto.UserEnvDTO;
-import com.cherrypick.backend.domain.auth.application.AuthService;
+import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
 import com.cherrypick.backend.global.util.JWTUtil;
 import com.cherrypick.backend.global.util.LogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +26,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
-    private final AuthService authService;
+    private final Oauth2ClientService oauth2ClientService;
     private final LogService logService;
     @Value("${spring.profiles.active}")
     private String activeProfile;
@@ -92,7 +92,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     // 리프레시 토큰 쿠키를 만들어서 반환.
     private ResponseCookie registeredUserRefreshToken(OAuth2UserDTO userInfo, UserEnvDTO userEnvDTO) {
         var refreshToken = jwtUtil.createRefreshToken(userInfo.userId(), userEnvDTO.deviceId());
-        authService.initializeResfreshToken(userInfo.userId(), userEnvDTO, refreshToken);
+        oauth2ClientService.initializeResfreshToken(userInfo.userId(), userEnvDTO, refreshToken);
 
         return jwtUtil.createRefreshCookie(refreshToken);
     }

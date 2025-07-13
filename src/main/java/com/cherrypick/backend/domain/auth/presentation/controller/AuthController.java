@@ -1,6 +1,7 @@
 package com.cherrypick.backend.domain.auth.presentation.controller;
 
 import com.cherrypick.backend.domain.auth.application.AuthService;
+import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
 import com.cherrypick.backend.domain.auth.presentation.dto.AuthRequestDTOs;
 import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
@@ -29,8 +30,6 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final JWTUtil jwtUtil;
-    private final UserRepository userRepository;
     private final AuthService authService;
 
     @Operation(
@@ -45,8 +44,8 @@ public class AuthController {
     public ResponseEntity<AuthResponseDTOs.LogoutResponseDTO> logout(HttpServletRequest request, HttpServletResponse response)
     {
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
-        var dummyCookie = jwtUtil.createDummyRefreshCookie();
-        response.addHeader("Set-Cookie", dummyCookie.toString());
+        var dummyCookie = authService.createLogoutToken();
+        response.addHeader("Set-Cookie", dummyCookie);
 
         return ResponseEntity.ok(new AuthResponseDTOs.LogoutResponseDTO(true));
     }
@@ -78,19 +77,10 @@ public class AuthController {
                 .map(Cookie::getValue)
                 .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_REQUIRED));
 
-        // 토큰 검증과 발급이 선행.
-        Long tokenUserId = jwtUtil.getUserIdFromRefreshToken(refreshToken);
-        String tokenDeviceId = jwtUtil.getDeviceIdFromRefreshToken(refreshToken);
-        if(!tokenDeviceId.equals(clientDeviceId)) throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
+        var tokens = authService.refreshAccessToken(clientDeviceId, refreshToken);
+        response.addHeader("Set-Cookie", tokens.refreshTokenCookie());
 
-        var accessToken = authService.refreshAccessToken(tokenUserId, tokenDeviceId, refreshToken);
-
-        // 리프레시 토큰도 파기 후 재생성해서 보내줌
-        var newRefreshToken = jwtUtil.createRefreshToken(tokenUserId, tokenDeviceId);
-        response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
-        authService.saveResfreshToken(tokenUserId, tokenDeviceId, newRefreshToken);
-
-        return ResponseEntity.ok(accessToken);
+        return ResponseEntity.ok(new AuthResponseDTOs.AccessToken(tokens.accessToken()));
     }
 
     @Operation(
@@ -109,7 +99,11 @@ public class AuthController {
     public ResponseEntity<AuthResponseDTOs.AccessToken> userInfo(@RequestBody RegisterDTO registerDTO, HttpServletRequest request, HttpServletResponse response) {
 
         registerDTO.validate();
-        return ResponseEntity.ok(authService.userRegisterComplete(registerDTO, response));
+
+        var tokens = authService.userRegisterComplete(registerDTO);
+        response.addHeader("Set-Cookie", tokens.refreshTokenCookie());
+
+        return ResponseEntity.ok(new AuthResponseDTOs.AccessToken(tokens.accessToken()));
     }
 
 

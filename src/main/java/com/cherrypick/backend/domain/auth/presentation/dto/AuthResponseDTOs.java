@@ -15,6 +15,13 @@ public class AuthResponseDTOs {
     ) {}
 
     @Builder
+    public record TokenResponse(
+            String accessToken,
+            String refreshTokenCookie
+    ){}
+
+
+    @Builder
     // 내부적으로 사용하는 레지스터 토큰 DTO
     public record RegisterTokenDTO(
             String oauthId,

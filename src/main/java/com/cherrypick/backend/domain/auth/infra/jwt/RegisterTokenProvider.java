@@ -26,7 +26,7 @@ public class RegisterTokenProvider {
     }
 
     // 레지스터 토큰 생성
-    public String createRegisterToken(String oauthId, String provider, String deviceId, String os, String browser, String version) {
+    public String createToken(String oauthId, String provider, String deviceId, String os, String browser, String version) {
         return Jwts.builder()
                 .claim("oauthId", oauthId)
                 .claim("provider", provider)
@@ -42,7 +42,7 @@ public class RegisterTokenProvider {
 
     // 레지스터 토큰 파싱
     // 레지스터 토큰에서 데이터를 추출
-    public RegisterTokenPayload getRegisterTokenPayload(String registerToken) {
+    public RegisterTokenPayload getTokenPayload(String registerToken) {
 
         var oauthId = Jwts.parser().verifyWith(registerSecretKey).build().parseSignedClaims(registerToken).getPayload().get("oauthId", String.class);;
         var provider = Jwts.parser().verifyWith(registerSecretKey).build().parseSignedClaims(registerToken).getPayload().get("provider", String.class);

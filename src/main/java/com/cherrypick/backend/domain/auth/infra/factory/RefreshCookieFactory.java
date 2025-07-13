@@ -13,7 +13,7 @@ public class RefreshCookieFactory
     @Value("${spring.jwt.refresh.key}")
     private Long refreshValidPeriod;
 
-    public ResponseCookie createRefreshCookie(String value)
+    public String createRefreshCookie(String value)
     {
         return ResponseCookie.from("refreshToken", value)
             .httpOnly(true)
@@ -21,18 +21,18 @@ public class RefreshCookieFactory
             .sameSite("None")
             .path("/")
             .maxAge(Duration.ofSeconds(refreshValidPeriod))
-            .build();
+            .build().toString();
     }
 
-    public ResponseCookie createExpiringRefreshCookie(String value)
+    public String createExpiringRefreshCookie()
     {
-        return ResponseCookie.from("refreshToken", value)
+        return ResponseCookie.from("refreshToken", "dummy_cookie")
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
                 .path("/")
                 .maxAge(0)
-                .build();
+                .build().toString();
     }
 
 }
