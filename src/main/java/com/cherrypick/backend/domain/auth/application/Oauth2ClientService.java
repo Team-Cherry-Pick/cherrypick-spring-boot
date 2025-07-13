@@ -43,23 +43,16 @@ public class Oauth2ClientService extends DefaultOAuth2UserService
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
+        // [0] OAuth 서버로부터 유저 데이터를 불러와 변수 초기화
         var oauth2User = super.loadUser(userRequest);
-        System.out.println(oauth2User.getAttributes().toString());
+        String oauthId = oauth2User.getAttribute("id").toString();
         String provider = userRequest.getClientRegistration().getRegistrationId(); // kakao 등
 
-        // oauthId를 찾아냄.
-        String oauthId = oauth2User.getAttribute("id").toString();
+        // [1] oauthId로 유저를 조회.
         var user = userRepository.findUserByOauthId(oauthId);
 
-        User loginUser = null;
-        if(user.isPresent()){
-            // 저장된 유저 불러오기
-            loginUser = user.get();
-
-            return OAuth2UserDTO.from(loginUser, false);
-        }
-        else{
-            // DB에 저장하지 않는다. 때문에 OAuth2UserDTO 에 oauthId와 provider만 담는다.
+        // [2] 존재하는 유저일 시 즉시 변환해 반환 / 신규 유저일 시 데이터를 받아 반환
+        return user.map(u -> OAuth2UserDTO.from(u, false)).orElseGet(() -> {
             var userAttr = oauth2User.getAttributes();
             return OAuth2UserDTO.builder()
                     .oauthId(oauthId)
@@ -67,7 +60,8 @@ public class Oauth2ClientService extends DefaultOAuth2UserService
                     .isNewUser(true)
                     .email(Optional.ofNullable((HashMap<String, String>)userAttr.get("kakao_account")).map(p -> p.get("email")).get().toString())
                     .build();
-        }
+        });
+
     }
 
     @Override
