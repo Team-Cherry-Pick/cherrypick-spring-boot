@@ -138,9 +138,10 @@ public class JWTUtil
     }
 
     // 리프레시 토큰 생성
-    public String createRefreshToken(long userId) {
+    public String createRefreshToken(long userId, String deviceId) {
         return Jwts.builder()
                 .claim("userId", userId)
+                .claim("deviceId", deviceId)
                 .claim("state", UUID.randomUUID().toString())
                 .claim("type", "refresh")
                 .issuedAt(new Date(System.currentTimeMillis()))

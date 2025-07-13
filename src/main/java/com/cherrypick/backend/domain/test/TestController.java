@@ -164,7 +164,7 @@ public class TestController
         User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
-        var newRefreshToken = jwtUtil.createRefreshToken(userId);
+        var newRefreshToken = jwtUtil.createRefreshToken(userId, deviceId);
         response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
         authService.saveResfreshToken(userId, deviceId, newRefreshToken);
 

@@ -73,7 +73,7 @@ public class AuthController {
         var cookies = Arrays.stream(
                 Optional.ofNullable(request.getCookies()).orElseThrow(() -> new BaseException(GlobalErrorCode.NO_COOKIES_TO_READ))
         ).toList();
-        
+
         String refreshToken = cookies.stream()
                 .filter(cookie -> cookie.getName().equals("refreshToken"))
                 .findFirst()
@@ -85,7 +85,7 @@ public class AuthController {
         var accessToken = authService.refreshAccessToken(userId, deviceId, refreshToken);
 
         // 리프레시 토큰도 파기 후 재생성해서 보내줌
-        var newRefreshToken = jwtUtil.createRefreshToken(userId);
+        var newRefreshToken = jwtUtil.createRefreshToken(userId, deviceId);
         response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
         authService.saveResfreshToken(userId, deviceId, newRefreshToken);
 

@@ -121,7 +121,7 @@ public class AuthService extends DefaultOAuth2UserService
         String accessToken = jwtUtil.createAccessToken(savedUser.getUserId(), savedUser.getRole(), savedUser.getNickname());
 
         // 리프레시 토큰 심어주기
-        var refreshToken = jwtUtil.createRefreshToken(savedUser.getUserId());
+        var refreshToken = jwtUtil.createRefreshToken(savedUser.getUserId(), registerToken.userEnv().deviceId());
         initializeResfreshToken(savedUser.getUserId(), registerToken.userEnv(), refreshToken);
         response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(refreshToken).toString());
 

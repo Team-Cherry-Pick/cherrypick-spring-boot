@@ -93,7 +93,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     // 리프레시 토큰 쿠키를 만들어서 반환.
     private ResponseCookie registeredUserRefreshToken(OAuth2UserDTO userInfo, UserEnvDTO userEnvDTO) {
-        var refreshToken = jwtUtil.createRefreshToken(userInfo.userId());
+        var refreshToken = jwtUtil.createRefreshToken(userInfo.userId(), userEnvDTO.deviceId());
         authService.initializeResfreshToken(userInfo.userId(), userEnvDTO, refreshToken);
 
         return jwtUtil.createRefreshCookie(refreshToken);
