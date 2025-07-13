@@ -64,7 +64,7 @@ public class JWTUtil
     }
 
 
-    public String removeBearer(String token)
+    public static String removeBearer(String token)
     {
         return token.replace("Bearer ", "");
     }
@@ -100,23 +100,7 @@ public class JWTUtil
     }
 
 
-    public Long getUserIdFromRefreshToken(String token) {
 
-        try{
-            return Jwts.parser().verifyWith(refreshSecretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
-        } catch (Exception e) {
-            throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
-        }
-    }
-
-    public String getDeviceIdFromRefreshToken(String token) {
-
-        try{
-            return Jwts.parser().verifyWith(refreshSecretKey).build().parseSignedClaims(token).getPayload().get("deviceId", String.class);
-        } catch (Exception e) {
-            throw new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_VALID);
-        }
-    }
 
     // 레지스터 토큰 생성
     public String createRegisterToken(AuthResponseDTOs.RegisterTokenDTO dto) {
