@@ -15,6 +15,7 @@ import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
+import com.cherrypick.backend.global.util.CacheKeyUtil;
 import com.cherrypick.backend.global.util.JWTUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +43,6 @@ public class AuthService extends DefaultOAuth2UserService
     private final RedisTemplate<String, Object> redisTemplate;
     private final JWTUtil jwtUtil;
     private final ImageService imageService;
-
-    private final String REFRESH_TOKEN_KEY_NAME = "user:token:refresh";
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -151,18 +150,18 @@ public class AuthService extends DefaultOAuth2UserService
 
     public void saveResfreshToken(Long userId, String deviceId, String refreshToken)
     {
-        String key = REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId;
+        String key = CacheKeyUtil.getRefreshTokenKey(userId, deviceId);
 
         redisTemplate.opsForHash().put( key, "token", refreshToken);
         redisTemplate.expire(key, Duration.ofSeconds(jwtUtil.refreshValidPeriod));
     }
 
-    // 최초
+    // 최초 리프레시 토큰 등록
     public void initializeResfreshToken(Long userId, UserEnvDTO userEnvDTO, String refreshToken)
     {
         // 토큰의 지속시간은 1주일
         String deviceId = userEnvDTO.deviceId();
-        String key = REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId;
+        String key = CacheKeyUtil.getRefreshTokenKey(userId, deviceId);
 
         redisTemplate.opsForHash().put( key, "token", refreshToken);
         redisTemplate.opsForHash().put( key, "userEnv", userEnvDTO.toJson());
@@ -171,7 +170,7 @@ public class AuthService extends DefaultOAuth2UserService
 
     public String loadRefreshToken(Long userId, String deviceId)
     {
-        String key = REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId;
+        String key = CacheKeyUtil.getRefreshTokenKey(userId, deviceId);
 
         return Optional.ofNullable(redisTemplate.opsForHash().get(key, "token"))
                 .map(Object::toString)
@@ -179,7 +178,7 @@ public class AuthService extends DefaultOAuth2UserService
     }
 
     public UserEnvDTO loadUserEnv(Long userId, String deviceId){
-        String key = REFRESH_TOKEN_KEY_NAME + ":" +userId.toString() + ":" + deviceId;
+        String key = CacheKeyUtil.getRefreshTokenKey(userId, deviceId);
         var userEnv = (String) redisTemplate.opsForHash().get( key, "userEnv");
         return UserEnvDTO.fromJson(userEnv);
     }

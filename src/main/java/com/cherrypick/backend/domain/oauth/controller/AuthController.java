@@ -76,7 +76,7 @@ public class AuthController {
                 .filter(cookie -> cookie.getName().equals("refreshToken"))
                 .findFirst()
                 .map(Cookie::getValue)
-                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(UserErrorCode.REFRESH_TOKEN_REQUIRED));
 
         // 토큰 검증과 발급이 선행.
         Long userId = jwtUtil.getUserIdFromRefreshToken(refreshToken);
