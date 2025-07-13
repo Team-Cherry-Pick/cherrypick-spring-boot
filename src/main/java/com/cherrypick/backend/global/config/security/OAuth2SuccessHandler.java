@@ -1,20 +1,18 @@
 package com.cherrypick.backend.global.config.security;
 
-import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
-import com.cherrypick.backend.domain.oauth.dto.OAuth2UserDTO;
-import com.cherrypick.backend.domain.oauth.dto.UserEnvDTO;
-import com.cherrypick.backend.domain.oauth.service.AuthService;
+import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.auth.presentation.dto.OAuth2UserDTO;
+import com.cherrypick.backend.domain.auth.presentation.dto.UserEnvDTO;
+import com.cherrypick.backend.domain.auth.application.AuthService;
 import com.cherrypick.backend.global.util.JWTUtil;
 import com.cherrypick.backend.global.util.LogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;

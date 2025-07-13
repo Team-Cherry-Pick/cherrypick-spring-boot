@@ -4,7 +4,6 @@ import com.cherrypick.backend.domain.category.repository.CategoryRepository;
 import com.cherrypick.backend.domain.category.entity.Category;
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
-import com.cherrypick.backend.domain.deal.dto.request.DealRequestDTOs;
 import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
@@ -16,7 +15,6 @@ import com.cherrypick.backend.domain.deal.enums.*;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.discount.entity.Discount;
 import com.cherrypick.backend.domain.discount.repository.DiscountRepository;
-import com.cherrypick.backend.domain.hashtag.repository.HashTagRepository;
 import com.cherrypick.backend.domain.hashtag.service.HashTagService;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
@@ -25,7 +23,7 @@ import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.store.repository.StoreRepository;
-import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
+import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
@@ -33,14 +31,10 @@ import com.cherrypick.backend.domain.vote.repository.VoteRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
-import com.cherrypick.backend.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -72,7 +66,7 @@ public class DealService {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof AuthenticationDetailDTO userDetails)) {
+        if (!(principal instanceof AuthenticatedUser userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
         }
 
@@ -414,7 +408,7 @@ public class DealService {
     public DealResponseDTOs.Update updateDeal(DealUpdateRequestDTO dto) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof AuthenticationDetailDTO userDetails)) {
+        if (!(principal instanceof AuthenticatedUser userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
         }
 
@@ -495,7 +489,7 @@ public class DealService {
     public DealResponseDTOs.Delete deleteDeal(Long dealId) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof AuthenticationDetailDTO userDetails)) {
+        if (!(principal instanceof AuthenticatedUser userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
         }
 

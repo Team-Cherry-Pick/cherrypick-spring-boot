@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.oauth.dto;
+package com.cherrypick.backend.domain.auth.presentation.dto;
 
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.entity.User;

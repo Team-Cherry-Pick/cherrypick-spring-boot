@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.oauth.dto;
+package com.cherrypick.backend.domain.auth.presentation.dto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

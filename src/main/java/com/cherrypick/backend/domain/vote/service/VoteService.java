@@ -3,7 +3,7 @@ package com.cherrypick.backend.domain.vote.service;
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.deal.service.RecommenderService;
-import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
+import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.domain.vote.dto.request.VoteRequestDTO;
@@ -35,7 +35,7 @@ public class VoteService {
     @Transactional
     public VoteResponseDTO createVote(Long dealId, VoteRequestDTO request) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(principal instanceof AuthenticationDetailDTO userDetails)) {
+        if (!(principal instanceof AuthenticatedUser userDetails)) {
             throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
         }
 

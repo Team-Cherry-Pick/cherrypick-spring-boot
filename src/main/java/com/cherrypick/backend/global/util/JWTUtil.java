@@ -1,11 +1,10 @@
 package com.cherrypick.backend.global.util;
 
 
-import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
-import com.cherrypick.backend.domain.oauth.dto.UserEnvDTO;
-import com.cherrypick.backend.domain.user.entity.User;
+import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.auth.presentation.dto.UserEnvDTO;
 import com.cherrypick.backend.domain.user.enums.Role;
-import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
+import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import io.jsonwebtoken.Jwts;
@@ -86,14 +85,14 @@ public class JWTUtil
     }
 
     // 엑세스 토큰에서 데이터를 추출
-    public AuthenticationDetailDTO getUserDetailDTOFromAccessToken(String accessToken) {
+    public AuthenticatedUser getUserDetailDTOFromAccessToken(String accessToken) {
         // TODO : 다중 권한 구조로 전환 필요
         accessToken = removeBearer(accessToken);
         var userId = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("userId", Long.class);;
         var roles = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("role", String.class);
         var nickName = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("nickname", String.class);
 
-        return AuthenticationDetailDTO.builder()
+        return AuthenticatedUser.builder()
                 .userId(userId)
                 .nickname(nickName)
                 .role(Role.valueOf(roles))

@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.oauth.dto;
+package com.cherrypick.backend.domain.auth.presentation.dto;
 
 import lombok.Builder;
 

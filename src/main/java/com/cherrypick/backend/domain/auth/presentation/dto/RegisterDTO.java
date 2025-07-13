@@ -1,6 +1,5 @@
-package com.cherrypick.backend.domain.oauth.dto;
+package com.cherrypick.backend.domain.auth.presentation.dto;
 
-import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.enums.Gender;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;

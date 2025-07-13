@@ -2,8 +2,7 @@ package com.cherrypick.backend.domain.test;
 
 import com.cherrypick.backend.domain.comment.service.CommentService;
 import com.cherrypick.backend.domain.deal.service.DealCrawlService;
-import com.cherrypick.backend.domain.oauth.service.AuthService;
-import com.cherrypick.backend.domain.user.dto.AuthenticationDetailDTO;
+import com.cherrypick.backend.domain.auth.application.AuthService;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -19,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
 
 @RestController @Profile({"local", "dev"})
 @RequiredArgsConstructor @Slf4j

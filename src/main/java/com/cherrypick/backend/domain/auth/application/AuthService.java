@@ -1,12 +1,11 @@
-package com.cherrypick.backend.domain.oauth.service;
+package com.cherrypick.backend.domain.auth.application;
 
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.service.ImageService;
-import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
-import com.cherrypick.backend.domain.oauth.dto.OAuth2UserDTO;
-import com.cherrypick.backend.domain.oauth.dto.RegisterDTO;
-import com.cherrypick.backend.domain.oauth.dto.UserEnvDTO;
-import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
+import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.auth.presentation.dto.OAuth2UserDTO;
+import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
+import com.cherrypick.backend.domain.auth.presentation.dto.UserEnvDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Gender;
 import com.cherrypick.backend.domain.user.enums.Role;
@@ -14,7 +13,6 @@ import com.cherrypick.backend.domain.user.enums.UserStatus;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
-import com.cherrypick.backend.global.util.AuthUtil;
 import com.cherrypick.backend.global.util.CacheKeyUtil;
 import com.cherrypick.backend.global.util.JWTUtil;
 import jakarta.servlet.http.HttpServletResponse;

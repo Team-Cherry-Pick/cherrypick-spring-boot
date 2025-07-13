@@ -1,16 +1,15 @@
-package com.cherrypick.backend.domain.oauth.controller;
+package com.cherrypick.backend.domain.auth.presentation.controller;
 
-import com.cherrypick.backend.domain.oauth.dto.AuthRequestDTOs;
-import com.cherrypick.backend.domain.oauth.dto.AuthResponseDTOs;
-import com.cherrypick.backend.domain.oauth.dto.RegisterDTO;
-import com.cherrypick.backend.domain.oauth.service.AuthService;
+import com.cherrypick.backend.domain.auth.application.AuthService;
+import com.cherrypick.backend.domain.auth.presentation.dto.AuthRequestDTOs;
+import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
+import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import java.util.Arrays;
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.user.dto;
+package com.cherrypick.backend.domain.auth.domain.vo;
 
 import com.cherrypick.backend.domain.user.enums.Role;
 import lombok.Builder;
@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Builder
-public record AuthenticationDetailDTO(
+public record AuthenticatedUser(
         Long userId,
         String nickname,
         Role role
