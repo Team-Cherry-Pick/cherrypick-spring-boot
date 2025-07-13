@@ -18,8 +18,8 @@ public class AccessTokenProvider
 {
 
     private final SecretKey accessSecretKey;
-    public final Long accessValidPeriod;
-    public final ObjectMapper mapper = new ObjectMapper();
+    private final Long accessValidPeriod;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public AccessTokenProvider(@Value("${spring.jwt.access.key}") String accessSecret, @Value("${spring.jwt.access.period}") long accessValidPeriod) {
 

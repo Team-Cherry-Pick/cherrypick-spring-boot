@@ -1,5 +1,12 @@
 package com.cherrypick.backend.domain.test;
 
+import com.cherrypick.backend.domain.auth.application.AuthService;
+import com.cherrypick.backend.domain.auth.domain.vo.UserEnv;
+import com.cherrypick.backend.domain.auth.infra.factory.RefreshCookieFactory;
+import com.cherrypick.backend.domain.auth.infra.jwt.AccessTokenProvider;
+import com.cherrypick.backend.domain.auth.infra.jwt.RefreshTokenProvider;
+import com.cherrypick.backend.domain.auth.infra.store.RefreshTokenStore;
+import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.comment.service.CommentService;
 import com.cherrypick.backend.domain.deal.service.DealCrawlService;
 import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
@@ -17,6 +24,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController @Profile({"local", "dev"})
@@ -26,9 +34,13 @@ public class TestController
 {
     private final CommentService commentService;
     private final DealCrawlService dealCrawlService;
-    private final Oauth2ClientService oauth2ClientService;
+    private final AuthService authService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final AccessTokenProvider accessTokenProvider;
+    private final RefreshTokenProvider refreshTokenProvider;
+    private final RefreshTokenStore refreshTokenStore;
+    private final RefreshCookieFactory refreshCookieFactory;
 
 
     String HTML = """
@@ -128,23 +140,6 @@ public class TestController
         }
     }
 
-    @Operation(
-            summary = "JWT 필터의 검증을 위한 API. ** 실 서비스에서는 사용하지 않습니다. **",
-            description = "헤더에 JWT를 넣으면 유저 정보를 뽑아줍니다. 토큰이 없으면 접근이 불가합니다."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "JWT 토큰 검증 성공"),
-            @ApiResponse(responseCode = "401", description = "인증하지 않으면 스프링 시큐리티 FilterChain에서 걸립니다."),
-            @ApiResponse(responseCode = "500", description = "서버 오류")
-    })
-    @GetMapping("/auth/jwt-filter")
-    public String jwtFilter(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String Authorization) {
-
-        log.trace(Authorization);
-        var userDetail = jwtUtil.getUserDetailDTOFromAccessToken(Authorization);
-
-        return "JWT Authorized : " + userDetail.userId() + " " + userDetail.nickname() + " " + userDetail.role().toString();
-    }
 
     @Operation(
             summary = "테스트를 위한 JWT 생성 API. ** 실 서비스에서는 사용하지 않습니다. **",
@@ -156,32 +151,26 @@ public class TestController
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/auth/authorization")
-    public String accessToken(@Parameter(description = "유저번호") Long userId, String deviceId, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDTOs.AccessToken> generateTestToken(
+            @Parameter(description = "유저번호") @RequestParam Long userId,
+            @RequestParam(defaultValue = "test-device") String deviceId,
+            HttpServletResponse response
+    ) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+        var accessToken = accessTokenProvider.createToken(userId, user.getRole(), user.getNickname());
+        var refreshToken = refreshTokenProvider.createToken(userId, deviceId);
 
-        // 리프레시 토큰도 파기 후 재생성해서 보내줌
-        var newRefreshToken = jwtUtil.createRefreshToken(userId, deviceId);
-        response.addHeader("Set-Cookie", jwtUtil.createRefreshCookie(newRefreshToken).toString());
-        oauth2ClientService.saveResfreshToken(userId, deviceId, newRefreshToken);
+        // 저장
+        refreshTokenStore.initializeToken(userId, deviceId, refreshToken, new UserEnv(deviceId, "test-os", "test-browser", "test-version"));
 
-        return jwtUtil.createAccessToken(user.getUserId(), user.getRole(), user.getNickname());
+        // 쿠키 세팅
+        var refreshCookie = refreshCookieFactory.createRefreshCookie(refreshToken);
+        response.addHeader("Set-Cookie", refreshCookie);
+
+        return ResponseEntity.ok(new AuthResponseDTOs.AccessToken(accessToken));
     }
 
-    @Operation(
-            summary = "access 토큰 정보를 보여줍니다. ** 실 서비스에서는 사용하지 않습니다. **",
-            description = "인증 시 사용가능"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "JWT 토큰 생성 성공"),
-            @ApiResponse(responseCode = "404", description = "찾을 수 없는 유저입니다. userId를 다시 한번 확인해주세요."),
-            @ApiResponse(responseCode = "500", description = "서버 오류")
-    })
-    @PostMapping("/auth/jwt-info")
-    public String getTokenInfo(String accessToken) {
 
-
-        System.out.println(jwtUtil.getExpriationTime(accessToken));
-        return jwtUtil.getExpriationTime(accessToken).toString();
-    }
 }

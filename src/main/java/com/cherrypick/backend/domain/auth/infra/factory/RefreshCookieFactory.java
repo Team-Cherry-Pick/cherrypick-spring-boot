@@ -10,7 +10,7 @@ import java.time.Duration;
 @Component @RequiredArgsConstructor
 public class RefreshCookieFactory
 {
-    @Value("${spring.jwt.refresh.key}")
+    @Value("${spring.jwt.refresh.period}")
     private Long refreshValidPeriod;
 
     public String createRefreshCookie(String value)

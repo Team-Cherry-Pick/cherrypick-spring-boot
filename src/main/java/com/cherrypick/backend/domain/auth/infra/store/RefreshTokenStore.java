@@ -22,7 +22,7 @@ import java.util.Optional;
 @Component @RequiredArgsConstructor
 public class RefreshTokenStore
 {
-    @Value("${spring.jwt.refresh.key}")
+    @Value("${spring.jwt.refresh.period}")
     private Long refreshValidPeriod;
     private final RedisTemplate<String, Object> redisTemplate;
 
