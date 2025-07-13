@@ -4,6 +4,10 @@ import lombok.Builder;
 
 public class AuthResponseDTOs {
 
+    public record LogoutResponseDTO(
+      Boolean isSuccess
+    ){}
+
     @Builder
     // 엑세스 토큰 재발급 시 사용되는 DTO
     public record AccessToken(

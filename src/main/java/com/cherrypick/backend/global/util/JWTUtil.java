@@ -155,10 +155,20 @@ public class JWTUtil
         return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true)
-                //.sameSite("Strict")
                 .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ofDays(14))
+                .build();
+    }
+
+    // logout 시 refreshToken을 없애줄 더미 토큰
+    public ResponseCookie createDummyRefreshCookie(){
+        return ResponseCookie.from("refreshToken", "logout")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(Duration.ofSeconds(0))
                 .build();
     }
 

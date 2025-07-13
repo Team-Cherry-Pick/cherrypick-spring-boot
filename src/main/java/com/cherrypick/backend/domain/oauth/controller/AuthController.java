@@ -44,6 +44,27 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "리프레시 토큰 / 유저를 찾을 수 없습니다."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
+    @PostMapping("/logout")
+    public ResponseEntity<AuthResponseDTOs.LogoutResponseDTO> logout(HttpServletRequest request, HttpServletResponse response)
+    {
+        // 리프레시 토큰도 파기 후 재생성해서 보내줌
+        var dummyCookie = jwtUtil.createDummyRefreshCookie();
+        response.addHeader("Set-Cookie", dummyCookie.toString());
+
+        return ResponseEntity.ok(null);
+    }
+
+
+    @Operation(
+            summary = "access token 재발급",
+            description = "refresh 쿠키를 가진 채로 실행해주시면 access token을 재발급 합니다." +
+                    "이때 refresh token도 함께 재발급 되어 쿠키로 저장해드립니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "JWT 토큰 생성 성공"),
+            @ApiResponse(responseCode = "404", description = "리프레시 토큰 / 유저를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponseDTOs.AccessToken> auth(@RequestBody AuthRequestDTOs.DeviceIdDTO deviceIdDto, HttpServletRequest request, HttpServletResponse response)
     {
