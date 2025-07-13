@@ -49,7 +49,7 @@ public class UserController {
     })
     @PatchMapping("")
     public ResponseEntity<UserDetailResponseDTO> update(
-            @Parameter(description = "유저 정보를 넘겨주십시오. (전부 넘겨주셔야함)") UserUpdateRequestDTO dto,
+            @Parameter(description = "유저 정보를 넘겨주십시오. (전부 넘겨주셔야함)") @RequestBody  UserUpdateRequestDTO dto,
             @RequestParam(value = "version", defaultValue = "v1") String version) {
 
         dto.validate(); // 요구 조건에 맞지 않으면 오류를 일으킴.
