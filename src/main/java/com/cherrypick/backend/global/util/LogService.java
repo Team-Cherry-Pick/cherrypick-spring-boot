@@ -95,12 +95,10 @@ public class LogService {
         MDC.put("logType", "ERROR_LOG");
 
         var stackTraceList = Arrays.asList(stackTrace);
-        stackTraceList = stackTraceList.subList(Math.max(0, stackTraceList.size()-5), stackTraceList.size());
-        var stackTraceString = stackTraceList.stream().map(StackTraceElement::toString).collect(Collectors.joining("\n")) ;
+        if(env.equals("prod")) stackTraceList = stackTraceList.subList(0, Math.min(10, stackTraceList.size()));
+        if(env .equals("local")) Arrays.stream(stackTrace).forEach(System.out::println);
 
-        if(env .equals("local")){
-            Arrays.stream(stackTrace).forEach(System.out::println);
-        }
+        var stackTraceString = stackTraceList.stream().map(StackTraceElement::toString).collect(Collectors.joining("\n")) ;
 
         HashMap<String, Object> map = new HashMap<>();
         map.put("error_msg", msg);
