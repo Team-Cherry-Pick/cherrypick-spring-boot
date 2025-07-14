@@ -16,6 +16,7 @@ public enum UserErrorCode implements BaseErrorCode {
     GENDER_NOT_VALID(HttpStatus.BAD_REQUEST, "성별이 맞지 않습니다.(MALE|FEMALE)"),
     MISSING_REQUIRED_PARAMETER(HttpStatus.BAD_REQUEST, "필요한 정보가 NULL입니다."),
     REFRESH_TOKEN_NOT_VALID(HttpStatus.BAD_REQUEST, "리프레시 토큰이 유효하지 않습니다."),
+    REFRESH_TOKEN_REQUIRED(HttpStatus.BAD_REQUEST, "리프레시 토큰이 필요합니다."),
     REFRESH_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "리프레시 토큰이 만료되었습니다."),
 
 
