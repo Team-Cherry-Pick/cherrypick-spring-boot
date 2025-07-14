@@ -7,6 +7,7 @@ import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
 import com.cherrypick.backend.domain.user.dto.UserRequestDTOs;
 import com.cherrypick.backend.domain.user.dto.UserResponseDTOs;
 import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
+import com.cherrypick.backend.domain.user.enums.Gender;
 import com.cherrypick.backend.domain.user.enums.UserStatus;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -38,11 +40,13 @@ public class UserService {
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
         imageService.deleteImageByUserId(userId);
-        if(dto.imageId() != null) imageService.attachImage(userId, List.of(dto.imageId()), ImageType.USER);
-
         user.setNickname(dto.nickname());
+        user.setBirthday(LocalDate.parse(dto.birthday()));
+        user.setGender(Gender.valueOf(dto.gender()));
 
         var updatedUser = userRepository.save(user);
+
+        if(dto.imageId() != null) imageService.attachImage(userId, List.of(dto.imageId()), ImageType.USER);
         var profileImage = imageService.getImageByUserId(userId);
 
         return UserDetailResponseDTO.from(updatedUser, profileImage);
