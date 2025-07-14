@@ -38,7 +38,7 @@ public class UserService {
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
         imageService.deleteImageByUserId(userId);
-        imageService.attachImage(userId, List.of(dto.imageId()), ImageType.USER);
+        if(dto.imageId() != null) imageService.attachImage(userId, List.of(dto.imageId()), ImageType.USER);
 
         user.setNickname(dto.nickname());
 

@@ -101,7 +101,7 @@ public class LogService {
         var stackTraceString = stackTraceList.stream().map(StackTraceElement::toString).collect(Collectors.joining("\n")) ;
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("error_msg", msg);
+        map.put("error_msg", String.valueOf(msg));
         map.put("error_status", String.valueOf(status));
         map.put("error_trace", stackTraceString);
 
