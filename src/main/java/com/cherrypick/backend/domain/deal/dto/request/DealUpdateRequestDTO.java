@@ -20,6 +20,7 @@ public record DealUpdateRequestDTO(
         String content,
         List<Long> discountIds,
         List<String> discountNames,
+        String discountDescription,
         boolean isSoldOut
 
 ) {

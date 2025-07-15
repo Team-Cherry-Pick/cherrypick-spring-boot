@@ -33,9 +33,8 @@ public record DealDetailResponseDTO (
         VoteType voteType,
         Long categoryId,
         Long storeId,
-        String storeName,
         List<Long> discountIds,
-        List<String> discountNames
+        String discountName
 
 ) {
 }

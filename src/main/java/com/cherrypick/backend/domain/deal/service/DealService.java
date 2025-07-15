@@ -386,12 +386,6 @@ public class DealService {
                     .toList();
         }
 
-        // discountName은 단일 필드라서 그냥 리스트에 하나 담아주기
-        List<String> discountNames = new ArrayList<>();
-        if (deal.getDiscountName() != null) {
-            discountNames.add(deal.getDiscountName());
-        }
-
         return new DealDetailResponseDTO(
                 deal.getDealId(),
                 imageUrls,
@@ -415,9 +409,8 @@ public class DealService {
                 voteType,
                 finalCategoryId,
                 storeId,
-                storeName,
                 discountIds,
-                discountNames
+                deal.getDiscountName()
         );
     }
 
@@ -486,6 +479,10 @@ public class DealService {
         if (dto.discountNames() != null) {
             String discountName = String.join(", ", dto.discountNames());
             deal.setDiscountName(discountName);
+        }
+
+        if (dto.discountDescription() != null) {
+            deal.setDiscountDescription(dto.discountDescription());
         }
 
         if (dto.isSoldOut()) {
