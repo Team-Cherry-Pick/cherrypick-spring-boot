@@ -1,5 +1,8 @@
 package com.cherrypick.backend.domain.image.service;
 
+import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
+import com.cherrypick.backend.domain.deal.entity.Deal;
+import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.image.dto.request.ImageUploadRequestDTO;
 import com.cherrypick.backend.domain.image.dto.response.ImageDeleteResponseDTO;
 import com.cherrypick.backend.domain.image.dto.response.ImageUploadResponseDTO;
@@ -7,12 +10,16 @@ import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
+import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.global.exception.BaseException;
+import com.cherrypick.backend.global.exception.enums.DealErrorCode;
+import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.s3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +33,7 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
     private final S3Uploader s3Uploader;
+    private final DealRepository dealRepository;
 
     // 이미지 업로드
     public List<ImageUploadResponseDTO> createImages(ImageUploadRequestDTO dto) {
@@ -68,11 +76,38 @@ public class ImageService {
     }
 
     // 이미지 삭제
-    @Transactional
     public ImageDeleteResponseDTO deleteImage(Long imageId) {
+        // 로그인 사용자 가져오기
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof AuthenticatedUser userDetails)) {
+            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
+        }
+
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
 
+        // 권한 체크
+        boolean isAdmin = userDetails.role() == Role.ADMIN;
+        boolean isOwner = false;
+
+        if (image.getImageType() == ImageType.DEAL) {
+            if (image.getRefId() != null) {
+                Deal deal = dealRepository.findById(image.getRefId()).orElse(null);
+                if (deal != null && deal.getUserId().getUserId().equals(userDetails.userId())) {
+                    isOwner = true;
+                }
+            }
+        } else if (image.getImageType() == ImageType.USER) {
+            if (image.getRefId() != null && image.getRefId().equals(userDetails.userId())) {
+                isOwner = true;
+            }
+        }
+
+        if (!isOwner && !isAdmin) {
+            throw new BaseException(GlobalErrorCode.FORBIDDEN);
+        }
+
+        // S3 삭제 및 DB 삭제
         s3Uploader.delete(image.getImageUrl());
         imageRepository.delete(image);
 
