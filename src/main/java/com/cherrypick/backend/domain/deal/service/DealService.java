@@ -25,6 +25,7 @@ import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.store.repository.StoreRepository;
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.user.entity.User;
+import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.cherrypick.backend.domain.vote.repository.VoteRepository;
@@ -511,14 +512,18 @@ public class DealService {
         Deal deal = dealRepository.findById(dealId)
                 .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
 
-        // 작성자 검증
-        if (!deal.getUserId().getUserId().equals(userDetails.userId())) {
+        // 작성자 또는 관리자 검증
+        boolean isOwner = deal.getUserId().getUserId().equals(userDetails.userId());
+        boolean isAdmin = userDetails.role() == Role.ADMIN;
+
+        if (!isOwner && !isAdmin) {
             throw new BaseException(GlobalErrorCode.FORBIDDEN);
         }
 
+        // 삭제 처리
         deal.setIsDelete(true);
 
-        // 삭제 후 해당 이미지 isTemp = true로 설정
+        // 관련 이미지 isTemp=true로 변경
         List<Image> images = imageRepository.findByRefIdAndImageTypeOrderByImageIndexAsc(dealId, ImageType.DEAL);
         for (Image image : images) {
             image.setTemp(true);
