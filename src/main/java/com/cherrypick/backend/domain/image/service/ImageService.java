@@ -76,6 +76,7 @@ public class ImageService {
     }
 
     // 이미지 삭제
+    @Transactional
     public ImageDeleteResponseDTO deleteImage(Long imageId) {
         // 로그인 사용자 가져오기
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
