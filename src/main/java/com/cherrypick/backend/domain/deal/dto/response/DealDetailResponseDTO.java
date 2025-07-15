@@ -30,6 +30,12 @@ public record DealDetailResponseDTO (
         String deepLink,
         String originalUrl,
         boolean isSoldOut,
-        VoteType voteType
+        VoteType voteType,
+        Long categoryId,
+        Long storeId,
+        String storeName,
+        List<Long> discountIds,
+        List<String> discountNames
+
 ) {
 }

@@ -313,19 +313,16 @@ public class DealService {
             }
         }
 
-        // 카테고리 정보
+        // 카테고리 이름 부모→자식 순으로
         List<String> categoryNames = new ArrayList<>();
-        Long categoryId = deal.getCategoryId().getCategoryId();
+        Long currentCategoryId = deal.getCategoryId() != null ? deal.getCategoryId().getCategoryId() : null;
+        Long finalCategoryId = currentCategoryId; // 최종 카테고리 아이디
 
-        // 카테고리 이름을 부모에서 자식 순으로 조회
-        while (categoryId != null) {
-            System.out.println("Current categoryId: " + categoryId);
-
-            Category category = categoryRepository.findById(categoryId)
+        while (currentCategoryId != null) {
+            Category category = categoryRepository.findById(currentCategoryId)
                     .orElseThrow(() -> new BaseException(DealErrorCode.CATEGORY_NOT_FOUND));
-
-            categoryNames.add(0, category.getName());  // 부모부터 자식 순으로 저장하기 위해 앞에 추가
-            categoryId = category.getParentId();  // 부모 카테고리로 이동
+            categoryNames.add(0, category.getName());
+            currentCategoryId = category.getParentId();
         }
 
         // 이미지 조회
@@ -340,17 +337,20 @@ public class DealService {
                 userImageOpt.map(Image::getImageUrl).orElse(null)
         );
 
-        // Store 정보
-        com.cherrypick.backend.domain.store.vo.Store storeVo = null;
+        // Store VO 생성
+        com.cherrypick.backend.domain.store.vo.Store storeVo;
+        Long storeId = null;
+        String storeName = null;
         if (deal.getStoreId() != null) {
-            // Store ID가 있다면 해당 스토어 정보 가져오기
+            storeId = deal.getStoreId().getStoreId();
+            storeName = deal.getStoreId().getName();
             storeVo = new com.cherrypick.backend.domain.store.vo.Store(
                     deal.getStoreId().getName(),
                     deal.getStoreId().getTextColor(),
                     deal.getStoreId().getBackgroundColor()
             );
-        } else if (deal.getStoreName() != null) {
-            // Store Name만 있으면 컬러 정보는 null로 처리
+        } else {
+            storeName = deal.getStoreName();
             storeVo = new com.cherrypick.backend.domain.store.vo.Store(
                     deal.getStoreName(),
                     null,
@@ -378,6 +378,19 @@ public class DealService {
                 ))
                 .toList();
 
+        // 할인 정보 처리
+        List<Long> discountIds = new ArrayList<>();
+        if (deal.getDiscounts() != null && !deal.getDiscounts().isEmpty()) {
+            discountIds = deal.getDiscounts().stream()
+                    .map(Discount::getDiscountId)
+                    .toList();
+        }
+
+        // discountName은 단일 필드라서 그냥 리스트에 하나 담아주기
+        List<String> discountNames = new ArrayList<>();
+        if (deal.getDiscountName() != null) {
+            discountNames.add(deal.getDiscountName());
+        }
 
         return new DealDetailResponseDTO(
                 deal.getDealId(),
@@ -399,7 +412,12 @@ public class DealService {
                 deal.getDeepLink(),
                 deal.getOriginalUrl(),
                 deal.isSoldOut(),
-                voteType
+                voteType,
+                finalCategoryId,
+                storeId,
+                storeName,
+                discountIds,
+                discountNames
         );
     }
 
