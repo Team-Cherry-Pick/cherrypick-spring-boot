@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,10 +117,11 @@ public class ImageService {
     }
 
     // 임시 이미지 삭제
-    @Scheduled(cron = "0 0 3 * * *") // 매일 새벽 3시
+    @Scheduled(cron = "0 0 5 * * *") // 매일 새벽 5시
     @Transactional
     public void deleteTempImages() {
-        List<Image> tempImages = imageRepository.findAllByIsTempTrue();
+        LocalDateTime threshold = LocalDateTime.now().minusHours(24); // 24시간 경과된 이미지만 삭제
+        List<Image> tempImages = imageRepository.findByIsTempTrueAndCreatedAtBefore(threshold);
 
         for (Image image : tempImages) {
             try {
@@ -133,26 +135,15 @@ public class ImageService {
     // 이미지를 특정 대상에 연결하는 공통 메소드
     @Transactional
     public void attachImage(Long refId, List<Long> imageIds, ImageType imageType) {
-        List<Image> images = imageRepository.findAllById(imageIds);
-
-        for (Image image : images) {
-            image.setRefId(refId);          // 게시글 ID나 유저 ID
-            image.setImageType(imageType);  // DEAL / USER
-            image.setTemp(false);           // false로 update
-        }
-    }
-
-    // 이미지 순서 수정 대비
-    @Transactional
-    public void attachAndIndexImages(Long refId, List<ImageUrl> imageUrls, ImageType imageType) {
-        for (ImageUrl imageUrl : imageUrls) {
-            Image image = imageRepository.findById(imageUrl.imageId())
+        int index = 0;
+        for (Long imageId : imageIds) {
+            Image image = imageRepository.findById(imageId)
                     .orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
 
-            image.setRefId(refId);
-            image.setImageType(imageType);
-            image.setTemp(false);
-            image.setImageIndex(imageUrl.indexes());
+            image.setRefId(refId);           // 게시글 ID
+            image.setImageType(imageType);   // DEAL / USER
+            image.setTemp(false);            // 활성화
+            image.setImageIndex(index++);    // 요청 순서대로 인덱스 재배치
         }
     }
 

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +24,9 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     // 이미지 조회
     @Query(value = "SELECT * FROM image WHERE ref_id=:refId and image_type='USER'", nativeQuery = true)
     Optional<Image> findByUserId(@Param("refId")Long refId);
+
+    // temp 이미지 삭제용으로 생성된지 일정시간 지난 이미지 조회
+    List<Image> findByIsTempTrueAndCreatedAtBefore(LocalDateTime threshold);
 
     @Query("""
     SELECT i FROM Image i
