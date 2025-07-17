@@ -9,7 +9,7 @@ import java.util.List;
 public record DealUpdateRequestDTO(
 
         Long dealId,
-        List<ImageUrl> imageUrls,
+        List<Long> imageIds,
         String title,
         Long categoryId,
         String originalUrl,
