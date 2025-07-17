@@ -32,6 +32,7 @@ import com.cherrypick.backend.domain.vote.repository.VoteRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
+import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -493,8 +494,30 @@ public class DealService {
         }
 
         // 이미지 매핑
-        if (dto.imageUrls() != null && !dto.imageUrls().isEmpty()) {
-            imageService.attachAndIndexImages(deal.getDealId(), dto.imageUrls(), ImageType.DEAL);
+        if (dto.imageIds() != null) {
+            // 1. 기존 이 게시글에 연결된 이미지들 가져오기
+            List<Image> existingImages = imageRepository.findByRefIdAndImageTypeOrderByImageIndexAsc(deal.getDealId(), ImageType.DEAL);
+
+            // 2. 요청으로 온 이미지 ID들을 Set으로 만들어서 비교
+            List<Long> requestedImageIds = dto.imageIds();
+            Set<Long> requestedSet = new HashSet<>(requestedImageIds);
+
+            // 3. 기존 이미지 중 요청에 포함되지 않은 것들은 isTemp = true
+            for (Image img : existingImages) {
+                if (!requestedSet.contains(img.getImageId())) {
+                    img.setTemp(true);
+                }
+            }
+
+            // 4. 요청으로 온 이미지 ID 순서대로 index 매기고 isTemp=false, refId 세팅
+            int index = 0;
+            for (Long imgId : requestedImageIds) {
+                Image img = imageRepository.findById(imgId)
+                        .orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
+                img.setRefId(deal.getDealId());
+                img.setImageIndex(index++);
+                img.setTemp(false);
+            }
         }
 
         return new DealResponseDTOs.Update(deal.getDealId(), "핫딜 게시글 수정 성공");
