@@ -1,12 +1,28 @@
-version: '3.8'
 
 services:
+  nginx:
+    image: nginx:1.26.0
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/www:/var/www/certbot
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - backend
+    depends_on:
+      - spring
+      - recommender
+
   spring:
     image: cpdevelopteam/repik:latest
     container_name: spring
     restart: unless-stopped
     env_file:
-      - .env.spring
+      - .env
     ports:
       - "8080:8080"
     networks:
@@ -19,7 +35,7 @@ services:
     container_name: recommender
     restart: unless-stopped
     env_file:
-      - .env.recommender
+      - .env
     networks:
       - backend
     depends_on:
@@ -29,23 +45,6 @@ services:
     image: redis:7.2.4
     container_name: redis
     restart: unless-stopped
-    networks:
-      - backend
-
-  nginx:
-    image: nginx:1.26.0
-    container_name: nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/conf:/etc/nginx/conf.d
-      - ./nginx/certs:/etc/nginx/certs:ro
-      - ./static:/usr/share/nginx/html
-    depends_on:
-      - spring
-      - recommender
     networks:
       - backend
 
