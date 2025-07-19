@@ -1,0 +1,94 @@
+package com.cherrypick.backend.domain.deal.entity;
+
+import com.cherrypick.backend.domain.category.entity.Category;
+import com.cherrypick.backend.domain.deal.vo.Price;
+import com.cherrypick.backend.domain.deal.vo.Shipping;
+import com.cherrypick.backend.domain.discount.entity.Discount;
+import com.cherrypick.backend.domain.hashtag.entity.DealTag;
+import com.cherrypick.backend.domain.store.entity.Store;
+import com.cherrypick.backend.domain.user.entity.User;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+public class Deal {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long dealId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "user_id")
+    private User userId;
+
+    private String title;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category categoryId;
+
+    private String originalUrl;
+    private String deepLink;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id")
+    private Store storeId;
+
+    @Embedded
+    private Price price;
+
+    @Embedded
+    private Shipping shipping;
+
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    @ManyToMany
+    @JoinTable(
+            name = "deal_discount",
+            joinColumns = @JoinColumn(name = "deal_id"),
+            inverseJoinColumns = @JoinColumn(name = "discount_id")
+    )
+    private List<Discount> discounts = new ArrayList<>();
+
+    private boolean isSoldOut;
+
+    private String storeName;
+    private String discountName;
+    private String discountDescription;
+
+    @OneToMany(mappedBy = "deal", orphanRemoval = true)
+    private List<DealTag> dealTags = new ArrayList<>();
+
+    @Column(nullable = false)
+    private double heat = 0.0;
+
+    @Builder.Default
+    private Long totalViews = 0L;
+
+    @Builder.Default
+    private Boolean isDelete = false;
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+}
