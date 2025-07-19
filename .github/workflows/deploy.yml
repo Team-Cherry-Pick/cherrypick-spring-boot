@@ -54,7 +54,7 @@ jobs:
           host: ${{secrets.DEV_SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "config/."
+          source: "config/*"
           target: "repik"
 
       - name: Deploy to EC2 Server
