@@ -39,6 +39,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Copy config/ to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          source: "config"
+          target: "~/repik"
+
       - name: Deploy to EC2 Server
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -46,15 +55,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            echo "${{ secrets.ENV }}" > ~/repik.env
+            cd ~/repik
+            echo "${{ secrets.ENV }}" > ~/env.spring
+            docker compose down
+            docker compose pull
+            docker compose up
 
-            docker pull cpdevelopteam/repik:latest
-            docker stop repik || true
-            docker rm repik || true
 
-            docker run --name repik \
-              --network repik-net \
-              -p 8080:8080 \
-              -d \
-              --env-file ~/repik.env \
-              cpdevelopteam/repik:latest

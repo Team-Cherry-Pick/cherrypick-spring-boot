@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  spring:
+    image: cpdevelopteam/repik:latest
+    container_name: spring
+    restart: unless-stopped
+    env_file:
+      - .env.spring
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+    depends_on:
+      - redis
+
+  recommender:
+    image: cpdevelopteam/repik-recommender:latest
+    container_name: recommender
+    restart: unless-stopped
+    env_file:
+      - .env.recommender
+    networks:
+      - backend
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7.2.4
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:1.26.0
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./static:/usr/share/nginx/html
+    depends_on:
+      - spring
+      - recommender
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
