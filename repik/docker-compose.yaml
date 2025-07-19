@@ -1,6 +1,21 @@
-version: '3.8'
 
 services:
+  nginx:
+    image: nginx:1.26.0
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - backend
+    depends_on:
+      - spring
+      - recommender
+
   spring:
     image: cpdevelopteam/repik:latest
     container_name: spring
@@ -29,22 +44,6 @@ services:
     image: redis:7.2.4
     container_name: redis
     restart: unless-stopped
-    networks:
-      - backend
-
-  nginx:
-    image: nginx:1.26.0
-    container_name: nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/conf:/etc/nginx/conf.d
-      - ./nginx/certs:/etc/nginx/certs:ro
-    depends_on:
-      - spring
-      - recommender
     networks:
       - backend
 
