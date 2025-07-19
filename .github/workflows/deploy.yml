@@ -42,9 +42,9 @@ jobs:
       - name: Copy config/ to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ec2-user
-          key: ${{ secrets.EC2_KEY }}
+          host: ${{secrets.SERVER_HOST }}
+          username: secrets.SERVER_USER
+          key: ${{ secrets.SERVER_SSH_KEY }}
           source: "config"
           target: "~/repik"
 
