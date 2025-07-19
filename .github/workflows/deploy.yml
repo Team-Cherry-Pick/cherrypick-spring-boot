@@ -39,14 +39,23 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Ensure target directory exists
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: mkdir -p ~/repik
+
+
       - name: Copy config/ to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{secrets.DEV_SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "config"
-          target: "~/repik"
+          source: "config/."
+          target: "repik"
 
       - name: Deploy to EC2 Server
         uses: appleboy/ssh-action@v0.1.6
@@ -55,8 +64,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd ~/repik
-            echo "${{ secrets.DEV_ENV }}" > ~/env.spring
+            cd repik
+            echo "${{ secrets.DEV_ENV }}" > env.spring
             docker compose down
             docker compose pull
             docker compose up
