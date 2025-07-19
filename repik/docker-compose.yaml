@@ -6,7 +6,7 @@ services:
     container_name: spring
     restart: unless-stopped
     env_file:
-      - spring.env
+      - .env
     ports:
       - "8080:8080"
     networks:
@@ -19,7 +19,7 @@ services:
     container_name: recommender
     restart: unless-stopped
     env_file:
-      - .env.recommender
+      - .env
     networks:
       - backend
     depends_on:
