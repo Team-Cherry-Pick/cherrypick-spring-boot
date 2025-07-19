@@ -6,7 +6,7 @@ services:
     container_name: spring
     restart: unless-stopped
     env_file:
-      - .env.spring
+      - spring.env
     ports:
       - "8080:8080"
     networks:
