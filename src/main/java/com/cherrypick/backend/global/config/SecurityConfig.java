@@ -12,6 +12,7 @@ import com.cherrypick.backend.global.util.JwtUtil;
 import com.cherrypick.backend.global.util.LogService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +34,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import java.util.List;
 
 @Configuration
-@EnableWebSecurity @RequiredArgsConstructor
+@EnableWebSecurity
 public class SecurityConfig {
 
     private final Oauth2ClientService oauthService;
@@ -47,6 +48,26 @@ public class SecurityConfig {
 
     @Value("${spring.profiles.active}")
     private String springProfilesActive;
+
+    public SecurityConfig(
+            Oauth2ClientService oauthService,
+            OAuth2SuccessHandler oauth2SuccessHandler,
+            CustomAuthorizationRequestResolver customAuthorizationRequestResolver,
+            AccessTokenProvider  accessTokenProvider,
+            FilterChainExceptionHandler filterChainExceptionHandler,
+            AuthenticationConfiguration authenticationConfiguration,
+            @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping requestMappingHandlerMapping
+
+    ) {
+        this.oauthService = oauthService;
+        this.oauth2SuccessHandler = oauth2SuccessHandler;
+        this.customAuthorizationRequestResolver = customAuthorizationRequestResolver;
+        this.accessTokenProvider = accessTokenProvider;
+        this.filterChainExceptionHandler = filterChainExceptionHandler;
+        this.authenticationConfiguration = authenticationConfiguration;
+        this.requestMappingHandlerMapping = requestMappingHandlerMapping;
+    }
+
 
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http, LogService logService) throws Exception {

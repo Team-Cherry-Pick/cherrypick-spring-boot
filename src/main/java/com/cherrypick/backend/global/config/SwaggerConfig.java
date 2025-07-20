@@ -16,15 +16,16 @@ import org.springframework.context.annotation.Profile;
 
 import java.util.List;
 
-@Configuration
 @Profile({"dev", "local"})
+@Configuration
 public class SwaggerConfig {
 
-    @Value("${spring.profiles.active:local}")
+    @Value("${spring.profiles.active}")
     private String activeProfile;
 
     @Bean
     public OpenAPI openAPI() {
+        
         // Security Scheme 정의
         SecurityScheme securityScheme = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
@@ -49,7 +50,7 @@ public class SwaggerConfig {
         // 서버 프로파일일 경우 서버 base URL 명시
         if ("dev".equals(activeProfile)) {
             Server server = new Server();
-            server.setUrl("https://api.repik.kr");
+            server.setUrl("https://api.cherrypick.cloud");
             server.setDescription("Develop Server");
             openAPI.setServers(List.of(server));
         }
