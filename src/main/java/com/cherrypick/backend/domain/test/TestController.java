@@ -129,18 +129,6 @@ public class TestController
         return "success";
     }
 
-    // 크롤링 API
-    @GetMapping("/deal/crawl-board")
-    public String crawlBoard(String count) {
-        try {
-            dealCrawlService.crawlAndSaveBoard(Integer.parseInt(count));
-            return "게시글 크롤링 및 저장 완료";
-        } catch (Exception e) {
-            return "오류 발생: " + e.getMessage();
-        }
-    }
-
-
     @Operation(
             summary = "테스트를 위한 JWT 생성 API. ** 실 서비스에서는 사용하지 않습니다. **",
             description = "userId를 넣어 해당 유저의 엑세스 토큰을 발급합니다."

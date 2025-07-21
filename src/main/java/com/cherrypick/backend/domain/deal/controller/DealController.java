@@ -30,8 +30,6 @@ public class DealController {
 
     private final DealService dealService;
     private final RecommenderService recommenderService;
-    private final DealCrawlService dealCrawlService;
-
     // 게시글 생성
     @Operation(
             summary = "핫딜 게시글 생성 API V1",
