@@ -39,42 +39,36 @@ public class ImageService {
     // 이미지 업로드
     public List<ImageUploadResponseDTO> createImages(ImageUploadRequestDTO dto) {
         MultipartFile[] images = dto.images();
-        Integer[] indexes = dto.indexes();
-
-        // 이미지 개수랑 인덱스 개수 안 맞으면 에러
-        if (images.length != indexes.length) {
-            throw new BaseException(ImageErrorCode.IMAGE_COUNT_MISMATCH);
-        }
 
         List<ImageUploadResponseDTO> responses = new ArrayList<>();
 
         for (int i = 0; i < images.length; i++) {
             MultipartFile image = images[i];
-            int index = indexes[i];
 
             String url;
             try {
                 url = s3Uploader.upload(image, "deal/123");
             } catch (BaseException e) {
-                throw e; // 위임
+                throw e;
             } catch (Exception e) {
                 throw new BaseException(ImageErrorCode.IMAGE_UPLOAD_FAIL);
             }
 
             Image imageEntity = new Image();
             imageEntity.setImageUrl(url);
-            imageEntity.setImageIndex(index);
+            imageEntity.setImageIndex(0);
             imageEntity.setImageType(null);
             imageEntity.setRefId(null);
             imageEntity.setTemp(true);
 
             imageRepository.save(imageEntity);
 
-            responses.add(new ImageUploadResponseDTO(imageEntity.getImageId(), url, index));
+            responses.add(new ImageUploadResponseDTO(imageEntity.getImageId(), url, imageEntity.getImageIndex()));
         }
 
         return responses;
     }
+
 
     // 이미지 삭제
     @Transactional
