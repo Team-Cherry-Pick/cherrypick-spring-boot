@@ -47,7 +47,7 @@ public class ImageService {
 
             String url;
             try {
-                url = s3Uploader.upload(image, "deal/123");
+                url = s3Uploader.upload(image, "image");
             } catch (BaseException e) {
                 throw e;
             } catch (Exception e) {
