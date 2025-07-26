@@ -32,7 +32,12 @@ public class RegistUserFactory {
                     .role(Role.CLIENT)
                     .build();
         }
-        else throw new BaseException(UserErrorCode.UNDEFINED_OAUTH_PROVIDER);
+        else
+        {
+            System.out.println(provider);
+            throw new BaseException(UserErrorCode.UNDEFINED_OAUTH_PROVIDER);
+        }
+
 
         return user;
     }
