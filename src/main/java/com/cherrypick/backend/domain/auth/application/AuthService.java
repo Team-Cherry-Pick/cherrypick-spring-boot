@@ -50,7 +50,7 @@ public class AuthService {
         }
 
         // [2] 저장할 유저 객체 생성, 현재 kakao만 지원.
-        var user = RegistUserFactory.extractUser(registerToken.oauthId(), registerToken.oauthId(), dto);
+        var user = RegistUserFactory.extractUser(registerToken.oauthId(), registerToken.provider(), dto);
 
         // [3] 신규 유저를 저장
         var savedUser = userRepository.save(user);
