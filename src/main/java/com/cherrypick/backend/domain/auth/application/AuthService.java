@@ -56,7 +56,7 @@ public class AuthService {
         var savedUser = userRepository.save(user);
 
         // [4] 유저의 사진을 등록
-        imageService.attachImage(savedUser.getUserId(), List.of(dto.imageId()), ImageType.USER);
+        if(dto.imageId() >= 0) imageService.attachImage(savedUser.getUserId(), List.of(dto.imageId()), ImageType.USER);
 
         // [5] 엑세스 토큰과 리프레시 토큰을 생성
         String accessToken = accessTokenProvider.createToken(savedUser.getUserId(), savedUser.getRole(), savedUser.getNickname());
