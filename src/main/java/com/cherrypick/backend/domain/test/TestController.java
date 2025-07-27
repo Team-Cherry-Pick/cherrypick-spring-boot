@@ -98,7 +98,7 @@ public class TestController
                   const encodedBrowser = encodeURIComponent(browser);
                   const encodedVersion = encodeURIComponent(version);
             
-                  var url =  `http://localhost:8080`        +
+                  var url =  `http://localhost:8080/oauth2/authorization/kakao`        +
                               `?redirect=${encodedRedirect}` +
                               `&os=${encodedOs}` +
                               `&browser=${encodedBrowser}` +
