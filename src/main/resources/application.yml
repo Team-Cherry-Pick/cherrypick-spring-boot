@@ -88,4 +88,4 @@ aws:
     bucket: ${BUCKET_NAME}
 
 linkprice:
-  affiliate-id: A100697697
+  affiliate-id: ${LINKPRICE_AFFILIATE_ID}
