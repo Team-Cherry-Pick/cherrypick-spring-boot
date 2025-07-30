@@ -4,8 +4,7 @@ import com.cherrypick.backend.domain.image.enums.ImageType;
 import org.springframework.web.multipart.MultipartFile;
 
 public record ImageUploadRequestDTO(
-        MultipartFile[] images,
-        Integer[] indexes
+        MultipartFile[] images
 ) {}
 
 

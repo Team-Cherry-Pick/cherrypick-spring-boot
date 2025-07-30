@@ -21,6 +21,7 @@ import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
+import com.cherrypick.backend.domain.linkprice.service.LinkPriceService;
 import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.store.repository.StoreRepository;
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
@@ -59,13 +60,11 @@ public class DealService {
     private final ImageRepository imageRepository;
     private final HashTagService  hashTagService;
     private final RecommenderService recommenderService;
+    private final LinkPriceService linkPriceService;
 
     // 게시글 생성
     @Transactional
     public DealResponseDTOs.Create createDeal(DealCreateRequestDTO dto) {
-
-        // TODO: 딥링크 변환
-
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if (!(principal instanceof AuthenticatedUser userDetails)) {
@@ -101,11 +100,15 @@ public class DealService {
             discountName = String.join(", ", dto.discountNames());
         }
 
+        // 딥링크 변환
+        String deepLink = linkPriceService.createDeeplink(dto.originalUrl());
+
         Deal deal = Deal.builder()
                 .userId(user)
                 .title(dto.title())
                 .categoryId(category)
                 .originalUrl(dto.originalUrl())
+                .deepLink(deepLink)
                 .storeId(store)
                 .storeName(store == null ? dto.storeName() : null)
                 .price(dto.price())
@@ -132,21 +135,33 @@ public class DealService {
 
     // 게시글 전체조회 (검색)
     public DealSearchPageResponseDTO searchDeals(DealSearchRequestDTO dto, int page, int size) {
+        // 카테고리 유효성
         if (dto.getCategoryId() != null && !categoryRepository.existsById(dto.getCategoryId())) {
             throw new BaseException(DealErrorCode.CATEGORY_NOT_FOUND);
         }
 
+        // 할인 ID 유효성 및 존재 여부
         if (dto.getDiscountIds() != null && !dto.getDiscountIds().isEmpty()) {
+            for (Long discountId : dto.getDiscountIds()) {
+                if (discountId == null || discountId <= 0) {
+                    throw new BaseException(DealErrorCode.INVALID_DISCOUNT_INFORMATION);
+                }
+            }
             List<Long> foundDiscountIds = discountRepository.findAllById(dto.getDiscountIds())
-                    .stream().map(Discount::getDiscountId).toList();
+                    .stream()
+                    .map(Discount::getDiscountId)
+                    .toList();
             if (foundDiscountIds.size() != dto.getDiscountIds().size()) {
                 throw new BaseException(DealErrorCode.DISCOUNT_NOT_FOUND);
             }
         }
 
+        // 스토어 ID 존재 여부
         if (dto.getStoreIds() != null && !dto.getStoreIds().isEmpty()) {
             List<Long> foundStoreIds = storeRepository.findAllById(dto.getStoreIds())
-                    .stream().map(Store::getStoreId).toList();
+                    .stream()
+                    .map(Store::getStoreId)
+                    .toList();
             if (foundStoreIds.size() != dto.getStoreIds().size()) {
                 throw new BaseException(DealErrorCode.STORE_NOT_FOUND);
             }
