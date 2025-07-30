@@ -61,6 +61,8 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponseDTOs.AccessToken> auth(@RequestBody AuthRequestDTOs.DeviceIdDTO deviceIdDto, HttpServletRequest request, HttpServletResponse response)
     {
+        log.info("isSecure : {}", request.isSecure());
+
         String clientDeviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("default");
 
         // 쿠키에서 refresh를 찾아낸다.
