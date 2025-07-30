@@ -62,6 +62,7 @@ public class AuthController {
     public ResponseEntity<AuthResponseDTOs.AccessToken> auth(@RequestBody AuthRequestDTOs.DeviceIdDTO deviceIdDto, HttpServletRequest request, HttpServletResponse response)
     {
         log.info("isSecure : {}", request.isSecure());
+        log.info("cookies : {}", (Object) request.getCookies());
 
         String clientDeviceId = Optional.ofNullable(deviceIdDto.deviceId()).orElse("default");
 
