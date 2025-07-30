@@ -43,6 +43,7 @@ public class TestController
     private final RefreshCookieFactory refreshCookieFactory;
 
 
+
     String HTML = """
             <!DOCTYPE html>
             <html>
@@ -170,6 +171,17 @@ public class TestController
         response.addHeader("Set-Cookie", refreshCookie);
 
         return ResponseEntity.ok(new AuthResponseDTOs.AccessToken(accessToken));
+    }
+
+    @GetMapping("/auth/expiretime")
+    @Operation(
+            summary = "토큰 만료 시간을 반환. ** 실 서비스에서는 사용하지 않습니다. **",
+            description = "해당 엑세스 토큰의 만료시간을 반환"
+    )
+    public ResponseEntity<String>  parseToken(@RequestParam String token) {
+
+       var str = accessTokenProvider.getExpriationTime(token).toString();
+        return ResponseEntity.ok(str);
     }
 
 

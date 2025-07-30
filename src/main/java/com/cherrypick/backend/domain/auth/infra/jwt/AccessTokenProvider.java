@@ -54,7 +54,7 @@ public class AccessTokenProvider
                 .claim("role", role.toString())
                 .claim("type", "access")
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + accessValidPeriod))
+                .expiration(new Date(System.currentTimeMillis() + accessValidPeriod * 1000))
                 .signWith(accessSecretKey)
                 .compact();
 
