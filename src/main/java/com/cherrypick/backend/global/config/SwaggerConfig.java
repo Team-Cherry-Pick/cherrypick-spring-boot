@@ -49,7 +49,7 @@ public class SwaggerConfig {
         // 서버 프로파일일 경우 서버 base URL 명시
         if ("dev".equals(activeProfile)) {
             Server server = new Server();
-            server.setUrl("https://api.repik.kr");
+            server.setUrl("https://api.cherrypick.cloud");
             server.setDescription("Develop Server");
             openAPI.setServers(List.of(server));
         }
