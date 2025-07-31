@@ -8,6 +8,7 @@ import com.cherrypick.backend.domain.auth.infra.jwt.RefreshTokenProvider;
 import com.cherrypick.backend.domain.auth.infra.store.RefreshTokenStore;
 import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.comment.service.CommentService;
+import com.cherrypick.backend.domain.deal.adapter.out.OpenAiAdapter;
 import com.cherrypick.backend.domain.deal.service.DealCrawlService;
 import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
 import com.cherrypick.backend.domain.user.entity.User;
@@ -41,7 +42,7 @@ public class TestController
     private final RefreshTokenProvider refreshTokenProvider;
     private final RefreshTokenStore refreshTokenStore;
     private final RefreshCookieFactory refreshCookieFactory;
-
+    private final OpenAiAdapter openAiAdapter;
 
     String HTML = """
             <!DOCTYPE html>
@@ -160,5 +161,21 @@ public class TestController
         return ResponseEntity.ok(new AuthResponseDTOs.AccessToken(accessToken));
     }
 
+    @Operation(
+            summary = "OpenAI 테스트 매서드",
+            description = "프롬프트 넣고 값 잘 나오나 확인"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "응답을 잘 받아왔습니다."),
+            @ApiResponse(responseCode = "404", description = "찾을 수 없는 유저입니다. userId를 다시 한번 확인해주세요."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PostMapping("/openai")
+    public ResponseEntity<String> testOpenAI(@Parameter(description = "프롬프트") @RequestParam String prompt)
+    {
+        String response = openAiAdapter.requestClassify(prompt).get();
+
+        return ResponseEntity.ok(response);
+    }
 
 }
