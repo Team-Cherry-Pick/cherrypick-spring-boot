@@ -185,20 +185,21 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        if(springProfilesActive.equalsIgnoreCase("prod")){
-            config.setAllowedOrigins(List.of(
-                    "https://repik.kr",                 // 프로덕트 서버
-                    "https://www.repik.kr",             // 프로덕트 서버 2
-                    "https://api.repik.kr"              // 프로덕트 API 서버
-            ));
-        }
-        else
+        //if(springProfilesActive.equalsIgnoreCase("prod")){
+        //    config.setAllowedOrigins(List.of(
+        //            "https://repik.kr",                 // 프로덕트 서버
+        //            "https://www.repik.kr",             // 프로덕트 서버 2
+        //            "https://api.repik.kr"              // 프로덕트 API 서버
+        //    ));
+        //}
+        //else
         {
             config.setAllowedOrigins(List.of(
                     "https://repik.kr",                 // 프로덕트 서버
                     "https://www.repik.kr",             // 프로덕트 서버 2
                     "https://api.repik.kr",             // 프로덕트 API 서버
                     "https://cherrypick.cloud",         // 개발 서버
+                    "https://www.cherrypick.cloud",     // 개발 서버 2
                     "https://api.cherrypick.cloud",     // 개발 API 서버
                     "http://localhost:3000",            // 로컬 프론트엔드
                     "http://localhost:8080"             // 로컬 백엔드

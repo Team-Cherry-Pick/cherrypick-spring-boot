@@ -50,13 +50,13 @@ public class AuthService {
         }
 
         // [2] 저장할 유저 객체 생성, 현재 kakao만 지원.
-        var user = RegistUserFactory.extractUser(registerToken.oauthId(), registerToken.oauthId(), dto);
+        var user = RegistUserFactory.extractUser(registerToken.oauthId(), registerToken.provider(), dto);
 
         // [3] 신규 유저를 저장
         var savedUser = userRepository.save(user);
 
         // [4] 유저의 사진을 등록
-        imageService.attachImage(savedUser.getUserId(), List.of(dto.imageId()), ImageType.USER);
+        if(dto.imageId() >= 0) imageService.attachImage(savedUser.getUserId(), List.of(dto.imageId()), ImageType.USER);
 
         // [5] 엑세스 토큰과 리프레시 토큰을 생성
         String accessToken = accessTokenProvider.createToken(savedUser.getUserId(), savedUser.getRole(), savedUser.getNickname());

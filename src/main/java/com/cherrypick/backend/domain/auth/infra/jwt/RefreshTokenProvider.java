@@ -34,7 +34,7 @@ public class RefreshTokenProvider
                 .claim("state", UUID.randomUUID().toString())
                 .claim("type", "refresh")
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + refreshValidPeriod))
+                .expiration(new Date(System.currentTimeMillis() + refreshValidPeriod * 1000))
                 .signWith(refreshSecretKey)
                 .compact();
     }

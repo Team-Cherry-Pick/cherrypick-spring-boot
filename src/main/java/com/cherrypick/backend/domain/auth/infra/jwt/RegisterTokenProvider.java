@@ -35,7 +35,7 @@ public class RegisterTokenProvider {
                 .claim("browser", browser)
                 .claim("version", version)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + registerValidPeriod))
+                .expiration(new Date(System.currentTimeMillis() + registerValidPeriod * 1000))
                 .signWith(registerSecretKey)
                 .compact();
     }
