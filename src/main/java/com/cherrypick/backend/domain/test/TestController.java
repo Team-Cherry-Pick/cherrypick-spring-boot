@@ -9,9 +9,7 @@ import com.cherrypick.backend.domain.auth.infra.store.RefreshTokenStore;
 import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.comment.service.CommentService;
 import com.cherrypick.backend.domain.deal.adapter.out.OpenAiAdapter;
-import com.cherrypick.backend.domain.deal.service.DealCrawlService;
-import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
-import com.cherrypick.backend.domain.user.entity.User;
+import com.cherrypick.backend.domain.deal.service.DealInfoService;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
@@ -20,7 +18,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 public class TestController
 {
     private final CommentService commentService;
-    private final DealCrawlService dealCrawlService;
+    private final DealInfoService dealCrawlService;
     private final AuthService authService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
@@ -128,17 +125,6 @@ public class TestController
     public String createDummyComment(){
         commentService.dummyDataSetting();
         return "success";
-    }
-
-    // 크롤링 API
-    @GetMapping("/deal/crawl-board")
-    public String crawlBoard(String count) {
-        try {
-            dealCrawlService.crawlAndSaveBoard(Integer.parseInt(count));
-            return "게시글 크롤링 및 저장 완료";
-        } catch (Exception e) {
-            return "오류 발생: " + e.getMessage();
-        }
     }
 
 

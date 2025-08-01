@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DealCrawlService {
+public class DealInfoService {
+
+
 
     
 
