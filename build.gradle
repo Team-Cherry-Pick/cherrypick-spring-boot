@@ -70,7 +70,7 @@ dependencies {
 
     // Crawler
     implementation 'org.jsoup:jsoup:1.15.4'
-    implementation 'org.seleniumhq.selenium:selenium-java:4.19.1'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.34.0'
     implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
 
     // 재컴파일 하지 않아도 즉시 적용
@@ -82,8 +82,7 @@ dependencies {
     // JSON 파싱
     implementation 'org.json:json:20240303'
 
-    // 크롤링
-    // implementation 'org.jsoup:jsoup:1.15.4'
+
 }
 
 tasks.named('test') {
