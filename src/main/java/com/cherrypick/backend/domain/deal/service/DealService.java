@@ -430,7 +430,6 @@ public class DealService {
                 (int) metrics[0], // likeCount
                 (int) metrics[1], // dislikeCount
                 (int) metrics[2], // commentCount
-                deal.getDeepLink(),
                 deal.getOriginalUrl(),
                 deal.isSoldOut(),
                 voteType,
