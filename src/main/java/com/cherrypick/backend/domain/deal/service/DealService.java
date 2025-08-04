@@ -42,6 +42,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -99,6 +101,10 @@ public class DealService {
         if (dto.discountNames() != null && !dto.discountNames().isEmpty()) {
             // discountNames "카드, 쿠폰" 형식으로 한 컬럼에 저장
             discountName = String.join(", ", dto.discountNames());
+        }
+
+        if (!isValidUrl(dto.originalUrl())) {
+            throw new BaseException(LinkPriceErrorCode.INVALID_ORIGINAL_URL);
         }
 
         // 딥링크 변환
@@ -468,6 +474,10 @@ public class DealService {
         }
 
         if (dto.originalUrl() != null) {
+            if (!isValidUrl(dto.originalUrl())) {
+                throw new BaseException(LinkPriceErrorCode.INVALID_ORIGINAL_URL);
+            }
+
             deal.setOriginalUrl(dto.originalUrl());
 
             // 딥링크 재생성
@@ -678,4 +688,42 @@ public class DealService {
             case LAST7DAYS -> now.minusDays(7);
         };
     }
+
+    // URL 검증
+    public static boolean isValidUrl(String url) {
+        Set<String> blockedShortDomains = Set.of(
+                "bit.ly", "t.co", "goo.gl", "tinyurl.com", "is.gd",
+                "ow.ly", "buff.ly", "cutt.ly", "rebrand.ly", "shorturl.at",
+                "adf.ly", "lnkd.in"
+        );
+
+        if (url == null || url.isBlank()) return false;
+
+        try {
+            URI uri = new URI(url);
+
+            // http 또는 https만 허용
+            String scheme = uri.getScheme();
+            if (scheme == null || (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https"))) {
+                return false;
+            }
+
+            // 호스트 검증
+            String host = uri.getHost();
+            if (host == null || host.isBlank()) {
+                return false;
+            }
+
+            // 단축 URL 도메인 차단
+            if (blockedShortDomains.contains(host.toLowerCase())) {
+                return false;
+            }
+
+            return true;
+
+        } catch (URISyntaxException e) {
+            return false;
+        }
+    }
+
 }
