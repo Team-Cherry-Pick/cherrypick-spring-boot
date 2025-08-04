@@ -63,7 +63,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,
                                 "/api/deal/recommend", "/api/deal/*",                                     // 게시글 추천 시스템 조회 요청
                                 "/api/category", "/api/store", "/api/discount",                         // 관련 리소스 조회 요청
-                                "/api/best-comment/*", "/api/comment/*"                                   // 댓글 조회 요청
+                                "/api/best-comment/*", "/api/comment/*",                                  // 댓글 조회 요청
+                                "/api/redirect/**"                                                          // 딥링크 리다이렉션
 
                         ).permitAll()
                         .requestMatchers("/api/deal/**").authenticated()                                     // 게시글 생성/수정/삭제 및 투표 등은 권한이 있어야함.
@@ -84,7 +85,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/refresh", "/api/auth/logout").permitAll()              // 액세스 토큰이 만료된 상태에서도 재발급은 받을 수 있어야함.
                         // 테스트 코드
                         .requestMatchers("/api/test/**").permitAll()
+
+                        // 리다이렉션 API
+                        .requestMatchers(HttpMethod.GET, "/api/redirect/**").permitAll()
                         .anyRequest().denyAll()
+
                 );
 
         http
