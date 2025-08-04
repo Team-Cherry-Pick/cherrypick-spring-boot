@@ -34,6 +34,7 @@ import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
+import com.cherrypick.backend.global.exception.enums.LinkPriceErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -101,7 +102,16 @@ public class DealService {
         }
 
         // 딥링크 변환
-        String deepLink = linkPriceService.createDeeplink(dto.originalUrl());
+        String deepLink = null;
+        try {
+            deepLink = linkPriceService.createDeeplink(dto.originalUrl());
+        } catch (BaseException e) {
+            if (e.getErrorCode() != LinkPriceErrorCode.LINKPRICE_API_RESULT_FAIL) {
+                throw e;
+            }
+            // LINKPRICE_API_RESULT_FAIL인 경우는 딥링크 null로 저장 후 생성
+        }
+
 
         Deal deal = Deal.builder()
                 .userId(user)
@@ -460,6 +470,18 @@ public class DealService {
 
         if (dto.originalUrl() != null) {
             deal.setOriginalUrl(dto.originalUrl());
+
+            // 딥링크 재생성
+            try {
+                String deepLink = linkPriceService.createDeeplink(dto.originalUrl());
+                deal.setDeepLink(deepLink);
+            } catch (BaseException e) {
+                if (e.getErrorCode() == LinkPriceErrorCode.LINKPRICE_API_RESULT_FAIL) {
+                    deal.setDeepLink(null); // 딥링크 생성 실패 시 null로 저장
+                } else {
+                    throw e; // 그 외 예외는 그대로 전파
+                }
+            }
         }
 
         Store store;
