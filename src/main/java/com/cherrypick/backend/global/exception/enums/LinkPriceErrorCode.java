@@ -9,7 +9,7 @@ public enum LinkPriceErrorCode implements BaseErrorCode {
 
     // ✅ 400 BAD REQUEST
     INVALID_ORIGINAL_URL(HttpStatus.BAD_REQUEST, "유효하지 않은 상품 링크입니다. 다시 확인해주시기 바랍니다."),
-    // 전달받은 originalUrl이 null 또는 빈 문자열일 경우
+    // 전달받은 originalUrl이 null 또는 정책에 어긋날 경우
 
     // ✅ 502 BAD GATEWAY
     API_CLIENT_ERROR(HttpStatus.BAD_GATEWAY, "링크 정보를 요청하는 중 오류가 발생했습니다. 잠시 후 다시 시도해주시기 바랍니다."),
