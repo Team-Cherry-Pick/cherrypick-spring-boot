@@ -34,6 +34,7 @@ import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
+import com.cherrypick.backend.global.exception.enums.LinkPriceErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +42,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -100,8 +103,21 @@ public class DealService {
             discountName = String.join(", ", dto.discountNames());
         }
 
+        if (!isValidUrl(dto.originalUrl())) {
+            throw new BaseException(LinkPriceErrorCode.INVALID_ORIGINAL_URL);
+        }
+
         // 딥링크 변환
-        String deepLink = linkPriceService.createDeeplink(dto.originalUrl());
+        String deepLink = null;
+        try {
+            deepLink = linkPriceService.createDeeplink(dto.originalUrl());
+        } catch (BaseException e) {
+            if (e.getErrorCode() != LinkPriceErrorCode.LINKPRICE_API_RESULT_FAIL) {
+                throw e;
+            }
+            // LINKPRICE_API_RESULT_FAIL인 경우는 딥링크 null로 저장 후 생성
+        }
+
 
         Deal deal = Deal.builder()
                 .userId(user)
@@ -420,7 +436,6 @@ public class DealService {
                 (int) metrics[0], // likeCount
                 (int) metrics[1], // dislikeCount
                 (int) metrics[2], // commentCount
-                deal.getDeepLink(),
                 deal.getOriginalUrl(),
                 deal.isSoldOut(),
                 voteType,
@@ -459,7 +474,23 @@ public class DealService {
         }
 
         if (dto.originalUrl() != null) {
+            if (!isValidUrl(dto.originalUrl())) {
+                throw new BaseException(LinkPriceErrorCode.INVALID_ORIGINAL_URL);
+            }
+
             deal.setOriginalUrl(dto.originalUrl());
+
+            // 딥링크 재생성
+            try {
+                String deepLink = linkPriceService.createDeeplink(dto.originalUrl());
+                deal.setDeepLink(deepLink);
+            } catch (BaseException e) {
+                if (e.getErrorCode() == LinkPriceErrorCode.LINKPRICE_API_RESULT_FAIL) {
+                    deal.setDeepLink(null); // 딥링크 생성 실패 시 null로 저장
+                } else {
+                    throw e; // 그 외 예외는 그대로 전파
+                }
+            }
         }
 
         Store store;
@@ -657,4 +688,42 @@ public class DealService {
             case LAST7DAYS -> now.minusDays(7);
         };
     }
+
+    // URL 검증
+    public static boolean isValidUrl(String url) {
+        Set<String> blockedShortDomains = Set.of(
+                "bit.ly", "t.co", "goo.gl", "tinyurl.com", "is.gd",
+                "ow.ly", "buff.ly", "cutt.ly", "rebrand.ly", "shorturl.at",
+                "adf.ly", "lnkd.in"
+        );
+
+        if (url == null || url.isBlank()) return false;
+
+        try {
+            URI uri = new URI(url);
+
+            // http 또는 https만 허용
+            String scheme = uri.getScheme();
+            if (scheme == null || (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https"))) {
+                return false;
+            }
+
+            // 호스트 검증
+            String host = uri.getHost();
+            if (host == null || host.isBlank()) {
+                return false;
+            }
+
+            // 단축 URL 도메인 차단
+            if (blockedShortDomains.contains(host.toLowerCase())) {
+                return false;
+            }
+
+            return true;
+
+        } catch (URISyntaxException e) {
+            return false;
+        }
+    }
+
 }
