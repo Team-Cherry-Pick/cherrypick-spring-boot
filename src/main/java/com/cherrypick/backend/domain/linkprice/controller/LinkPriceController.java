@@ -24,4 +24,5 @@ public class LinkPriceController {
     public RedirectView redirect(@PathVariable Long dealId, HttpServletRequest request) {
         return linkPriceService.redirectToDeeplink(dealId, request);
     }
+
 }

@@ -103,6 +103,7 @@ public class DealService {
             discountName = String.join(", ", dto.discountNames());
         }
 
+
         if (!isValidUrl(dto.originalUrl())) {
             throw new BaseException(LinkPriceErrorCode.INVALID_ORIGINAL_URL);
         }
@@ -117,6 +118,7 @@ public class DealService {
             }
             // LINKPRICE_API_RESULT_FAIL인 경우는 딥링크 null로 저장 후 생성
         }
+
 
 
         Deal deal = Deal.builder()

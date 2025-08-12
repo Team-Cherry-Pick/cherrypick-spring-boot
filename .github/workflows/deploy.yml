@@ -3,7 +3,7 @@ name: Repik SpringBoot CI/CD
 on:
   push:
     branches:
-      - release/RP-9
+      - main
 
 jobs:
   build-and-deploy:
@@ -42,7 +42,7 @@ jobs:
       - name: Copy config/ to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{secrets.DEV_SERVER_HOST }}
+          host: ${{secrets.PROD_SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "repik"
@@ -51,12 +51,12 @@ jobs:
       - name: Deploy to EC2 Server
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.DEV_SERVER_HOST }}
+          host: ${{ secrets.PROD_SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd repik
-            echo "${{ secrets.DEV_ENV }}" > .env
+            echo "${{ secrets.PROD_ENV }}" > .env
             docker compose down
             docker compose pull
             docker compose up -d
