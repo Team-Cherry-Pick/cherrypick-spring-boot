@@ -8,7 +8,7 @@ import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.enums.UserBehaviorType;
-import com.cherrypick.backend.domain.deal.service.DealInfoService;
+import com.cherrypick.backend.domain.deal.service.ProductInfoService;
 import com.cherrypick.backend.domain.deal.service.DealService;
 import com.cherrypick.backend.domain.deal.service.RecommenderService;
 import com.cherrypick.backend.global.util.AuthUtil;
@@ -27,7 +27,7 @@ public class DealController {
 
     private final DealService dealService;
     private final RecommenderService recommenderService;
-    private final DealInfoService dealInfoService;
+    private final ProductInfoService productInfoService;
 
     // 게시글 생성
     @Operation(
@@ -111,18 +111,7 @@ public class DealController {
         return ResponseEntity.ok(dealService.deleteDeal(dealId));
     }
 
-    // 게시를 위한 글 정보 받아오기
-    @Operation(
-            summary = "핫딜 정보 불러오기",
-            description = "크롤링으로 해당 상품의 정보를 받아옵니다."
-    )
-    @GetMapping("/url-info")
-    public ResponseEntity<?> getDealInfo(
-            @RequestParam String url,
-            @RequestParam(value = "version", defaultValue = "v1") String version) {
 
-        return ResponseEntity.ok(null);
-    }
 
 
 }
