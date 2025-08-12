@@ -70,6 +70,8 @@ dependencies {
 
     // Crawler
     implementation 'org.jsoup:jsoup:1.15.4'
+    implementation "org.checkerframework:checker-qual:3.40.0"
+
 
     // 재컴파일 하지 않아도 즉시 적용
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

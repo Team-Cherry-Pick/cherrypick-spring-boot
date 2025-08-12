@@ -8,7 +8,6 @@ import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.enums.UserBehaviorType;
-import com.cherrypick.backend.domain.deal.service.ProductInfoService;
 import com.cherrypick.backend.domain.deal.service.DealService;
 import com.cherrypick.backend.domain.deal.service.RecommenderService;
 import com.cherrypick.backend.global.util.AuthUtil;
@@ -27,7 +26,7 @@ public class DealController {
 
     private final DealService dealService;
     private final RecommenderService recommenderService;
-    private final ProductInfoService productInfoService;
+
 
     // 게시글 생성
     @Operation(

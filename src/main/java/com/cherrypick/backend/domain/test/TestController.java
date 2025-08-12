@@ -9,7 +9,6 @@ import com.cherrypick.backend.domain.auth.infra.store.RefreshTokenStore;
 import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.comment.service.CommentService;
 import com.cherrypick.backend.domain.deal.adapter.out.OpenAiAdapter;
-import com.cherrypick.backend.domain.deal.service.ProductInfoService;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 public class TestController
 {
     private final CommentService commentService;
-    private final ProductInfoService dealCrawlService;
     private final AuthService authService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
