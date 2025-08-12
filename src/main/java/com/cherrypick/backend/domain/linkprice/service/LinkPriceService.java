@@ -1,11 +1,25 @@
 package com.cherrypick.backend.domain.linkprice.service;
 
+import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
+import com.cherrypick.backend.domain.deal.entity.Deal;
+import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.global.exception.BaseException;
+import com.cherrypick.backend.global.exception.enums.DealErrorCode;
+import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.LinkPriceErrorCode;
+import io.jsonwebtoken.io.IOException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.view.RedirectView;
+
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -17,6 +31,8 @@ import java.nio.charset.StandardCharsets;
 @Service
 @RequiredArgsConstructor
 public class LinkPriceService {
+
+    private final DealRepository dealRepository;
 
     @Value("${linkprice.affiliate-id}")
     private String affiliateId;
@@ -88,5 +104,52 @@ public class LinkPriceService {
                 connection.disconnect();
             }
         }
+    }
+
+    // 리다이렉션 메소드
+    public RedirectView redirectToDeeplink(@PathVariable Long dealId, HttpServletRequest request) {
+        // 1. 방문자 ID 추출 (회원이면 userId, 비회원이면 deviceId)
+        String visitorId = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof AuthenticatedUser userDetails) {
+            visitorId = String.valueOf(userDetails.userId());
+        } else {
+            // 비회원: 쿠키에서 deviceId 추출
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("deviceId".equals(cookie.getName())) {
+                        visitorId = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+            if (visitorId == null || visitorId.isBlank()) {
+                throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
+            }
+        }
+
+        // 2. 딜 정보 조회
+        Deal deal = dealRepository.findById(dealId)
+                .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
+
+        Long writerId = deal.getUserId().getUserId();
+        String baseUrl = (deal.getDeepLink() != null && !deal.getDeepLink().isBlank())
+                ? deal.getDeepLink()
+                : deal.getOriginalUrl();
+
+
+        // 3. u_id 파라미터 구성
+        String uId = URLEncoder.encode(writerId + ":" + visitorId, StandardCharsets.UTF_8);
+        String redirectUrl = baseUrl.contains("?")
+                ? baseUrl + "&saved_u_id=" + uId
+                : baseUrl + "?saved_u_id=" + uId;
+
+        System.out.println("Redirect URL = " + redirectUrl);
+
+        // 4. 리다이렉트
+        RedirectView redirectView = new RedirectView();
+        redirectView.setUrl(redirectUrl);
+        return redirectView;
     }
 }
