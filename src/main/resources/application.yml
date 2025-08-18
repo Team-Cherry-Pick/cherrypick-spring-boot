@@ -25,6 +25,14 @@ spring:
       maximum-pool-size: 10
       minimum-idle: 2
 
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      base-url: ${OPENAI_API_URL}
+    chat:
+      options:
+        model: gpt-3.5-turbo
+
   jpa:
     properties:
       #show-sql: true # 배포 시 주석처리
@@ -79,10 +87,6 @@ spring:
 slack:
   webhook:
     url: ${SLACK_WEBHOOK_URL}
-
-openai:
-  api-key: ${OPENAI_API_KEY}
-  api-url: ${OPENAI_API_URL}
 
 aws:
   s3:

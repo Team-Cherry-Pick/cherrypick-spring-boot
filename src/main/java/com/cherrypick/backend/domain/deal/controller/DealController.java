@@ -7,9 +7,7 @@ import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
-import com.cherrypick.backend.domain.deal.dto.response.DealSearchResponseDTO;
 import com.cherrypick.backend.domain.deal.enums.UserBehaviorType;
-import com.cherrypick.backend.domain.deal.service.DealCrawlService;
 import com.cherrypick.backend.domain.deal.service.DealService;
 import com.cherrypick.backend.domain.deal.service.RecommenderService;
 import com.cherrypick.backend.global.util.AuthUtil;
@@ -20,8 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RequiredArgsConstructor
 @Tag(name = "Deal", description = "핫딜 게시글 CRUD")
 @RestController
@@ -30,7 +26,7 @@ public class DealController {
 
     private final DealService dealService;
     private final RecommenderService recommenderService;
-    private final DealCrawlService dealCrawlService;
+
 
     // 게시글 생성
     @Operation(
@@ -113,5 +109,8 @@ public class DealController {
 
         return ResponseEntity.ok(dealService.deleteDeal(dealId));
     }
+
+
+
 
 }

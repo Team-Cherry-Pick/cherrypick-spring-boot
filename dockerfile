@@ -1,14 +1,21 @@
 # Build stage
-FROM bellsoft/liberica-openjdk-alpine:17 AS builder
+FROM openjdk:17-slim AS builder
 
 WORKDIR /app
 
-COPY . .
+COPY build.gradle settings.gradle gradlew gradlew.bat ./
+COPY gradle gradle
 
+RUN ./gradlew dependencies || true
+
+# 실제 소스 복사
+COPY src src
+
+# 빌드
 RUN ./gradlew clean build -x test
 
 # Run stage
-FROM bellsoft/liberica-openjdk-alpine:17
+FROM openjdk:17-slim
 
 WORKDIR /app
 
