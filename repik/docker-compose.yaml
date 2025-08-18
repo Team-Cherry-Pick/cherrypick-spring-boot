@@ -4,7 +4,7 @@ services:
     container_name: spring
     restart: unless-stopped
     env_file:
-      - .env.spring
+      - .env
     environment:
       TZ  : Asia/Seoul
     ports:
@@ -19,7 +19,7 @@ services:
     container_name: recommender
     restart: unless-stopped
     env_file:
-      - .env.recommender
+      - .env
     environment:
       TZ: Asia/Seoul
     networks:
