@@ -20,9 +20,9 @@ public class OpenAiAdapter {
     /// 요청과 응답만 해주는 클래스
     /// 프롬프트를 입력하고 응답으로 온 스트링도 직접 파싱해야함.
 
-    @Value("${spring.ai.openai.api-key}")
+    @Value("${openai.api-key}")
     private String openAiApiKey;
-    @Value("${spring.ai.openai.base-url}")
+    @Value("${openai.api-url}")
     private String openAiApiUrl;
 
     private final LogService logService;
