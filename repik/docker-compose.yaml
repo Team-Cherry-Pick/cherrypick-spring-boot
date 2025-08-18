@@ -45,8 +45,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx/conf:/etc/nginx/conf.d
-      - ./nginx/certs:/etc/nginx/certs:ro
-      - ./static:/usr/share/nginx/html
+      - ./nginx/www:/var/www/certbot
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - spring
       - recommender
