@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   spring:
     image: cpdevelopteam/repik:latest
@@ -7,6 +5,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env.spring
+    environment:
+      TZ  : Asia/Seoul
     ports:
       - "8080:8080"
     networks:
@@ -20,6 +20,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env.recommender
+    environment:
+      TZ: Asia/Seoul
     networks:
       - backend
     depends_on:
@@ -31,6 +33,8 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    environment:
+      TZ: Asia/Seoul
 
   nginx:
     image: nginx:1.26.0
@@ -48,6 +52,8 @@ services:
       - recommender
     networks:
       - backend
+    environment:
+      TZ: Asia/Seoul
 
 networks:
   backend:
