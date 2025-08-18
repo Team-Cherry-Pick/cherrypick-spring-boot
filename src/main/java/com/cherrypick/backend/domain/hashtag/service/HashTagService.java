@@ -30,10 +30,10 @@ public class HashTagService
     private final LogService logService;
 
 
-    @Value("${openai.api-key}")
+    @Value("${spring.ai.openai.api-key}")
     private String openAiApiKey;
 
-    @Value("${openai.api-url}")
+    @Value("${spring.ai.openai.base-url}")
     private String openAiApiUrl;
 
     public void saveHashTags(Long targetDealId, Set<String> tagSet)
@@ -100,7 +100,7 @@ public class HashTagService
         try {
 
             org.springframework.http.ResponseEntity<String> responseEntity =
-                    restTemplate.exchange(openAiApiUrl, org.springframework.http.HttpMethod.POST, request, String.class);
+                    restTemplate.exchange(openAiApiUrl+"/v1/chat/completions", org.springframework.http.HttpMethod.POST, request, String.class);
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 String response = responseEntity.getBody();

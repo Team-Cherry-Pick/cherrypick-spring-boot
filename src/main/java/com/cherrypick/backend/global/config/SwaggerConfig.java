@@ -16,15 +16,16 @@ import org.springframework.context.annotation.Profile;
 
 import java.util.List;
 
-@Configuration
 @Profile({"dev", "local"})
+@Configuration
 public class SwaggerConfig {
 
-    @Value("${spring.profiles.active:local}")
+    @Value("${spring.profiles.active}")
     private String activeProfile;
 
     @Bean
     public OpenAPI openAPI() {
+        
         // Security Scheme 정의
         SecurityScheme securityScheme = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
