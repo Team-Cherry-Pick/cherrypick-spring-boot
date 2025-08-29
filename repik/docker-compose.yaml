@@ -4,26 +4,28 @@ services:
     container_name: spring
     restart: unless-stopped
     env_file:
-      - .env
+      - spring.env
     environment:
       TZ  : Asia/Seoul
     ports:
       - "8080:8080"
     networks:
-      - backend
+      - repik-backend
     depends_on:
       - redis
 
-  recommender:
-    image: cpdevelopteam/repik-recommender:latest
-    container_name: recommender
+  fastapi:
+    image: cpdevelopteam/repik-toolbox:latest
+    container_name: fastapi
     restart: unless-stopped
     env_file:
-      - .env
+      - fastapi.env
+    ports:
+      - "8000:8000"
     environment:
       TZ: Asia/Seoul
     networks:
-      - backend
+      - repik-backend
     depends_on:
       - redis
 
@@ -32,7 +34,7 @@ services:
     container_name: redis
     restart: unless-stopped
     networks:
-      - backend
+      - repik-backend
     environment:
       TZ: Asia/Seoul
 
@@ -49,12 +51,12 @@ services:
       - ./static:/usr/share/nginx/html
     depends_on:
       - spring
-      - recommender
+      - fastapi
     networks:
-      - backend
+      - repik-backend
     environment:
       TZ: Asia/Seoul
 
 networks:
-  backend:
+  repik-backend:
     driver: bridge
