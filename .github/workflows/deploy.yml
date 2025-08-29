@@ -56,7 +56,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd repik
-            echo "${{ secrets.PROD_ENV }}" > .env
+            echo "${{ secrets.PROD_ENV }}" > spring.env
             docker compose down
             docker compose pull
             docker compose up -d
