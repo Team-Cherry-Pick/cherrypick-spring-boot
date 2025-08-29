@@ -56,7 +56,7 @@ WHERE
 
     @Query(value = "SELECT b.* " +
             "FROM deal b " +
-            "         INNER JOIN repik.deal_tag hb ON b.deal_id = hb.deal_id " +
+            "         INNER JOIN deal_tag hb ON b.deal_id = hb.deal_id " +
             "         INNER JOIN hash_tag h ON hb.hash_tag_id = h.hash_tag_id " +
             "WHERE h.hash_tag_id IN :tagIds " +
             "ORDER BY RAND() LIMIT :count;", nativeQuery = true)
