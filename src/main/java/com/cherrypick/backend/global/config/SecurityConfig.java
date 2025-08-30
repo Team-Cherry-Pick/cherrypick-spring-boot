@@ -109,6 +109,9 @@ public class SecurityConfig {
 
                         // 리다이렉션 API
                         .requestMatchers(HttpMethod.GET, "/api/redirect/**").permitAll()
+                        
+                        // CORS preflight OPTIONS 요청 허용
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().denyAll()
 
                 );
