@@ -4,6 +4,7 @@ import com.cherrypick.backend.domain.auth.infra.jwt.AccessTokenProvider;
 import com.cherrypick.backend.global.config.security.CustomAuthorizationRequestResolver;
 import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
 import com.cherrypick.backend.global.config.security.OAuth2SuccessHandler;
+import com.cherrypick.backend.global.config.security.filterchain.CorsDebugFilter;
 import com.cherrypick.backend.global.config.security.filterchain.FilterChainExceptionHandler;
 import com.cherrypick.backend.global.config.security.filterchain.JWTFilter;
 import com.cherrypick.backend.global.config.security.filterchain.RequestLogFilter;
@@ -45,6 +46,7 @@ public class SecurityConfig {
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
+    private final CorsDebugFilter corsDebugFilter;
 
     @Value("${spring.profiles.active}")
     private String springProfilesActive;
@@ -56,7 +58,8 @@ public class SecurityConfig {
             AccessTokenProvider  accessTokenProvider,
             FilterChainExceptionHandler filterChainExceptionHandler,
             AuthenticationConfiguration authenticationConfiguration,
-            @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping requestMappingHandlerMapping
+            @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping requestMappingHandlerMapping,
+            CorsDebugFilter corsDebugFilter
 
     ) {
         this.oauthService = oauthService;
@@ -66,6 +69,7 @@ public class SecurityConfig {
         this.filterChainExceptionHandler = filterChainExceptionHandler;
         this.authenticationConfiguration = authenticationConfiguration;
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
+        this.corsDebugFilter = corsDebugFilter;
     }
 
 
@@ -134,7 +138,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable);
 
 
-        http.addFilterBefore(new RequestLogFilter(logService), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(corsDebugFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new RequestLogFilter(logService), CorsDebugFilter.class);
         http.addFilterBefore(new JWTFilter(accessTokenProvider), RequestLogFilter.class);
         http.addFilterBefore(new UriPatterMatchingFilterChain(requestMappingHandlerMapping), JWTFilter.class);
         
@@ -199,6 +204,7 @@ public class SecurityConfig {
                     "https://www.repik.kr",             // 프로덕트 서버 2
                     "https://api.repik.kr"              // 프로덕트 API 서버
             ));
+            System.out.println("CORS: PROD 모드 - 허용된 Origins: " + config.getAllowedOrigins());
         }
         else
         {
@@ -212,6 +218,8 @@ public class SecurityConfig {
                     "http://localhost:3000",            // 로컬 프론트엔드
                     "http://localhost:8080"             // 로컬 백엔드
             ));
+            System.out.println("CORS: DEV 모드 - 현재 프로파일: " + springProfilesActive);
+            System.out.println("CORS: DEV 모드 - 허용된 Origins: " + config.getAllowedOrigins());
         }
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
