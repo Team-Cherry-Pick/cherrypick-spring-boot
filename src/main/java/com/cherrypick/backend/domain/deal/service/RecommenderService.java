@@ -211,7 +211,7 @@ public class RecommenderService
 
     public DealSearchPageResponseDTO getInterestBoard(Long userId)
     {
-        var key = "user:" + userId + ":interests";
+        var key = "REPIK:user:" + userId + ":interests";
 
         // 관심 해쉬태그 불러오기
         var userHashTag = redisTemplate.opsForZSet().reverseRange(key,0, 1);
