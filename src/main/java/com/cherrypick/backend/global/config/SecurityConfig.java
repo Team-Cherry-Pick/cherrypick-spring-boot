@@ -138,8 +138,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable);
 
 
-        http.addFilterBefore(corsDebugFilter, UsernamePasswordAuthenticationFilter.class);
-        // http.addFilterBefore(new RequestLogFilter(logService), CorsDebugFilter.class); //cors 에러 시에 활성화
+        // http.addFilterBefore(corsDebugFilter, UsernamePasswordAuthenticationFilter.class); //cors 에러 시에 활성화
+        http.addFilterBefore(new RequestLogFilter(logService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new JWTFilter(accessTokenProvider), RequestLogFilter.class);
         http.addFilterBefore(new UriPatterMatchingFilterChain(requestMappingHandlerMapping), JWTFilter.class);
         
