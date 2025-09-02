@@ -12,6 +12,7 @@ import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.global.exception.BaseException;
+import com.cherrypick.backend.global.util.AuthUtil;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
@@ -19,7 +20,6 @@ import com.cherrypick.backend.global.s3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -74,10 +74,7 @@ public class ImageService {
     @Transactional
     public ImageDeleteResponseDTO deleteImage(Long imageId) {
         // 로그인 사용자 가져오기
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(principal instanceof AuthenticatedUser userDetails)) {
-            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
-        }
+        AuthenticatedUser userDetails = AuthUtil.getUserDetail();
 
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
@@ -154,7 +151,9 @@ public class ImageService {
 
         var image = imageRepository.findByUserId(userId);
         if(image.isEmpty()) return new ImageDeleteResponseDTO("해당 유저는 프로필 사진이 없습니다.");
-        return deleteImage(image.map(Image::getRefId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
+
+        log.info(image.get().getImageId().toString());
+        return deleteImage(image.map(Image::getImageId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
     }
 
 
