@@ -35,6 +35,7 @@ import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.exception.enums.LinkPriceErrorCode;
+import com.cherrypick.backend.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -68,11 +69,8 @@ public class DealService {
     // 게시글 생성
     @Transactional
     public DealResponseDTOs.Create createDeal(DealCreateRequestDTO dto) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof AuthenticatedUser userDetails)) {
-            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
-        }
+        var userDetails = AuthUtil.getUserDetail();
 
         User user = userRepository.findById(userDetails.userId())
                 .orElseThrow(() -> new BaseException(GlobalErrorCode.UNAUTHORIZED));
@@ -137,9 +135,6 @@ public class DealService {
                 .build();
 
         Deal saved = dealRepository.save(deal);
-
-        // 해쉬태그 생성
-        hashTagService.saveHashTags(saved.getDealId(), hashTagService.getChatGPTResponse(saved.getTitle(), saved.getContent()));
 
         // 이미지랑 매핑
         if (dto.imageIds() != null && !dto.imageIds().isEmpty()) {
