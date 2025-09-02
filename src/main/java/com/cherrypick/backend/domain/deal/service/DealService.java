@@ -616,22 +616,20 @@ public class DealService {
 
         // 배송 타입이 FREE이면 #무료배송 추가
         if (deal.getShipping() != null && deal.getShipping().shippingType() == ShippingType.FREE) {
-            infoTags.add("#무료배송");
+            infoTags.add("무료배송");
         }
 
         // 할인 ID가 있다면 해당 할인 ID의 이름에 해시태그 추가
         if (deal.getDiscounts() != null && !deal.getDiscounts().isEmpty()) {
             for (Discount discount : deal.getDiscounts()) {
-                infoTags.add("#" + discount.getName());
+                infoTags.add(discount.getName());
             }
         }
 
         // 할인 이름이 있다면, 카드나 쿠폰 이름을 해시태그로 추가
         if (deal.getDiscountName() != null && !deal.getDiscountName().isEmpty()) {
             String[] discountNames = deal.getDiscountName().split(", ");
-            for (String discountName : discountNames) {
-                infoTags.add("#" + discountName);
-            }
+            infoTags.addAll(Arrays.asList(discountNames));
         }
         return infoTags;
     }
