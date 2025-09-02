@@ -46,7 +46,6 @@ public class SecurityConfig {
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
-    private final CorsDebugFilter corsDebugFilter;
 
     @Value("${spring.profiles.active}")
     private String springProfilesActive;
@@ -58,8 +57,7 @@ public class SecurityConfig {
             AccessTokenProvider  accessTokenProvider,
             FilterChainExceptionHandler filterChainExceptionHandler,
             AuthenticationConfiguration authenticationConfiguration,
-            @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping requestMappingHandlerMapping,
-            CorsDebugFilter corsDebugFilter
+            @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping requestMappingHandlerMapping
 
     ) {
         this.oauthService = oauthService;
@@ -69,7 +67,6 @@ public class SecurityConfig {
         this.filterChainExceptionHandler = filterChainExceptionHandler;
         this.authenticationConfiguration = authenticationConfiguration;
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
-        this.corsDebugFilter = corsDebugFilter;
     }
 
 
@@ -138,7 +135,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable);
 
 
-        // http.addFilterBefore(corsDebugFilter, UsernamePasswordAuthenticationFilter.class); //cors 에러 시에 활성화
+        // http.addFilterBefore(new CorsDebugFilter(), UsernamePasswordAuthenticationFilter.class); //cors 에러 시에 활성화
         http.addFilterBefore(new RequestLogFilter(logService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new JWTFilter(accessTokenProvider), RequestLogFilter.class);
         http.addFilterBefore(new UriPatterMatchingFilterChain(requestMappingHandlerMapping), JWTFilter.class);
