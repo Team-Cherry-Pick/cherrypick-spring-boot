@@ -145,6 +145,31 @@ public class ImageService {
         return image.orElseGet(() -> Image.builder().imageId(null).imageUrl(null).build());
     }
 
+    // 유저 프로필 이미지 업데이트
+    @Transactional
+    public Image updateUserProfileImage(Long userId, Long newImageId) {
+        var currentImage = getImageByUserId(userId);
+        Long currentImageId = currentImage.getImageId();
+        
+        // null을 -1로 변환해서 비교
+        Long safeCurrentImageId = (currentImageId != null) ? currentImageId : -1L;
+        Long safeNewImageId = (newImageId != null) ? newImageId : -1L;
+        
+        if (!safeCurrentImageId.equals(safeNewImageId)) {
+            // 기존 이미지가 있으면 삭제
+            if (safeCurrentImageId != -1L) {
+                deleteImageByUserId(userId);
+            }
+            // 새 이미지가 있으면 연결
+            if (safeNewImageId != -1L) {
+                attachImage(userId, List.of(newImageId), ImageType.USER);
+            }
+            return getImageByUserId(userId);
+        }
+        
+        return currentImage;
+    }
+
     // 이미지 삭제
     @Transactional
     public ImageDeleteResponseDTO deleteImageByUserId(Long userId) {
@@ -152,7 +177,6 @@ public class ImageService {
         var image = imageRepository.findByUserId(userId);
         if(image.isEmpty()) return new ImageDeleteResponseDTO("해당 유저는 프로필 사진이 없습니다.");
 
-        log.info(image.get().getImageId().toString());
         return deleteImage(image.map(Image::getImageId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
     }
 
