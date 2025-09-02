@@ -139,7 +139,7 @@ public class SecurityConfig {
 
 
         http.addFilterBefore(corsDebugFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(new RequestLogFilter(logService), CorsDebugFilter.class);
+        // http.addFilterBefore(new RequestLogFilter(logService), CorsDebugFilter.class); //cors 에러 시에 활성화
         http.addFilterBefore(new JWTFilter(accessTokenProvider), RequestLogFilter.class);
         http.addFilterBefore(new UriPatterMatchingFilterChain(requestMappingHandlerMapping), JWTFilter.class);
         
@@ -198,29 +198,29 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        if(springProfilesActive.equalsIgnoreCase("prod")){
-            config.setAllowedOrigins(List.of(
-                    "https://repik.kr",                 // 프로덕트 서버
-                    "https://www.repik.kr",             // 프로덕트 서버 2
-                    "https://api.repik.kr"              // 프로덕트 API 서버
-            ));
-            System.out.println("CORS: PROD 모드 - 허용된 Origins: " + config.getAllowedOrigins());
-        }
-        else
-        {
-            config.setAllowedOrigins(List.of(
-                    "https://repik.kr",                 // 프로덕트 서버
-                    "https://www.repik.kr",             // 프로덕트 서버 2
-                    "https://api.repik.kr",             // 프로덕트 API 서버
-                    "https://cherrypick.cloud",         // 개발 서버
-                    "https://www.cherrypick.cloud",     // 개발 서버 2
-                    "https://api.cherrypick.cloud",     // 개발 API 서버
-                    "http://localhost:3000",            // 로컬 프론트엔드
-                    "http://localhost:8080"             // 로컬 백엔드
-            ));
-            System.out.println("CORS: DEV 모드 - 현재 프로파일: " + springProfilesActive);
-            System.out.println("CORS: DEV 모드 - 허용된 Origins: " + config.getAllowedOrigins());
-        }
+        //if(springProfilesActive.equalsIgnoreCase("prod")){
+        //    config.setAllowedOrigins(List.of(
+        //            "https://repik.kr",                 // 프로덕트 서버
+        //            "https://www.repik.kr",             // 프로덕트 서버 2
+        //            "https://api.repik.kr"              // 프로덕트 API 서버
+        //    ));
+        //    System.out.println("CORS: PROD 모드 - 허용된 Origins: " + config.getAllowedOrigins());
+        //}
+        //else
+        //{
+        //    config.setAllowedOrigins(List.of(
+        //            "https://repik.kr",                 // 프로덕트 서버
+        //            "https://www.repik.kr",             // 프로덕트 서버 2
+        //            "https://api.repik.kr",             // 프로덕트 API 서버
+        //            "https://cherrypick.cloud",         // 개발 서버
+        //            "https://www.cherrypick.cloud",     // 개발 서버 2
+        //            "https://api.cherrypick.cloud",     // 개발 API 서버
+        //            "http://localhost:3000",            // 로컬 프론트엔드
+        //            "http://localhost:8080"             // 로컬 백엔드
+        //    ));
+        //    System.out.println("CORS: DEV 모드 - 현재 프로파일: " + springProfilesActive);
+        //    System.out.println("CORS: DEV 모드 - 허용된 Origins: " + config.getAllowedOrigins());
+        //}
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of(
