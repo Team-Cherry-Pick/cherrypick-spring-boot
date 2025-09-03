@@ -82,6 +82,8 @@ dependencies {
     // JSON 파싱
     implementation 'org.json:json:20240303'
 
+    // webClient
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 }
 
