@@ -30,8 +30,16 @@ public enum LinkPriceErrorCode implements BaseErrorCode {
     LINKPRICE_API_EXCEPTION(HttpStatus.BAD_GATEWAY, "링크 생성 중 알 수 없는 오류가 발생했습니다."),
     // 기타 예외 (IOException, 예기치 못한 에러 등)
 
+
+    TRANSLIST_HTTP_CLIENT_ERROR(HttpStatus.BAD_GATEWAY, "실적 조회 요청이 잘못되었습니다."),
+    TRANSLIST_HTTP_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "실적 조회 서버 오류가 발생했습니다."),
+    TRANSLIST_RESULT_NOT_SUCCESS(HttpStatus.BAD_GATEWAY, "실적 조회에 실패했습니다."),
+
+
+
     // ✅ 504 GATEWAY TIMEOUT
     API_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "링크 생성 요청 시간이 초과되었습니다. 잠시 후 다시 시도해주시기 바랍니다.");
+
 
     private final HttpStatus status;
     private final String message;
