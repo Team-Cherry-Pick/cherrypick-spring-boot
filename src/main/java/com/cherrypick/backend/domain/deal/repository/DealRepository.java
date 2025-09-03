@@ -25,6 +25,7 @@ WHERE
          LOWER(d.content) LIKE LOWER(CONCAT('%', :keyword, '%')))
     AND (:viewSoldOut = TRUE OR d.isSoldOut = FALSE)
     AND (:freeShipping = FALSE OR d.shipping.shippingType = 'FREE')
+    AND (:globalShipping = FALSE OR d.price.priceType = 'USD')
     AND (:startDate IS NULL OR d.createdAt >= :startDate)
     AND (:endDate IS NULL OR d.createdAt <= :endDate)
     AND (
@@ -43,6 +44,7 @@ WHERE
             @Param("keyword") String keyword,
             @Param("viewSoldOut") boolean viewSoldOut,
             @Param("freeShipping") boolean freeShipping,
+            @Param("globalShipping") boolean globalShipping,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("minPrice") Double minPrice,
