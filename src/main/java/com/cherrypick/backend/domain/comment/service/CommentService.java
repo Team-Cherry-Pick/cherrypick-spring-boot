@@ -13,6 +13,7 @@ import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.image.entity.Image;
+import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
@@ -270,13 +271,18 @@ public class CommentService {
             isLike = commentLikeRepository.existsById(new CommentLikeId(loginUserId, comment.getCommentId()));
         }
 
+        String imageUrl = imageRepository
+                .findTopByRefIdAndImageTypeOrderByImageIndexAsc(comment.getUserId().getUserId(), ImageType.USER)
+                .map(Image::getImageUrl)
+                .orElse(null);
+
         return new CommentListResponseDTO(
                 comment.getCommentId(),
                 comment.getParentId(),
                 new com.cherrypick.backend.domain.user.vo.User(
                         comment.getUserId().getUserId(),
                         comment.getUserId().getNickname(),
-                        null
+                        imageUrl
                 ),
                 comment.getContent(),
                 totalLikes,
