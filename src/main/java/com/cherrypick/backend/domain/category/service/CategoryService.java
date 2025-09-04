@@ -49,5 +49,38 @@ public class CategoryService {
                 .toList();
     }
 
+    // 특정 카테고리와 그 하위 카테고리들의 ID를 모두 조회
+    public List<Long> getCategoryWithChildren(Long categoryId) {
+        List<Category> allCategories = categoryRepository.findAll();
+        List<Long> result = new ArrayList<>();
+        
+        // 해당 카테고리 찾기
+        Optional<Category> targetCategory = allCategories.stream()
+                .filter(c -> c.getCategoryId().equals(categoryId))
+                .findFirst();
+        
+        if (targetCategory.isPresent()) {
+            result.add(targetCategory.get().getCategoryId());
+            // 하위 카테고리들 재귀적으로 추가
+            addChildCategoryIds(categoryId, allCategories, result);
+        }
+        
+        return result;
+    }
+
+    // 재귀적으로 하위 카테고리 ID들을 추가하는 헬퍼 메서드
+    private void addChildCategoryIds(Long parentId, List<Category> allCategories, List<Long> result) {
+        List<Category> children = allCategories.stream()
+                .filter(c -> Optional.ofNullable(c.getParentId()).orElse(0L).equals(parentId))
+                .toList();
+        
+        for (Category child : children) {
+            result.add(child.getCategoryId());
+            // 재귀 호출로 하위 카테고리들도 추가
+            addChildCategoryIds(child.getCategoryId(), allCategories, result);
+        }
+    }
+
+
 
 }

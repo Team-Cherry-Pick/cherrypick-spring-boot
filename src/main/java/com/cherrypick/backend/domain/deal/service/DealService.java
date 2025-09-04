@@ -2,6 +2,7 @@ package com.cherrypick.backend.domain.deal.service;
 
 import com.cherrypick.backend.domain.category.repository.CategoryRepository;
 import com.cherrypick.backend.domain.category.entity.Category;
+import com.cherrypick.backend.domain.category.service.CategoryService;
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
@@ -62,9 +63,8 @@ public class DealService {
     private final CommentRepository commentRepository;
     private final ImageService imageService;
     private final ImageRepository imageRepository;
-    private final HashTagService  hashTagService;
-    private final RecommenderService recommenderService;
     private final LinkPriceService linkPriceService;
+    private final CategoryService categoryService;
 
     // 게시글 생성
     @Transactional
@@ -210,8 +210,11 @@ public class DealService {
             default -> sort = Sort.unsorted();
         }
 
+        List<Long> categoryList = null;
+        if(dto.getCategoryId() != null) categoryList = categoryService.getCategoryWithChildren(dto.getCategoryId());
+
         List<Deal> allFilteredDeals = dealRepository.searchDealsWithPaging(
-                dto.getCategoryId(),
+                categoryList,
                 dto.getKeyword(),
                 viewSoldOut,
                 freeShipping,
