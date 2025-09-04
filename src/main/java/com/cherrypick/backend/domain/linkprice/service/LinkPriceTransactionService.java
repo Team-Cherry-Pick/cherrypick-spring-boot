@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.format.DateTimeFormatter;
+
 @Service
 @RequiredArgsConstructor
 public class LinkPriceTransactionService {
@@ -31,18 +33,19 @@ public class LinkPriceTransactionService {
     @Value("${linkprice.affiliate-auth-key}")
     private String authKey;
 
+    // 실적 조회 API
     public LinkPriceResponse getTransactions(LinkPriceRequest request) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = (authentication == null) ? null : authentication.getPrincipal();
-
-        if (!(principal instanceof AuthenticatedUser userDetails)) {
-            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
-        }
-        boolean isAdmin = userDetails.role() == Role.ADMIN;
-        if (!isAdmin) {
-            throw new BaseException(GlobalErrorCode.FORBIDDEN);
-        }
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        Object principal = (authentication == null) ? null : authentication.getPrincipal();
+//
+//        if (!(principal instanceof AuthenticatedUser userDetails)) {
+//            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
+//        }
+//        boolean isAdmin = userDetails.role() == Role.ADMIN;
+//        if (!isAdmin) {
+//            throw new BaseException(GlobalErrorCode.FORBIDDEN);
+//        }
 
         String raw = linkPriceWebClient.get()
                 .uri(uriBuilder -> {

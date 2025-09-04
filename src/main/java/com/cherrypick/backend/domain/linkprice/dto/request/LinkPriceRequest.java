@@ -1,7 +1,10 @@
 package com.cherrypick.backend.domain.linkprice.dto.request;
 
+import lombok.Builder;
+
 import java.util.Optional;
 
+@Builder
 public record LinkPriceRequest(
         String yyyymmdd,          // 조회일자 (필수, YYYYMMDD 또는 YYYYMM)
         String cancelFlag,        // 취소여부 (옵션: Y/N)

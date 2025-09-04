@@ -9,12 +9,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 @RestController
 @RequiredArgsConstructor
 public class LinkPriceController {
 
     private final LinkPriceService linkPriceService;
     private final LinkPriceTransactionService transactionService;
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+    private static final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final int PER_PAGE = 500;
 
     // 테스트용 딥링크 변환 API
     // GET /api/test/linkprice?url=https://www.gmarket.co.kr
