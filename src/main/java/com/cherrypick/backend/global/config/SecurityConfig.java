@@ -237,7 +237,7 @@ public class SecurityConfig {
                 "Accept",
                 "Origin",
                 "X-Forwarded-Proto",
-                "Deviceid"
+                "Device-Id"
         ));
         config.setAllowCredentials(true);
 
