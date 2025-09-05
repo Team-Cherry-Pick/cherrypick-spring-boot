@@ -50,7 +50,7 @@ public class LogService {
     }
 
     // 엑세스 로그
-    public void accessLog(Long durationTime, String uriPattern, Long userId, String method, String clientIp, String url, String queryString) {
+    public void accessLog(Long durationTime, String uriPattern, Long userId, String deviceId,  String method, String clientIp, String url, String queryString) {
 
         mdcInitialize();
         MDC.put("logType", "ACCESS_LOG");
@@ -59,6 +59,7 @@ public class LogService {
         map.put("access_duration", Optional.ofNullable(durationTime).orElse(-1L));
         map.put("access_uriPattern", Optional.ofNullable(uriPattern).orElse("unknown"));
         map.put("access_userId", Optional.ofNullable(userId).orElse(-1L));
+        map.put("access_deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
         map.put("access_method", Optional.ofNullable(method).orElse("unknown"));
         map.put("access_clientIp", Optional.ofNullable(clientIp).orElse("unknown"));
         map.put("access_queryString", Optional.ofNullable(queryString).orElse("unknown"));

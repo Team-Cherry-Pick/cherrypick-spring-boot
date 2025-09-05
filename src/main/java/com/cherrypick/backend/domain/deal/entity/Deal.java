@@ -59,11 +59,15 @@ public class Deal {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "deal_discount",
             joinColumns = @JoinColumn(name = "deal_id"),
-            inverseJoinColumns = @JoinColumn(name = "discount_id")
+            inverseJoinColumns = @JoinColumn(name = "discount_id"),
+            foreignKey = @ForeignKey(
+                    name = "FK_deal_discount_deal",
+                    foreignKeyDefinition = "FOREIGN KEY (deal_id) REFERENCES deal(deal_id) ON DELETE CASCADE"
+            )
     )
     private List<Discount> discounts = new ArrayList<>();
 

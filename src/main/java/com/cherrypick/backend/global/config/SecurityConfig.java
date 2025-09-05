@@ -144,7 +144,6 @@ public class SecurityConfig {
 	    http
                 .oauth2Login((oauth2) -> oauth2
                         .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(customAuthorizationRequestResolver))
-                        .loginPage("/login")
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                         .userService(oauthService))
                         .successHandler(oauth2SuccessHandler)
@@ -238,7 +237,7 @@ public class SecurityConfig {
                 "Accept",
                 "Origin",
                 "X-Forwarded-Proto",
-                "Deviceid"
+                "Device-Id"
         ));
         config.setAllowCredentials(true);
 
