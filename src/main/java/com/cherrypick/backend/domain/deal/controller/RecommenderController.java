@@ -15,19 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class RecommenderController {
     private final RecommenderService recommenderService;
 
-
-    @Operation(
-            summary = "유저 행동 로그 생성",
-            description = "유저 행동 로그를 생성합니다."
-    )
-    @PostMapping("/user/{user_id}/logs")
-    @ResponseBody
-    public ResponseEntity<?> createLog(@RequestBody DealRequestDTOs.UserBehaviorDTO logDto)
-    {
-        log.warn("행동로그 생성");
-        return ResponseEntity.ok(recommenderService.addUserBehaviorLog(logDto));
-    }
-
+    
     @Operation(
             summary = "유저 행동 로그 조회",
             description = "유저 행동 로그를 조회합니다."

@@ -40,10 +40,11 @@ public class RequestLogFilter extends OncePerRequestFilter {
         String method = request.getMethod();
         String queryString = request.getQueryString();
         String uriPattern = (String) request.getAttribute("uri_pattern");
+        String deviceId = request.getHeader("Device-Id");
         String ipAddress = getClientIp(request);
         String url = request.getRequestURI();
 
-        logService.accessLog(duration, uriPattern, userId, method, ipAddress, url, queryString);
+        logService.accessLog(duration, uriPattern, userId, deviceId, method, ipAddress, url, queryString);
 
     }
 
