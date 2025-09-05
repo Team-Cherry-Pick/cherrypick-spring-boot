@@ -2,6 +2,7 @@ package com.cherrypick.backend.domain.deal.service;
 
 import com.cherrypick.backend.domain.category.repository.CategoryRepository;
 import com.cherrypick.backend.domain.category.entity.Category;
+import com.cherrypick.backend.domain.category.service.CategoryService;
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
@@ -35,6 +36,7 @@ import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.exception.enums.LinkPriceErrorCode;
+import com.cherrypick.backend.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -61,18 +63,14 @@ public class DealService {
     private final CommentRepository commentRepository;
     private final ImageService imageService;
     private final ImageRepository imageRepository;
-    private final HashTagService  hashTagService;
-    private final RecommenderService recommenderService;
     private final LinkPriceService linkPriceService;
+    private final CategoryService categoryService;
 
     // 게시글 생성
     @Transactional
     public DealResponseDTOs.Create createDeal(DealCreateRequestDTO dto) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (!(principal instanceof AuthenticatedUser userDetails)) {
-            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
-        }
+        var userDetails = AuthUtil.getUserDetail();
 
         User user = userRepository.findById(userDetails.userId())
                 .orElseThrow(() -> new BaseException(GlobalErrorCode.UNAUTHORIZED));
@@ -140,9 +138,6 @@ public class DealService {
 
         Deal saved = dealRepository.save(deal);
 
-        // 해쉬태그 생성
-        hashTagService.saveHashTags(saved.getDealId(), hashTagService.getChatGPTResponse(saved.getTitle(), saved.getContent()));
-
         // 이미지랑 매핑
         if (dto.imageIds() != null && !dto.imageIds().isEmpty()) {
             imageService.attachImage(saved.getDealId(), dto.imageIds(), ImageType.DEAL);
@@ -204,6 +199,7 @@ public class DealService {
 
         boolean viewSoldOut = dto.getFilters() != null && dto.getFilters().viewSoldOut();
         boolean freeShipping = dto.getFilters() != null && dto.getFilters().freeShipping();
+        boolean globalShipping = dto.getFilters() != null && dto.getFilters().globalShipping();
         boolean variousPrice = dto.getVariousPrice() != null ? dto.getVariousPrice() : true;
 
         List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty()) ? null : dto.getDiscountIds();
@@ -217,11 +213,15 @@ public class DealService {
             default -> sort = Sort.unsorted();
         }
 
+        List<Long> categoryList = null;
+        if(dto.getCategoryId() != null) categoryList = categoryService.getCategoryWithChildren(dto.getCategoryId());
+
         List<Deal> allFilteredDeals = dealRepository.searchDealsWithPaging(
-                dto.getCategoryId(),
+                categoryList,
                 dto.getKeyword(),
                 viewSoldOut,
                 freeShipping,
+                globalShipping,
                 startDate,
                 endDate,
                 minPrice,
@@ -376,17 +376,22 @@ public class DealService {
         com.cherrypick.backend.domain.store.vo.Store storeVo;
         Long storeId = null;
         String storeName = null;
+
         if (deal.getStoreId() != null) {
             storeId = deal.getStoreId().getStoreId();
             storeName = deal.getStoreId().getName();
+
             storeVo = new com.cherrypick.backend.domain.store.vo.Store(
+                    deal.getStoreId().getStoreId(),
                     deal.getStoreId().getName(),
                     deal.getStoreId().getTextColor(),
                     deal.getStoreId().getBackgroundColor()
             );
         } else {
             storeName = deal.getStoreName();
+
             storeVo = new com.cherrypick.backend.domain.store.vo.Store(
+                    null,
                     deal.getStoreName(),
                     null,
                     null
@@ -618,22 +623,20 @@ public class DealService {
 
         // 배송 타입이 FREE이면 #무료배송 추가
         if (deal.getShipping() != null && deal.getShipping().shippingType() == ShippingType.FREE) {
-            infoTags.add("#무료배송");
+            infoTags.add("무료배송");
         }
 
         // 할인 ID가 있다면 해당 할인 ID의 이름에 해시태그 추가
         if (deal.getDiscounts() != null && !deal.getDiscounts().isEmpty()) {
             for (Discount discount : deal.getDiscounts()) {
-                infoTags.add("#" + discount.getName());
+                infoTags.add(discount.getName());
             }
         }
 
         // 할인 이름이 있다면, 카드나 쿠폰 이름을 해시태그로 추가
         if (deal.getDiscountName() != null && !deal.getDiscountName().isEmpty()) {
             String[] discountNames = deal.getDiscountName().split(", ");
-            for (String discountName : discountNames) {
-                infoTags.add("#" + discountName);
-            }
+            infoTags.addAll(Arrays.asList(discountNames));
         }
         return infoTags;
     }

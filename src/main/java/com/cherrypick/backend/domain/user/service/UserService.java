@@ -1,7 +1,6 @@
 package com.cherrypick.backend.domain.user.service;
 
 
-import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
 import com.cherrypick.backend.domain.user.dto.UserRequestDTOs;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor @Slf4j
@@ -35,19 +33,19 @@ public class UserService {
     @Transactional
     public UserDetailResponseDTO userUpdate(UserUpdateRequestDTO dto){
 
-        // 인증된 유저의 ID를 찾음, 인증되지 않았다면 오류.
+        // [0] 인증된 유저 정보 가져오기
         var userId = AuthUtil.getUserDetail().userId();
-        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+        var user = userRepository.findById(userId)
+            .orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
-        imageService.deleteImageByUserId(userId);
+        // [1] 유저 기본 정보 업데이트
         user.setNickname(dto.nickname());
         user.setBirthday(LocalDate.parse(dto.birthday()));
         user.setGender(Gender.valueOf(dto.gender()));
-
         var updatedUser = userRepository.save(user);
 
-        if(dto.imageId() != null) imageService.attachImage(userId, List.of(dto.imageId()), ImageType.USER);
-        var profileImage = imageService.getImageByUserId(userId);
+        // [2] 프로필 이미지 업데이트
+        var profileImage = imageService.updateUserProfileImage(userId, dto.imageId());
 
         return UserDetailResponseDTO.from(updatedUser, profileImage);
     }

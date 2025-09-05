@@ -7,16 +7,13 @@ import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.LinkPriceErrorCode;
-import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -35,7 +32,7 @@ public class LinkPriceService {
     private final DealRepository dealRepository;
 
     @Value("${linkprice.affiliate-id}")
-    private String affiliateId;
+    private String aId;
 
     public String createDeeplink(String originalUrl) {
         // 원본 URL 유효성 체크
@@ -50,7 +47,7 @@ public class LinkPriceService {
 
             // API 요청 URL
             String apiUrl = "https://api.linkprice.com/ci/service/custom_link_xml"
-                    + "?a_id=" + affiliateId
+                    + "?a_id=" + aId
                     + "&url=" + encodedUrl
                     + "&mode=json";
 
@@ -133,14 +130,13 @@ public class LinkPriceService {
         Deal deal = dealRepository.findById(dealId)
                 .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
 
-        Long writerId = deal.getUserId().getUserId();
         String baseUrl = (deal.getDeepLink() != null && !deal.getDeepLink().isBlank())
                 ? deal.getDeepLink()
                 : deal.getOriginalUrl();
 
+        // 3. saved_u_id -> 글ID:방문자ID
+        String uId = URLEncoder.encode(dealId + ":" + visitorId, StandardCharsets.UTF_8);
 
-        // 3. u_id 파라미터 구성
-        String uId = URLEncoder.encode(writerId + ":" + visitorId, StandardCharsets.UTF_8);
         String redirectUrl = baseUrl.contains("?")
                 ? baseUrl + "&saved_u_id=" + uId
                 : baseUrl + "?saved_u_id=" + uId;

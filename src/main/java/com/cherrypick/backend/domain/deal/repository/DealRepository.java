@@ -1,5 +1,6 @@
 package com.cherrypick.backend.domain.deal.repository;
 
+import com.cherrypick.backend.domain.category.entity.Category;
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.enums.PriceType;
 import org.springframework.data.domain.Pageable;
@@ -19,12 +20,13 @@ LEFT JOIN FETCH d.discounts discount
 LEFT JOIN FETCH d.storeId store
 WHERE 
     d.isDelete = FALSE
-    AND (:categoryId IS NULL OR c.categoryId = :categoryId OR c.parentId = :categoryId)
+    AND (:categoryIds IS NULL OR c.categoryId in :categoryIds)
     AND (:keyword IS NULL OR 
          LOWER(d.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR 
          LOWER(d.content) LIKE LOWER(CONCAT('%', :keyword, '%')))
     AND (:viewSoldOut = TRUE OR d.isSoldOut = FALSE)
     AND (:freeShipping = FALSE OR d.shipping.shippingType = 'FREE')
+    AND (:globalShipping = FALSE OR d.price.priceType = 'USD')
     AND (:startDate IS NULL OR d.createdAt >= :startDate)
     AND (:endDate IS NULL OR d.createdAt <= :endDate)
     AND (
@@ -39,10 +41,11 @@ WHERE
     AND (:storeIds IS NULL OR store.storeId IN :storeIds)
 """)
     List<Deal> searchDealsWithPaging(
-            @Param("categoryId") Long categoryId,
+            @Param("categoryIds") List<Long> categoryIds,
             @Param("keyword") String keyword,
             @Param("viewSoldOut") boolean viewSoldOut,
             @Param("freeShipping") boolean freeShipping,
+            @Param("globalShipping") boolean globalShipping,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("minPrice") Double minPrice,

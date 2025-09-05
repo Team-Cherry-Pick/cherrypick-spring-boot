@@ -12,6 +12,7 @@ import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.global.exception.BaseException;
+import com.cherrypick.backend.global.util.AuthUtil;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
@@ -19,7 +20,6 @@ import com.cherrypick.backend.global.s3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -74,10 +74,7 @@ public class ImageService {
     @Transactional
     public ImageDeleteResponseDTO deleteImage(Long imageId) {
         // 로그인 사용자 가져오기
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(principal instanceof AuthenticatedUser userDetails)) {
-            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
-        }
+        AuthenticatedUser userDetails = AuthUtil.getUserDetail();
 
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
@@ -148,13 +145,39 @@ public class ImageService {
         return image.orElseGet(() -> Image.builder().imageId(null).imageUrl(null).build());
     }
 
+    // 유저 프로필 이미지 업데이트
+    @Transactional
+    public Image updateUserProfileImage(Long userId, Long newImageId) {
+        var currentImage = getImageByUserId(userId);
+        Long currentImageId = currentImage.getImageId();
+        
+        // null을 -1로 변환해서 비교
+        Long safeCurrentImageId = (currentImageId != null) ? currentImageId : -1L;
+        Long safeNewImageId = (newImageId != null) ? newImageId : -1L;
+        
+        if (!safeCurrentImageId.equals(safeNewImageId)) {
+            // 기존 이미지가 있으면 삭제
+            if (safeCurrentImageId != -1L) {
+                deleteImageByUserId(userId);
+            }
+            // 새 이미지가 있으면 연결
+            if (safeNewImageId != -1L) {
+                attachImage(userId, List.of(newImageId), ImageType.USER);
+            }
+            return getImageByUserId(userId);
+        }
+        
+        return currentImage;
+    }
+
     // 이미지 삭제
     @Transactional
     public ImageDeleteResponseDTO deleteImageByUserId(Long userId) {
 
         var image = imageRepository.findByUserId(userId);
         if(image.isEmpty()) return new ImageDeleteResponseDTO("해당 유저는 프로필 사진이 없습니다.");
-        return deleteImage(image.map(Image::getRefId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
+
+        return deleteImage(image.map(Image::getImageId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
     }
 
 
