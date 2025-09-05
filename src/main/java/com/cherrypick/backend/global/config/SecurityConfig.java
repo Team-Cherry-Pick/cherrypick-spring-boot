@@ -108,7 +108,8 @@ public class SecurityConfig {
                         // 테스트 코드
                         .requestMatchers("/api/test/**").permitAll()
 
-                        // 리다이렉션 API
+                        // 링크프라이스
+                        .requestMatchers(HttpMethod.POST, "/api/linkprice/transactions").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/redirect/**").permitAll()
                         
                         // CORS preflight OPTIONS 요청 허용
@@ -139,7 +140,7 @@ public class SecurityConfig {
         http.addFilterBefore(new RequestLogFilter(logService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new JWTFilter(accessTokenProvider), RequestLogFilter.class);
         http.addFilterBefore(new UriPatterMatchingFilterChain(requestMappingHandlerMapping), JWTFilter.class);
-        
+
         // oauth2
 	    http
                 .oauth2Login((oauth2) -> oauth2

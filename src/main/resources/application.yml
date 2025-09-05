@@ -93,3 +93,4 @@ openai:
 
 linkprice:
   affiliate-id: ${LINKPRICE_AFFILIATE_ID}
+  affiliate-auth-key: ${LINKPRICE_AFFILIATE_AUTH_KEY}

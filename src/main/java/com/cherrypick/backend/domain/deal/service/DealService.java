@@ -197,6 +197,7 @@ public class DealService {
 
         boolean viewSoldOut = dto.getFilters() != null && dto.getFilters().viewSoldOut();
         boolean freeShipping = dto.getFilters() != null && dto.getFilters().freeShipping();
+        boolean globalShipping = dto.getFilters() != null && dto.getFilters().globalShipping();
         boolean variousPrice = dto.getVariousPrice() != null ? dto.getVariousPrice() : true;
 
         List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty()) ? null : dto.getDiscountIds();
@@ -218,6 +219,7 @@ public class DealService {
                 dto.getKeyword(),
                 viewSoldOut,
                 freeShipping,
+                globalShipping,
                 startDate,
                 endDate,
                 minPrice,
@@ -372,17 +374,22 @@ public class DealService {
         com.cherrypick.backend.domain.store.vo.Store storeVo;
         Long storeId = null;
         String storeName = null;
+
         if (deal.getStoreId() != null) {
             storeId = deal.getStoreId().getStoreId();
             storeName = deal.getStoreId().getName();
+
             storeVo = new com.cherrypick.backend.domain.store.vo.Store(
+                    deal.getStoreId().getStoreId(),
                     deal.getStoreId().getName(),
                     deal.getStoreId().getTextColor(),
                     deal.getStoreId().getBackgroundColor()
             );
         } else {
             storeName = deal.getStoreName();
+
             storeVo = new com.cherrypick.backend.domain.store.vo.Store(
+                    null,
                     deal.getStoreName(),
                     null,
                     null
