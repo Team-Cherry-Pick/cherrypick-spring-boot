@@ -16,6 +16,7 @@ import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
+import com.cherrypick.backend.global.util.LogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class AuthService {
     private final ImageService imageService;
     private final UserRepository userRepository;
     private final RefreshCookieFactory refreshCookieFactory;
+    private final LogService logService;
 
 
     // 유저를 등록 완료시키는 로직
@@ -67,6 +69,16 @@ public class AuthService {
 
         // [7] 액세스 토큰과 쿠키에 담긴 리프레시 토큰 문자열을 반환
         String refreshCookie = refreshCookieFactory.createRefreshCookie(refreshToken);
+
+        // [8] 회원가입 로그
+        logService.userRegisterLog(
+                savedUser.getUserId(),
+                savedUser.getNickname(),
+                savedUser.getEmail(),
+                savedUser.getOauthId(),
+                "SUCCESS"
+        );
+
         return new AuthResponseDTOs.TokenResponse(accessToken, refreshCookie);
     }
 
