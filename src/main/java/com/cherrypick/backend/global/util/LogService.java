@@ -147,9 +147,10 @@ public class LogService {
     public void clickPurchaseLog(Long userId,
                                  String deviceId,
                                  Long dealId,
+                                 String dealTitle,
                                  Long categoryId,
-                                 String categoryName,
-                                 String dealTitle) {
+                                 String categoryName)
+    {
         mdcInitialize();
         MDC.put("logType", "PURCHASE_CLICK_LOG");
 
@@ -157,9 +158,9 @@ public class LogService {
         map.put("purchaseclick_userId", Optional.ofNullable(userId).orElse(-1L));
         map.put("purchaseclick_deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
         map.put("purchaseclick_dealId", Optional.ofNullable(dealId).orElse(-1L));
+        map.put("purchaseclick_dealTitle", Optional.ofNullable(dealTitle).orElse("unknown"));
         map.put("purchaseclick_categoryId", Optional.ofNullable(categoryId).orElse(-1L));
         map.put("purchaseclick_categoryName", Optional.ofNullable(categoryName).orElse("unknown"));
-        map.put("purchaseclick_dealTitle", Optional.ofNullable(dealTitle).orElse("unknown"));
         log.info(toJson(map));
 
         MDC.remove("logType");
