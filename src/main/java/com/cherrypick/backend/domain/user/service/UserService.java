@@ -118,8 +118,15 @@ public class UserService {
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
         logService.userDeleteLog(userId, user.getNickname(), user.getEmail(), user.getOauthId(), dto.reason());
-
         userRepository.delete(user);
+
+        logService.userDeleteLog(
+                user.getUserId(),
+                user.getNickname(),
+                user.getEmail(),
+                user.getOauthId(),
+                dto.reason()
+        );
 
         return new UserResponseDTOs.DeleteResponseDTO(userId, "magic hot super delete success");
 
