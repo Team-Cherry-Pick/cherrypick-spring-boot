@@ -127,6 +127,22 @@ public class LogService {
 
     }
 
+    public void userRegisterLog(Long userId, String name, String email, String oauthId, String message) {
+        mdcInitialize();
+        MDC.put("logType", "USER_REGISTER_LOG");
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("reguser_msg", message);
+        map.put("reguser_id", Optional.ofNullable(userId).orElse(-1L));
+        map.put("reguser_name", name);
+        map.put("reguser_oauthid", oauthId);
+        map.put("reguser_email", email);
+        log.info(toJson(map));
+
+        MDC.remove("logType");
+
+    }
+
     public void openAiLog(Integer promptTokens, Integer completionTokens, Integer totalTokens)
     {
         mdcInitialize();
