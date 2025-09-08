@@ -111,20 +111,36 @@ public class LogService {
 
     }
 
+    // 유저 삭제 로그
     public void userDeleteLog(Long userId, String name, String email, String oauthId, String message) {
         mdcInitialize();
         MDC.put("logType", "USER_DELETE_LOG");
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("deluser_msg", message);
+        map.put("deluser_msg", Optional.ofNullable(message).orElse("unknown"));
         map.put("deluser_id", Optional.ofNullable(userId).orElse(-1L));
-        map.put("deluser_name", name);
-        map.put("deluser_oauthid", oauthId);
-        map.put("deluser_email", email);
+        map.put("deluser_name", Optional.ofNullable(name).orElse("unknown"));
+        map.put("deluser_oauthid", Optional.ofNullable(oauthId).orElse("unknown"));
+        map.put("deluser_email", Optional.ofNullable(email).orElse("unknown"));
         log.info(toJson(map));
 
         MDC.remove("logType");
+    }
 
+    // 유저 등록 로그
+    public void userRegisterLog(Long userId, String name, String email, String oauthId, String message) {
+        mdcInitialize();
+        MDC.put("logType", "USER_REGISTER_LOG");
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("reguser_msg", Optional.ofNullable(message).orElse("unknown"));
+        map.put("reguser_id", Optional.ofNullable(userId).orElse(-1L));
+        map.put("reguser_name", Optional.ofNullable(name).orElse("unknown"));
+        map.put("reguser_oauthid", Optional.ofNullable(oauthId).orElse("unknown"));
+        map.put("reguser_email", Optional.ofNullable(email).orElse("unknown"));
+        log.info(toJson(map));
+
+        MDC.remove("logType");
     }
 
     public void openAiLog(Integer promptTokens, Integer completionTokens, Integer totalTokens)
