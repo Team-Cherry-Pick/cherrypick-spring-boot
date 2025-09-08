@@ -8,11 +8,13 @@ import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.enums.UserBehaviorType;
+import com.cherrypick.backend.domain.deal.service.DealLogService;
 import com.cherrypick.backend.domain.deal.service.DealService;
 import com.cherrypick.backend.domain.deal.service.RecommenderService;
 import com.cherrypick.backend.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class DealController {
 
     private final DealService dealService;
+    private final DealLogService dealLogService;
     private final RecommenderService recommenderService;
 
 
@@ -103,7 +106,20 @@ public class DealController {
         return ResponseEntity.ok(dealService.deleteDeal(dealId));
     }
 
+    // 게시글 삭제
+    @Operation(
+            summary = "핫딜 게시글 구매 버튼 로그 추가 API V1",
+            description = "구매버튼을 눌렀다는 이력의 로그를 찍습니다."
+    )
+    @GetMapping("/deal/purchase-log")
+    public ResponseEntity<String> purchaseLog(
+            @RequestParam(value = "dealId", defaultValue = "1") Long dealId,
+            @RequestParam(value = "version", defaultValue = "v1") String version,
+            HttpServletRequest request) {
 
+        String deviceId = request.getHeader("Device-Id");
 
+        return ResponseEntity.ok(dealLogService.putPurchaseClickLog(dealId, deviceId));
+    }
 
 }
