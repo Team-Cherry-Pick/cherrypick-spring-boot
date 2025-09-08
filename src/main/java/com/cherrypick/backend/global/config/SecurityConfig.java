@@ -86,7 +86,7 @@ public class SecurityConfig {
                                 "/api/deal/recommend", "/api/deal/*", "/api/product-info",              // 게시글 추천 시스템 조회 요청
                                 "/api/category", "/api/store", "/api/discount",                         // 관련 리소스 조회 요청
                                 "/api/best-comment/*", "/api/comment/*",                                  // 댓글 조회 요청
-                                "/api/redirect/**"                                                          // 딥링크 리다이렉션
+                                "/api/redirect/**", "/api/deal/purchase-log"                                                          // 딥링크 리다이렉션
 
                         ).permitAll()
                         .requestMatchers("/api/deal/**").authenticated()                                     // 게시글 생성/수정/삭제 및 투표 등은 권한이 있어야함.
