@@ -74,6 +74,6 @@ WHERE
 
     @Modifying
     @Query("UPDATE Deal d SET d.heat = d.heat + :amount WHERE d.dealId = :dealId")
-    Optional<Double> updateHeat(@Param("dealId") Long dealId, @Param("amount") Double amount);
+    int updateHeat(@Param("dealId") Long dealId, @Param("amount") Double amount);
 
 }
