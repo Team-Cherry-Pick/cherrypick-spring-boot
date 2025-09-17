@@ -7,7 +7,21 @@ import com.cherrypick.backend.domain.discount.entity.Discount;
 import com.cherrypick.backend.domain.hashtag.entity.DealTag;
 import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.user.entity.User;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -32,6 +46,7 @@ public class Deal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long dealId;
 
+    // TODO : 필드명 수정 요함.
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id")
@@ -39,6 +54,7 @@ public class Deal {
 
     private String title;
 
+    // TODO : 필드명 수정 요함.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category categoryId;
@@ -46,6 +62,7 @@ public class Deal {
     private String originalUrl;
     private String deepLink;
 
+    // TODO : 필드명 수정 요함.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")
     private Store storeId;
@@ -95,4 +112,22 @@ public class Deal {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    /**
+     * 딜의 인기도(heat)를 업데이트합니다.
+     *
+     * @param amount 변경할 인기도 값 (양수: 증가, 음수: 감소)
+     * @return 업데이트된 인기도 값 (-999.0 ~ 999.0 범위로 제한됨)
+     */
+    public Double updateHeat(double amount){
+
+        var updatedHeat = heat + amount;
+        if(updatedHeat < -999.0) updatedHeat = -999.0;
+        else if(updatedHeat > 999.0) updatedHeat = 999.0;
+
+        return updatedHeat;
+    }
+
+
+
 }
