@@ -15,6 +15,7 @@ import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.VoteErrorCode;
+import com.cherrypick.backend.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,10 +35,7 @@ public class VoteService {
 
     @Transactional
     public VoteResponseDTO createVote(Long dealId, VoteRequestDTO request) {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(principal instanceof AuthenticatedUser userDetails)) {
-            throw new BaseException(GlobalErrorCode.UNAUTHORIZED);
-        }
+        var userDetails = AuthUtil.getUserDetail();
 
         User user = userRepository.findById(userDetails.userId())
                 .orElseThrow(() -> new BaseException(GlobalErrorCode.UNAUTHORIZED));
@@ -65,8 +63,8 @@ public class VoteService {
         deal.setHeat(clampScore(deal.getHeat() - prevScore));
 
         // 새 점수 계산
-        double newScore = 0.0;
-        if (request.voteType() != VoteType.NONE) {
+        double newScore = 1.0;
+        if (request.voteType() == VoteType.NONE) {
             newScore = calculateSingleScore(user, deal, request.voteType(), LocalDateTime.now());
             deal.setHeat(clampScore(deal.getHeat() + newScore));
         }
@@ -90,11 +88,12 @@ public class VoteService {
         double timeDecay = getTimeDecay(deal.getCreatedAt(), now);
         double likeWeight = switch (voteType) {
             case TRUE -> 1.0;
-            case FALSE -> -0.8;
+            case FALSE -> -1.8;
             default -> 0.0;
         };
         double resistance = 2.0 + (deal.getHeat() / 100.0); // CurrentResistance = BaseResistance + CurrentHeat / ResistanceWeight
-        return (userWeight * timeDecay * likeWeight / resistance);
+        // 추후 가중이 적용된 수치로 반환해야함.
+        return likeWeight;
     }
 
     // 생성 시간 감쇠율
