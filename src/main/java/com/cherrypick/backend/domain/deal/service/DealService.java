@@ -26,6 +26,8 @@ import com.cherrypick.backend.domain.linkprice.service.LinkPriceService;
 import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.store.repository.StoreRepository;
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
+import com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter;
+import static com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter.Behavior;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
@@ -65,6 +67,7 @@ public class DealService {
     private final ImageRepository imageRepository;
     private final LinkPriceService linkPriceService;
     private final CategoryService categoryService;
+    private final RedisDuplicationPreventionAdapter duplicationPreventionAdapter;
 
     // 게시글 생성
     @Transactional
@@ -327,7 +330,7 @@ public class DealService {
 
     // 게시글 상세조회
     @Transactional(readOnly = true)
-    public DealDetailResponseDTO getDealDetail(Long dealId) {
+    public DealDetailResponseDTO getDealDetail(Long dealId, String deviceId) {
 
         // Deal이 존재하는지 확인
         Deal deal = dealRepository.findById(dealId)
@@ -399,9 +402,15 @@ public class DealService {
         // 인포 태그 생성
         List<String> infoTags = getInfoTags(deal);
 
-        // 조회수/온도 원자적 증가
-        int totalViews = dealRepository.incrementViewCount(dealId).orElse(0);
-        dealRepository.updateHeat(dealId, +0.1);
+        // 중복 조회 방지 및 조회수/온도 증가
+        int totalViews = deal.getTotalViews() != null ? deal.getTotalViews().intValue() : 0;
+
+        // 이미 조회한 적이 없다면 조회수와 온도 증가
+        if (!duplicationPreventionAdapter.isDuplicate(Behavior.VIEW, dealId, deviceId)) {
+            totalViews = dealRepository.incrementViewCount(dealId).orElse(0);
+            dealRepository.updateHeat(dealId, +0.1);
+            duplicationPreventionAdapter.preventDuplicate(Behavior.VIEW, dealId, deviceId);
+        }
 
         // 매트릭스 조회 (조회수, 좋아요 수, 싫어요 수, 댓글 수)
         long[] metrics = getDealMetrics(deal);

@@ -1,17 +1,13 @@
 package com.cherrypick.backend.domain.deal.controller;
 
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
-import com.cherrypick.backend.domain.deal.dto.request.DealRequestDTOs;
 import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
-import com.cherrypick.backend.domain.deal.enums.UserBehaviorType;
 import com.cherrypick.backend.domain.deal.service.DealLogService;
 import com.cherrypick.backend.domain.deal.service.DealService;
-import com.cherrypick.backend.domain.deal.service.RecommenderService;
-import com.cherrypick.backend.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -72,10 +68,11 @@ public class DealController {
     @GetMapping("/deal/{dealId}")
     public ResponseEntity<DealDetailResponseDTO> getDealDetail(
             @PathVariable Long dealId,
-            @RequestParam(value = "version", defaultValue = "v1") String version) {
+            @RequestParam(value = "version", defaultValue = "v1") String version,
+            HttpServletRequest request) {
 
-
-        return ResponseEntity.ok(dealService.getDealDetail(dealId));
+        String deviceId = request.getHeader("Device-Id");
+        return ResponseEntity.ok(dealService.getDealDetail(dealId, deviceId));
     }
 
     // 게시물 수정
