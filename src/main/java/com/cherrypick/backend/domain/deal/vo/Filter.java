@@ -1,5 +1,6 @@
 package com.cherrypick.backend.domain.deal.vo;
 
+// TODO : 파일명 수정요함
 public record Filter (
 
         boolean viewSoldOut,        // 품절 포함 여부

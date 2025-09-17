@@ -1,17 +1,13 @@
 package com.cherrypick.backend.domain.deal.controller;
 
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
-import com.cherrypick.backend.domain.deal.dto.request.DealRequestDTOs;
 import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
-import com.cherrypick.backend.domain.deal.enums.UserBehaviorType;
 import com.cherrypick.backend.domain.deal.service.DealLogService;
 import com.cherrypick.backend.domain.deal.service.DealService;
-import com.cherrypick.backend.domain.deal.service.RecommenderService;
-import com.cherrypick.backend.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,8 +24,6 @@ public class DealController {
 
     private final DealService dealService;
     private final DealLogService dealLogService;
-    private final RecommenderService recommenderService;
-
 
     // 게시글 생성
     @Operation(
@@ -74,10 +68,11 @@ public class DealController {
     @GetMapping("/deal/{dealId}")
     public ResponseEntity<DealDetailResponseDTO> getDealDetail(
             @PathVariable Long dealId,
-            @RequestParam(value = "version", defaultValue = "v1") String version) {
+            @RequestParam(value = "version", defaultValue = "v1") String version,
+            HttpServletRequest request) {
 
-
-        return ResponseEntity.ok(dealService.getDealDetail(dealId));
+        String deviceId = request.getHeader("Device-Id");
+        return ResponseEntity.ok(dealService.getDealDetail(dealId, deviceId));
     }
 
     // 게시물 수정
@@ -106,7 +101,7 @@ public class DealController {
         return ResponseEntity.ok(dealService.deleteDeal(dealId));
     }
 
-    // 게시글 삭제
+    // 구매로그
     @Operation(
             summary = "핫딜 게시글 구매 버튼 로그 추가 API V1",
             description = "구매버튼을 눌렀다는 이력의 로그를 찍습니다."
@@ -121,5 +116,19 @@ public class DealController {
 
         return ResponseEntity.ok(dealLogService.putPurchaseClickLog(dealId, deviceId));
     }
+    // 게시글 삭제
+    @Operation(
+            summary = "핫딜 게시글 공유 버튼 로그 추가 API V1",
+            description = "공유버튼을 눌렀다는 이력의 로그를 찍습니다."
+    )
+    @GetMapping("/deal/share-log")
+    public ResponseEntity<String> shareLog(
+            @RequestParam(value = "dealId", defaultValue = "1") Long dealId,
+            @RequestParam(value = "version", defaultValue = "v1") String version,
+            HttpServletRequest request) {
 
+        String deviceId = request.getHeader("Device-Id");
+
+        return ResponseEntity.ok(dealLogService.putShareClickLog(dealId, deviceId));
+    }
 }
