@@ -59,5 +59,39 @@ public class DealLogService
         return "success";
     }
 
+    @Transactional
+    public String putShareClickLog(Long dealId, String deviceId)
+    {
+        // 딜 구매버튼 클릭 시
+        if(duplicationPreventionAdapter.isDuplicate(RedisDuplicationPreventionAdapter.Behavior.SHARE, dealId, deviceId))
+        {
+            return "DUPLICATE";
+        }
+        duplicationPreventionAdapter.preventDuplicate(RedisDuplicationPreventionAdapter.Behavior.SHARE, dealId, deviceId);
+
+        var deal = dealRepository.findById(dealId).orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
+        var category = deal.getCategoryId();
+        Long user = null;
+        try{
+            user = AuthUtil.getUserDetail().userId();
+        } catch (RuntimeException e) {
+            System.out.println("등록되지 않은 유저");
+        }
+
+        // 구매 버튼을 눌렀으니 가중치를 2 추가
+        dealRepository.updateHeat(dealId, 2.0);
+        logService.clickShareLog(
+                user,
+                deviceId,
+                deal.getDealId(),
+                deal.getTitle(),
+                category.getCategoryId(),
+                category.getName()
+        );
+
+        return "success";
+    }
+
+
 
 }

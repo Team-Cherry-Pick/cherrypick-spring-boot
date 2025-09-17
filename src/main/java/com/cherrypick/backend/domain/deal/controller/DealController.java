@@ -101,7 +101,7 @@ public class DealController {
         return ResponseEntity.ok(dealService.deleteDeal(dealId));
     }
 
-    // 게시글 삭제
+    // 구매로그
     @Operation(
             summary = "핫딜 게시글 구매 버튼 로그 추가 API V1",
             description = "구매버튼을 눌렀다는 이력의 로그를 찍습니다."
@@ -116,5 +116,19 @@ public class DealController {
 
         return ResponseEntity.ok(dealLogService.putPurchaseClickLog(dealId, deviceId));
     }
+    // 게시글 삭제
+    @Operation(
+            summary = "핫딜 게시글 공유 버튼 로그 추가 API V1",
+            description = "공유버튼을 눌렀다는 이력의 로그를 찍습니다."
+    )
+    @GetMapping("/deal/share-log")
+    public ResponseEntity<String> shareLog(
+            @RequestParam(value = "dealId", defaultValue = "1") Long dealId,
+            @RequestParam(value = "version", defaultValue = "v1") String version,
+            HttpServletRequest request) {
 
+        String deviceId = request.getHeader("Device-Id");
+
+        return ResponseEntity.ok(dealLogService.putShareClickLog(dealId, deviceId));
+    }
 }
