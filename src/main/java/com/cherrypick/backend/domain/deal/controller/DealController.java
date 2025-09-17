@@ -28,8 +28,6 @@ public class DealController {
 
     private final DealService dealService;
     private final DealLogService dealLogService;
-    private final RecommenderService recommenderService;
-
 
     // 게시글 생성
     @Operation(

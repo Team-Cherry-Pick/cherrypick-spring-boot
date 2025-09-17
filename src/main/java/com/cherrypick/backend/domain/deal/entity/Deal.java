@@ -95,4 +95,22 @@ public class Deal {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    /**
+     * 딜의 인기도(heat)를 업데이트합니다.
+     *
+     * @param amount 변경할 인기도 값 (양수: 증가, 음수: 감소)
+     * @return 업데이트된 인기도 값 (-999.0 ~ 999.0 범위로 제한됨)
+     */
+    public Double updateHeat(double amount){
+
+        var updatedHeat = heat + amount;
+        if(updatedHeat < -999.0) updatedHeat = -999.0;
+        else if(updatedHeat > 999.0) updatedHeat = 999.0;
+
+        return updatedHeat;
+    }
+
+
+
 }

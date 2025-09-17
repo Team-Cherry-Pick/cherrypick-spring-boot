@@ -37,12 +37,12 @@ import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.exception.enums.LinkPriceErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -326,7 +326,7 @@ public class DealService {
     }
 
     // 게시글 상세조회
-    @Transactional
+    @Transactional(readOnly = true)
     public DealDetailResponseDTO getDealDetail(Long dealId) {
 
         // Deal이 존재하는지 확인
@@ -334,8 +334,8 @@ public class DealService {
                 .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
 
         // 로그인 사용자 ID 추출
-        final Long loginUserId = com.cherrypick.backend.global.util.AuthUtil.isAuthenticated() ? com.cherrypick.backend.global.util.AuthUtil.getUserDetail().userId() : null;
-        com.cherrypick.backend.domain.vote.enums.VoteType voteType = com.cherrypick.backend.domain.vote.enums.VoteType.NONE;
+        final Long loginUserId = AuthUtil.isAuthenticated() ? AuthUtil.getUserDetail().userId() : null;
+        VoteType voteType = VoteType.NONE;
         if (loginUserId != null) {
             var user = userRepository.findById(loginUserId).orElse(null);
             if (user != null) {
@@ -399,9 +399,9 @@ public class DealService {
         // 인포 태그 생성
         List<String> infoTags = getInfoTags(deal);
 
-        // 조회수 증가
-        deal.setTotalViews(deal.getTotalViews() + 1);
-        long totalViews = deal.getTotalViews();
+        // 조회수/온도 원자적 증가
+        int totalViews = dealRepository.incrementViewCount(dealId).orElse(0);
+        dealRepository.updateHeat(dealId, +0.1);
 
         // 매트릭스 조회 (조회수, 좋아요 수, 싫어요 수, 댓글 수)
         long[] metrics = getDealMetrics(deal);
@@ -437,7 +437,7 @@ public class DealService {
                 deal.getContent(),
                 deal.getDiscountDescription(),
                 (int) deal.getHeat(),
-                (int) totalViews,
+                totalViews,
                 (int) metrics[0], // likeCount
                 (int) metrics[1], // dislikeCount
                 (int) metrics[2], // commentCount
