@@ -26,6 +26,8 @@ import com.cherrypick.backend.domain.linkprice.service.LinkPriceService;
 import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.store.repository.StoreRepository;
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
+import com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter;
+import static com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter.Behavior;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
@@ -37,12 +39,12 @@ import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.exception.enums.LinkPriceErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -65,6 +67,7 @@ public class DealService {
     private final ImageRepository imageRepository;
     private final LinkPriceService linkPriceService;
     private final CategoryService categoryService;
+    private final RedisDuplicationPreventionAdapter duplicationPreventionAdapter;
 
     // 게시글 생성
     @Transactional
@@ -328,16 +331,16 @@ public class DealService {
     }
 
     // 게시글 상세조회
-    @Transactional
-    public DealDetailResponseDTO getDealDetail(Long dealId) {
+    @Transactional()
+    public DealDetailResponseDTO getDealDetail(Long dealId, String deviceId) {
 
         // Deal이 존재하는지 확인
         Deal deal = dealRepository.findById(dealId)
                 .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
 
         // 로그인 사용자 ID 추출
-        final Long loginUserId = com.cherrypick.backend.global.util.AuthUtil.isAuthenticated() ? com.cherrypick.backend.global.util.AuthUtil.getUserDetail().userId() : null;
-        com.cherrypick.backend.domain.vote.enums.VoteType voteType = com.cherrypick.backend.domain.vote.enums.VoteType.NONE;
+        final Long loginUserId = AuthUtil.isAuthenticated() ? AuthUtil.getUserDetail().userId() : null;
+        VoteType voteType = VoteType.NONE;
         if (loginUserId != null) {
             var user = userRepository.findById(loginUserId).orElse(null);
             if (user != null) {
@@ -401,9 +404,15 @@ public class DealService {
         // 인포 태그 생성
         List<String> infoTags = getInfoTags(deal);
 
-        // 조회수 증가
-        deal.setTotalViews(deal.getTotalViews() + 1);
-        long totalViews = deal.getTotalViews();
+        // 중복 조회 방지 및 조회수/온도 증가
+        int totalViews = deal.getTotalViews() != null ? deal.getTotalViews().intValue() : 0;
+
+        // 이미 조회한 적이 없다면 조회수와 온도 증가
+        if (!duplicationPreventionAdapter.isDuplicate(Behavior.VIEW, dealId, deviceId)) {
+            dealRepository.incrementViewCount(dealId);
+            dealRepository.updateHeat(dealId, +0.1);
+            duplicationPreventionAdapter.preventDuplicate(Behavior.VIEW, dealId, deviceId);
+        }
 
         // 매트릭스 조회 (조회수, 좋아요 수, 싫어요 수, 댓글 수)
         long[] metrics = getDealMetrics(deal);
@@ -439,7 +448,7 @@ public class DealService {
                 deal.getContent(),
                 deal.getDiscountDescription(),
                 (int) deal.getHeat(),
-                (int) totalViews,
+                totalViews,
                 (int) metrics[0], // likeCount
                 (int) metrics[1], // dislikeCount
                 (int) metrics[2], // commentCount

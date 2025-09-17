@@ -6,6 +6,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Builder;
 
+// TODO : 파일명 수정요함
 @Embeddable @Builder
 public record Price(
         @Enumerated(EnumType.STRING)
