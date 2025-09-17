@@ -2,6 +2,7 @@ package com.cherrypick.backend.domain.deal.service;
 
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.category.repository.CategoryRepository;
+import com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter;
 import com.cherrypick.backend.domain.deal.entity.Deal;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
@@ -12,6 +13,7 @@ import com.cherrypick.backend.global.util.LogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLOutput;
 
@@ -22,10 +24,19 @@ public class DealLogService
     private final DealRepository dealRepository;
     private final CategoryRepository categoryRepository;
     private final LogService logService;
+    private final RedisDuplicationPreventionAdapter duplicationPreventionAdapter;
 
+    @Transactional
     public String putPurchaseClickLog(Long dealId, String deviceId)
     {
-        var deal = dealRepository.findById(dealId).get();
+        // 딜 구매버튼 클릭 시
+        if(duplicationPreventionAdapter.isDuplicate(RedisDuplicationPreventionAdapter.Behavior.PURCHASE, dealId, deviceId))
+        {
+            return "DUPLICATE";
+        }
+        duplicationPreventionAdapter.preventDuplicate(RedisDuplicationPreventionAdapter.Behavior.PURCHASE, dealId, deviceId);
+
+        var deal = dealRepository.findById(dealId).orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
         var category = deal.getCategoryId();
         Long user = null;
         try{
@@ -34,6 +45,8 @@ public class DealLogService
             System.out.println("등록되지 않은 유저");
         }
 
+        // 구매 버튼을 눌렀으니 가중치를 2 추가
+        dealRepository.updateHeat(dealId, 2.0);
         logService.clickPurchaseLog(
                 user,
                 deviceId,
