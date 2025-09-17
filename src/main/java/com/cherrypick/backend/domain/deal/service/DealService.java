@@ -329,7 +329,7 @@ public class DealService {
     }
 
     // 게시글 상세조회
-    @Transactional(readOnly = true)
+    @Transactional()
     public DealDetailResponseDTO getDealDetail(Long dealId, String deviceId) {
 
         // Deal이 존재하는지 확인
@@ -407,7 +407,7 @@ public class DealService {
 
         // 이미 조회한 적이 없다면 조회수와 온도 증가
         if (!duplicationPreventionAdapter.isDuplicate(Behavior.VIEW, dealId, deviceId)) {
-            totalViews = dealRepository.incrementViewCount(dealId).orElse(0);
+            dealRepository.incrementViewCount(dealId);
             dealRepository.updateHeat(dealId, +0.1);
             duplicationPreventionAdapter.preventDuplicate(Behavior.VIEW, dealId, deviceId);
         }

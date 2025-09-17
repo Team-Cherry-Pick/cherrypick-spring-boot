@@ -70,7 +70,7 @@ WHERE
 
     @Modifying
     @Query("UPDATE Deal d SET d.totalViews = d.totalViews + 1 WHERE d.dealId = :dealId")
-    Optional<Integer> incrementViewCount(@Param("dealId") Long dealId);
+    int incrementViewCount(@Param("dealId") Long dealId);
 
     @Modifying
     @Query("UPDATE Deal d SET d.heat = d.heat + :amount WHERE d.dealId = :dealId")

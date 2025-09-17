@@ -18,6 +18,7 @@ import com.cherrypick.backend.global.exception.enums.VoteErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor @Slf4j
 public class VoteService {
 
     private final VoteRepository voteRepository;
@@ -64,11 +65,16 @@ public class VoteService {
 
         // 새 점수 계산
         double newScore = 1.0;
-        if (request.voteType() == VoteType.NONE) {
+        if (request.voteType() != VoteType.NONE) {
             newScore = calculateSingleScore(user, deal, request.voteType(), LocalDateTime.now());
             deal.setHeat(clampScore(deal.getHeat() + newScore));
+            log.info("getHeat : {}", deal.getHeat());
+            log.info("newScore : {}", newScore);
+            log.info("updatedScore : {}", clampScore(deal.getHeat() + newScore));
         }
+        else newScore = 0.0;
 
+        log.info("newScore : {}", newScore);
         // 투표 갱신
         vote.setUserId(user);
         vote.setDealId(deal);
@@ -76,8 +82,6 @@ public class VoteService {
         vote.setContent(content);
         vote.setScore(newScore);
         voteRepository.save(vote);
-
-        dealRepository.save(deal);
 
         return new VoteResponseDTO(deal.getDealId(), "핫딜 게시글 투표 성공");
     }
@@ -88,11 +92,12 @@ public class VoteService {
         double timeDecay = getTimeDecay(deal.getCreatedAt(), now);
         double likeWeight = switch (voteType) {
             case TRUE -> 1.0;
-            case FALSE -> -1.8;
+            case FALSE -> -1.0;
             default -> 0.0;
         };
         double resistance = 2.0 + (deal.getHeat() / 100.0); // CurrentResistance = BaseResistance + CurrentHeat / ResistanceWeight
         // 추후 가중이 적용된 수치로 반환해야함.
+        log.info("likeWeight : {}", likeWeight);
         return likeWeight;
     }
 
