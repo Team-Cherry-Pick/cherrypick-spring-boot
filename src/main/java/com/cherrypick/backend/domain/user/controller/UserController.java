@@ -4,6 +4,7 @@ import com.cherrypick.backend.domain.user.dto.response.UserDetailResponseDTO;
 import com.cherrypick.backend.domain.user.dto.request.UserRequestDTOs;
 import com.cherrypick.backend.domain.user.dto.response.UserResponseDTOs;
 import com.cherrypick.backend.domain.user.dto.request.UserUpdateRequestDTO;
+import com.cherrypick.backend.domain.user.service.BadgeService;
 import com.cherrypick.backend.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final BadgeService badgeService;
+
 
     @Operation(
             summary = "닉네임 유효성 판별 API V1",
@@ -94,5 +97,17 @@ public class UserController {
 
         return ResponseEntity.ok(userService.hardDelete(deleteRequestDTO));
     }
+
+    @Operation(
+            summary = "베타테스터 권한 부여 API V1",
+            description = "해당 유저에게 베타테스터 권한을 부여합니다."
+    )
+    @PostMapping("/badge/beta-tester")
+    public ResponseEntity<UserResponseDTOs.BadgeRegisterDTO> registerBetaTester(@RequestParam(value = "version", defaultValue = "v1") String version)
+    {
+
+        return ResponseEntity.ok(badgeService.registerBadge(1L));
+    }
+
 
 }
