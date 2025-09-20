@@ -1,12 +1,10 @@
 package com.cherrypick.backend.domain.user.controller;
 
-import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
-import com.cherrypick.backend.domain.user.dto.UserRequestDTOs;
-import com.cherrypick.backend.domain.user.dto.UserResponseDTOs;
-import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
+import com.cherrypick.backend.domain.user.dto.response.UserDetailResponseDTO;
+import com.cherrypick.backend.domain.user.dto.request.UserRequestDTOs;
+import com.cherrypick.backend.domain.user.dto.response.UserResponseDTOs;
+import com.cherrypick.backend.domain.user.dto.request.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.service.UserService;
-import com.cherrypick.backend.global.exception.BaseException;
-import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

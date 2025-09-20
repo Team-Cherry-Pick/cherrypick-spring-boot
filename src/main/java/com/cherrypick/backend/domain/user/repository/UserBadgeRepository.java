@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserBadgeRepository extends JpaRepository<UserBadge, Long>
 {
-    
+
 }

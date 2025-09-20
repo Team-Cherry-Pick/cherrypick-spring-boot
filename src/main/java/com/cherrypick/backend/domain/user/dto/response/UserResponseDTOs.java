@@ -1,6 +1,5 @@
-package com.cherrypick.backend.domain.user.dto;
+package com.cherrypick.backend.domain.user.dto.response;
 
-import com.cherrypick.backend.domain.user.entity.User;
 import lombok.Builder;
 
 public class UserResponseDTOs {
