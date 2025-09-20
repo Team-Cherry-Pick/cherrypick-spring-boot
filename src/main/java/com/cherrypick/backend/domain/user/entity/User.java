@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -42,6 +43,11 @@ public class User {
     private Role role;
 
     private double userWeight = 0.8;
+
+    @OneToMany(mappedBy = "user",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true)
+    List<UserBadge> userBadges;
 
     @CreatedDate
     @Column(updatable = false)
