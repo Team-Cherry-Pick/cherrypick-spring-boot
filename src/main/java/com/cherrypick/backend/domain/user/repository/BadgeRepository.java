@@ -1,0 +1,12 @@
+package com.cherrypick.backend.domain.user.repository;
+
+import com.cherrypick.backend.domain.user.entity.Badge;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface BadgeRepository extends JpaRepository<Badge, Long>
+{
+
+
+}
