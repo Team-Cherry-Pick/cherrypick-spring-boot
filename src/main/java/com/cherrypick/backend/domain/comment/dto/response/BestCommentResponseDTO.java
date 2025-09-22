@@ -4,7 +4,7 @@ import com.cherrypick.backend.domain.user.vo.UserVO;
 
 public record BestCommentResponseDTO(
         Long commentId,
-        UserVO userVO,
+        UserVO user,
         int totalLikes,
         String content,
         boolean isLike
