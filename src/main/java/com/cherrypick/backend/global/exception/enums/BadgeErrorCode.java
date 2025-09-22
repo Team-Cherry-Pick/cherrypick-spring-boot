@@ -9,6 +9,7 @@ public enum BadgeErrorCode implements BaseErrorCode {
 
     // 400 BAD REQUEST
     BADGE_NOT_OWNED(HttpStatus.BAD_REQUEST, "해당 뱃지를 소유하지 않고 있습니다."),
+    BADGE_OWNED_ALREADY(HttpStatus.BAD_REQUEST, "이미 해당 뱃지를 소유하고 있습니다."),
 
     // 401 UNAUTHORIZED
 

@@ -27,12 +27,17 @@ public class BadgeService
      *
      * @param userId 뱃지를 부여할 유저 아이디입니다.
      * @param badgeId 부여할 뱃지의 아이디입니다.
-     * @return BadgeRegisterDTO (success만 반환됨.)
+     * @return BadgeEquipDTO (착용 유저 아이디, 착용 뱃지 아이디, 착용 뱃지명)
+     * @throws BaseException 400 BADGE_OWNED_ALREADY
      * @throws BaseException 404 BADGE_NOT_FIND, USER_NOT_FOUND
      */
     @Transactional
     public UserResponseDTOs.BadgeEquipDTO registerBadge(Long userId, Long badgeId)
     {
+        if (userBadgeRepository.existsByUserAndBadge(userId, badgeId)){
+            throw new BaseException(BadgeErrorCode.BADGE_OWNED_ALREADY);
+        }
+
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
         var badge = badgeRepository.findById(badgeId).orElseThrow(() -> new BaseException(BadgeErrorCode.BADGE_NOT_FIND));
 
@@ -65,7 +70,7 @@ public class BadgeService
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
         var badge = badgeRepository.findById(badgeId).orElseThrow(() -> new BaseException(BadgeErrorCode.BADGE_NOT_FIND));
 
-        if (!userBadgeRepository.existsByUserAndBadge(user, badge)){
+        if (!userBadgeRepository.existsByUserAndBadge(userId, badgeId)){
             throw new BaseException(BadgeErrorCode.BADGE_NOT_OWNED);
         }
 
