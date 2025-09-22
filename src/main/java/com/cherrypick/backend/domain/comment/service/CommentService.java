@@ -16,8 +16,10 @@ import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
+import com.cherrypick.backend.domain.user.entity.Badge;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.domain.user.entity.User;
+import com.cherrypick.backend.domain.user.vo.UserVO;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.CommentErrorCode;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
@@ -143,12 +145,16 @@ public class CommentService {
                         isLike = commentLikeRepository.existsById(new CommentLikeId(loginUserId, comment.getCommentId()));
                     }
 
+                    User user = comment.getUserId();
+                    Badge badge = user.getBadge();
                     return new BestCommentResponseDTO(
                             comment.getCommentId(),
-                            new com.cherrypick.backend.domain.user.vo.User(
-                                    comment.getUserId().getUserId(),
-                                    comment.getUserId().getNickname(),
-                                    imageOpt.map(Image::getImageUrl).orElse(null)
+                            new UserVO(
+                                    user.getUserId(),
+                                    user.getNickname(),
+                                    imageOpt.map(Image::getImageUrl).orElse(null),
+                                    badge.getBadgeId(),
+                                    badge.getDisplayName()
                             ),
                             totalLikes,
                             comment.getContent(),
@@ -244,13 +250,17 @@ public class CommentService {
             isLike = commentLikeRepository.existsById(new CommentLikeId(loginUserId, comment.getCommentId()));
         }
 
+        User user = comment.getUserId();
+        Badge badge = user.getBadge();
         return new CommentListResponseDTO(
                 comment.getCommentId(),
                 comment.getParentId(),
-                new com.cherrypick.backend.domain.user.vo.User(
-                        comment.getUserId().getUserId(),
-                        comment.getUserId().getNickname(),
-                        imageOpt.map(Image::getImageUrl).orElse(null)
+                new UserVO(
+                        user.getUserId(),
+                        user.getNickname(),
+                        imageOpt.map(Image::getImageUrl).orElse(null),
+                        badge.getBadgeId(),
+                        badge.getDisplayName()
                 ),
                 comment.getContent(),
                 totalLikes,
@@ -275,14 +285,17 @@ public class CommentService {
                 .findTopByRefIdAndImageTypeOrderByImageIndexAsc(comment.getUserId().getUserId(), ImageType.USER)
                 .map(Image::getImageUrl)
                 .orElse(null);
-
+        User user = comment.getUserId();
+        Badge badge = user.getBadge();
         return new CommentListResponseDTO(
                 comment.getCommentId(),
                 comment.getParentId(),
-                new com.cherrypick.backend.domain.user.vo.User(
-                        comment.getUserId().getUserId(),
-                        comment.getUserId().getNickname(),
-                        imageUrl
+                new UserVO(
+                        user.getUserId(),
+                        user.getNickname(),
+                        imageUrl,
+                        badge.getBadgeId(),
+                        badge.getDisplayName()
                 ),
                 comment.getContent(),
                 totalLikes,
