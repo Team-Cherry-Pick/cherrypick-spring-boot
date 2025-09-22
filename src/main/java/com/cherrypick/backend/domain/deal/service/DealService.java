@@ -16,7 +16,6 @@ import com.cherrypick.backend.domain.deal.enums.*;
 import com.cherrypick.backend.domain.deal.repository.DealRepository;
 import com.cherrypick.backend.domain.discount.entity.Discount;
 import com.cherrypick.backend.domain.discount.repository.DiscountRepository;
-import com.cherrypick.backend.domain.hashtag.service.HashTagService;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
@@ -28,9 +27,12 @@ import com.cherrypick.backend.domain.store.repository.StoreRepository;
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter;
 import static com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter.Behavior;
+
+import com.cherrypick.backend.domain.user.entity.Badge;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
+import com.cherrypick.backend.domain.user.vo.UserVO;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.cherrypick.backend.domain.vote.repository.VoteRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -317,6 +319,7 @@ public class DealService {
                     getInfoTags(deal),
                     deal.getPrice(),
                     user != null ? user.getNickname() : null,
+                    user != null ? user.getBadge().getBadgeId() : null,
                     deal.getCreatedAt().toString(),
                     (int) deal.getHeat(),
                     (int) likeCount,
@@ -366,11 +369,16 @@ public class DealService {
                 deal.getUserId().getUserId()
         );
 
+
+        User user = deal.getUserId();
+        Badge badge = user.getBadge();
         // User VO 생성
-        com.cherrypick.backend.domain.user.vo.User userVo = new com.cherrypick.backend.domain.user.vo.User(
-                deal.getUserId().getUserId(),
-                deal.getUserId().getNickname(),
-                userImageOpt.map(Image::getImageUrl).orElse(null)
+        UserVO userVo = new UserVO(
+                user.getUserId(),
+                user.getNickname(),
+                userImageOpt.map(Image::getImageUrl).orElse(null),
+                badge.getBadgeId(),
+                badge.getDisplayName()
         );
 
         // Store VO 생성

@@ -2,10 +2,10 @@ package com.cherrypick.backend.domain.user.service;
 
 
 import com.cherrypick.backend.domain.image.service.ImageService;
-import com.cherrypick.backend.domain.user.dto.UserDetailResponseDTO;
-import com.cherrypick.backend.domain.user.dto.UserRequestDTOs;
-import com.cherrypick.backend.domain.user.dto.UserResponseDTOs;
-import com.cherrypick.backend.domain.user.dto.UserUpdateRequestDTO;
+import com.cherrypick.backend.domain.user.dto.response.UserDetailResponseDTO;
+import com.cherrypick.backend.domain.user.dto.request.UserRequestDTOs;
+import com.cherrypick.backend.domain.user.dto.response.UserResponseDTOs;
+import com.cherrypick.backend.domain.user.dto.request.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.enums.Gender;
 import com.cherrypick.backend.domain.user.enums.UserStatus;
 import com.cherrypick.backend.domain.user.repository.UserRepository;

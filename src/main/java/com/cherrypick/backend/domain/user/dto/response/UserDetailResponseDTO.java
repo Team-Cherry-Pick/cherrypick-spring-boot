@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.user.dto;
+package com.cherrypick.backend.domain.user.dto.response;
 
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.user.entity.User;

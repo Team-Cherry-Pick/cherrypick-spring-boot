@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -23,7 +24,6 @@ public class User {
 
     /// 확장 가능성
     /// 유저 등급제 ,로그인 매서드 , 선호 해시태그/카테고리
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -41,7 +41,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "badge_id")
+    private Badge badge;
+
     private double userWeight = 0.8;
+
+    @OneToMany(mappedBy = "user",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true)
+    List<UserBadge> userBadges;
 
     @CreatedDate
     @Column(updatable = false)

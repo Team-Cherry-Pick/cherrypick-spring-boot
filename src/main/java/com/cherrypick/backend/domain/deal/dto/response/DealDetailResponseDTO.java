@@ -3,7 +3,7 @@ package com.cherrypick.backend.domain.deal.dto.response;
 import com.cherrypick.backend.domain.deal.vo.Price;
 import com.cherrypick.backend.domain.deal.vo.Shipping;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
-import com.cherrypick.backend.domain.user.vo.User;
+import com.cherrypick.backend.domain.user.vo.UserVO;
 import com.cherrypick.backend.domain.store.vo.Store;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
 
@@ -13,7 +13,7 @@ public record DealDetailResponseDTO (
 
         Long dealId,
         List<ImageUrl> imageUrls,
-        User user,
+        UserVO user,
         Store store,
         List<String> categorys,
         String title,

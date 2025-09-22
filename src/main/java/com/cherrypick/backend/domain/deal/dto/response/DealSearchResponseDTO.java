@@ -20,6 +20,7 @@ public class DealSearchResponseDTO {
     private List<String> infoTags;
     private Price price;
     private String nickname;
+    private Long badgeId;
     private String createdAt;
     private int heat;
     private int totalLikes;
