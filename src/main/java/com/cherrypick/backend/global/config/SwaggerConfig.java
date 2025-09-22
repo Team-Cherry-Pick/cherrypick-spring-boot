@@ -34,6 +34,11 @@ public class SwaggerConfig {
                 .in(SecurityScheme.In.HEADER)
                 .name("Authorization");
 
+        SecurityScheme deviceIdHeader = new SecurityScheme()
+                .type(SecurityScheme.Type.APIKEY)
+                .in(SecurityScheme.In.HEADER)
+                .name("Device-ID");
+
         // Security Requirement 정의
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("BearerAuth");
 
@@ -45,7 +50,8 @@ public class SwaggerConfig {
         OpenAPI openAPI = new OpenAPI()
                 .info(info)
                 .addSecurityItem(securityRequirement)
-                .schemaRequirement("BearerAuth", securityScheme);
+                .schemaRequirement("BearerAuth", securityScheme)
+                .schemaRequirement("DeviceIdAuth", deviceIdHeader);
 
         // 서버 프로파일일 경우 서버 base URL 명시
         if ("dev".equals(activeProfile)) {

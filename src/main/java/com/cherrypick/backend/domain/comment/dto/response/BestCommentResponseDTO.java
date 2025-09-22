@@ -1,10 +1,10 @@
 package com.cherrypick.backend.domain.comment.dto.response;
 
-import com.cherrypick.backend.domain.user.vo.User;
+import com.cherrypick.backend.domain.user.vo.UserVO;
 
 public record BestCommentResponseDTO(
         Long commentId,
-        User user,
+        UserVO userVO,
         int totalLikes,
         String content,
         boolean isLike
