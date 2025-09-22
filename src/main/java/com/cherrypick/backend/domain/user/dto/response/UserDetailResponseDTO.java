@@ -16,7 +16,8 @@ public record UserDetailResponseDTO(
         Gender gender,          // nullable
         String birthday,        // nullable
         String imageURL,        // nullable
-        Long imageId            // nullable
+        Long imageId,           // nullable
+        Long badgeId
 )
 {
     public static UserDetailResponseDTO from(User user, Image image) {
@@ -28,6 +29,7 @@ public record UserDetailResponseDTO(
                 .birthday(Optional.ofNullable(user.getBirthday()).map(LocalDate::toString).orElse(null))
                 .imageId(image.getImageId())
                 .imageURL(image.getImageUrl())
+                .badgeId(user.getBadge().getBadgeId())
                 .build();
     }
 }
