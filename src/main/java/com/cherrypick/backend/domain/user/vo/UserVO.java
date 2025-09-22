@@ -1,7 +1,9 @@
 package com.cherrypick.backend.domain.user.vo;
 
-public record User(
+public record UserVO(
         Long userId,
         String userName,
-        String userImageUrl
+        String userImageUrl,
+        Long badgeId,
+        String badgeName
 ) {}

@@ -14,6 +14,7 @@ import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
+import com.cherrypick.backend.domain.user.service.BadgeService;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.LogService;
@@ -28,9 +29,9 @@ public class AuthService {
     private final RegisterTokenProvider registerTokenProvider;
     private final RefreshTokenProvider refreshTokenProvider;
     private final AccessTokenProvider accessTokenProvider;
-
     private final RefreshTokenStore refreshTokenStore;
 
+    private final BadgeService badgeService;
     private final ImageService imageService;
     private final UserRepository userRepository;
     private final RefreshCookieFactory refreshCookieFactory;
@@ -70,7 +71,11 @@ public class AuthService {
         // [7] 액세스 토큰과 쿠키에 담긴 리프레시 토큰 문자열을 반환
         String refreshCookie = refreshCookieFactory.createRefreshCookie(refreshToken);
 
-        // [8] 회원가입 로그
+        // [8] 기본 뱃지 등록
+        badgeService.registerBadge(user.getUserId(), 1L);
+        badgeService.equipBadge(user.getUserId(), 1L);
+
+        // [9] 회원가입 로그
         logService.userRegisterLog(
                 savedUser.getUserId(),
                 savedUser.getNickname(),
@@ -81,7 +86,6 @@ public class AuthService {
 
         return new AuthResponseDTOs.TokenResponse(accessToken, refreshCookie);
     }
-
 
     // 액세스 토큰 재발급 로직
     public AuthResponseDTOs.TokenResponse refreshAccessToken(String clientDeviceId, String clientRefreshToken)
