@@ -6,6 +6,7 @@ import com.cherrypick.backend.domain.user.dto.response.UserResponseDTOs;
 import com.cherrypick.backend.domain.user.dto.request.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.service.BadgeService;
 import com.cherrypick.backend.domain.user.service.UserService;
+import com.cherrypick.backend.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -103,10 +104,14 @@ public class UserController {
             description = "해당 유저에게 베타테스터 권한을 부여합니다."
     )
     @PostMapping("/badge/beta-tester")
-    public ResponseEntity<UserResponseDTOs.BadgeRegisterDTO> registerBetaTester(@RequestParam(value = "version", defaultValue = "v1") String version)
+    public ResponseEntity<UserResponseDTOs.BadgeEquipDTO> registerBetaTester(@RequestParam(value = "version", defaultValue = "v1") String version)
     {
+        Long userId = AuthUtil.getUserDetail().userId();
+        // 베타테스터 뱃지 ID는 2L
+        badgeService.registerBadge(userId, 2L);
+        var response = badgeService.equipBadge(userId, 2L);
 
-        return ResponseEntity.ok(badgeService.registerBadge(1L));
+        return ResponseEntity.ok(response);
     }
 
 

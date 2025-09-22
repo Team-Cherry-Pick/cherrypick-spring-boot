@@ -31,7 +31,7 @@ public class BadgeService
      * @throws BaseException 404 BADGE_NOT_FIND, USER_NOT_FOUND
      */
     @Transactional
-    public UserResponseDTOs.BadgeRegisterDTO registerBadge(Long userId, Long badgeId)
+    public UserResponseDTOs.BadgeEquipDTO registerBadge(Long userId, Long badgeId)
     {
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
         var badge = badgeRepository.findById(badgeId).orElseThrow(() -> new BaseException(BadgeErrorCode.BADGE_NOT_FIND));
@@ -43,7 +43,11 @@ public class BadgeService
 
         userBadgeRepository.save(userBadge);
 
-        return new UserResponseDTOs.BadgeRegisterDTO("success");
+        return new UserResponseDTOs.BadgeEquipDTO(
+                user.getUserId(),
+                badge.getBadgeId(),
+                badge.getDisplayName()
+        );
     }
 
     /**
