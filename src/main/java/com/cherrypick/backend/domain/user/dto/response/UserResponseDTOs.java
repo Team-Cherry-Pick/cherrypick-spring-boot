@@ -7,6 +7,11 @@ public class UserResponseDTOs {
     public record NicknameValidDTO(String nickname, boolean isValid, String details) {}
     public record DeleteResponseDTO(Long id, String message) {}
     public record BadgeRegisterDTO(String message) {}
+    public record BadgeEquipDTO(
+            Long userId,
+            Long badgeId,
+            String badgeName
+    ) {}
 
 
 }

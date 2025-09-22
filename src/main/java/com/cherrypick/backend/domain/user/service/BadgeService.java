@@ -46,9 +46,33 @@ public class BadgeService
         return new UserResponseDTOs.BadgeRegisterDTO("success");
     }
 
+    /**
+     * 유저가 뱃지를 착용합니다.
+     *
+     * @param userId 뱃지를 착용할 유저 아이디입니다.
+     * @param badgeId 착용할 뱃지 아이디입니다.
+     * @return BadgeEquipDTO (착용 유저 아이디, 착용 뱃지 아이디, 착용 뱃지명)
+     * @throws BaseException 400 BADGE_NOT_OWNED
+     * @throws BaseException 404 BADGE_NOT_FIND , USER_NOT_FOUND
+     */
+    @Transactional
+    public UserResponseDTOs.BadgeEquipDTO equipBadge(Long userId, Long badgeId)
+    {
+        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+        var badge = badgeRepository.findById(badgeId).orElseThrow(() -> new BaseException(BadgeErrorCode.BADGE_NOT_FIND));
 
+        if (!userBadgeRepository.existsByUserAndBadge(user, badge)){
+            throw new BaseException(BadgeErrorCode.BADGE_NOT_OWNED);
+        }
 
+        user.setBadge(badge);
+        userRepository.save(user);
 
-
+        return new UserResponseDTOs.BadgeEquipDTO(
+                user.getUserId(),
+                badge.getBadgeId(),
+                badge.getDisplayName()
+        );
+    }
 
 }

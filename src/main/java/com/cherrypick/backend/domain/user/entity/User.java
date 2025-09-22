@@ -24,7 +24,6 @@ public class User {
 
     /// 확장 가능성
     /// 유저 등급제 ,로그인 매서드 , 선호 해시태그/카테고리
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -41,6 +40,10 @@ public class User {
     // TODO : 다중 권한 구조로 전환 필요
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "badge_id")
+    private Badge badge;
 
     private double userWeight = 0.8;
 
