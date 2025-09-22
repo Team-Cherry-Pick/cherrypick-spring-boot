@@ -8,7 +8,7 @@ import java.util.List;
 public record CommentListResponseDTO(
         Long commentId,
         Long parentId,
-        UserVO userVO,
+        UserVO user,
         String content,
         int totalLikes,
         int totalReplys,
