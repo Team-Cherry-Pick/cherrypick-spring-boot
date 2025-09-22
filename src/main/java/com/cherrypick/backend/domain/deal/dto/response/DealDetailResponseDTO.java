@@ -13,7 +13,7 @@ public record DealDetailResponseDTO (
 
         Long dealId,
         List<ImageUrl> imageUrls,
-        UserVO userVO,
+        UserVO user,
         Store store,
         List<String> categorys,
         String title,
