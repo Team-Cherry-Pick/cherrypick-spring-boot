@@ -11,6 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserBadgeRepository extends JpaRepository<UserBadge, Long>
 {
-    @Query(value = "SELECT EXISTS(SELECT 1 FROM user_badge WHERE user_id = :userId AND badge_id = :badgeId)", nativeQuery = true)
-    boolean existsByUserAndBadge(@Param("userId") Long userId, @Param("badgeId") Long badgeId);
+    boolean existsByUserIdAndBadgeId(Long userId, Long badgeId);
 }

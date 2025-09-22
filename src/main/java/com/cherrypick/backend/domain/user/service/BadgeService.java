@@ -34,7 +34,7 @@ public class BadgeService
     @Transactional
     public UserResponseDTOs.BadgeEquipDTO registerBadge(Long userId, Long badgeId)
     {
-        if (userBadgeRepository.existsByUserAndBadge(userId, badgeId)){
+        if (userBadgeRepository.existsByUserIdAndBadgeId(userId, badgeId)){
             throw new BaseException(BadgeErrorCode.BADGE_OWNED_ALREADY);
         }
 
@@ -70,7 +70,7 @@ public class BadgeService
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
         var badge = badgeRepository.findById(badgeId).orElseThrow(() -> new BaseException(BadgeErrorCode.BADGE_NOT_FIND));
 
-        if (!userBadgeRepository.existsByUserAndBadge(userId, badgeId)){
+        if (!userBadgeRepository.existsByUserIdAndBadgeId(userId, badgeId)){
             throw new BaseException(BadgeErrorCode.BADGE_NOT_OWNED);
         }
 
