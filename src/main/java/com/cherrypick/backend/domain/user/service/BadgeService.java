@@ -4,28 +4,37 @@ import com.cherrypick.backend.domain.user.dto.response.UserResponseDTOs;
 import com.cherrypick.backend.domain.user.entity.Badge;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.entity.UserBadge;
+import com.cherrypick.backend.domain.user.repository.BadgeRepository;
 import com.cherrypick.backend.domain.user.repository.UserBadgeRepository;
+import com.cherrypick.backend.domain.user.repository.UserRepository;
+import com.cherrypick.backend.global.exception.enums.BadgeErrorCode;
+import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.cherrypick.backend.global.exception.BaseException;
 
 @Service @RequiredArgsConstructor
 public class BadgeService
 {
     private final UserBadgeRepository userBadgeRepository;
+    private final UserRepository userRepository;
+    private final BadgeRepository badgeRepository;
 
+    /**
+     * 유저에게 뱃지를 부여합니다.
+     *
+     * @param userId 뱃지를 부여할 유저 아이디입니다.
+     * @param badgeId 부여할 뱃지의 아이디입니다.
+     * @return BadgeRegisterDTO (success만 반환됨.)
+     * @throws BaseException 404 BADGE_NOT_FIND, USER_NOT_FOUND
+     */
     @Transactional
-    public UserResponseDTOs.BadgeRegisterDTO registerBadge(Long badgeId)
+    public UserResponseDTOs.BadgeRegisterDTO registerBadge(Long userId, Long badgeId)
     {
-        var userId = AuthUtil.getUserDetail().userId();
-
-        var user = User.builder()
-                .userId(userId)
-                .build();
-        var badge = Badge.builder()
-                .badgeId(badgeId)
-                .build();
+        var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+        var badge = badgeRepository.findById(badgeId).orElseThrow(() -> new BaseException(BadgeErrorCode.BADGE_NOT_FIND));
 
         UserBadge userBadge = UserBadge.builder()
                     .user(user)
@@ -36,6 +45,10 @@ public class BadgeService
 
         return new UserResponseDTOs.BadgeRegisterDTO("success");
     }
+
+
+
+
 
 
 }
