@@ -28,6 +28,7 @@ public record DealDetailResponseDTO (
         int totalUnLikes,
         int totalComments,
         String originalUrl,
+        String deepLink,
         boolean isSoldOut,
         VoteType voteType,
         Long categoryId,
