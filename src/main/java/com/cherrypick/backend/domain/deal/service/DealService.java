@@ -461,6 +461,7 @@ public class DealService {
                 (int) metrics[1], // dislikeCount
                 (int) metrics[2], // commentCount
                 deal.getOriginalUrl(),
+                deal.getDeepLink(),
                 deal.isSoldOut(),
                 voteType,
                 finalCategoryId,
