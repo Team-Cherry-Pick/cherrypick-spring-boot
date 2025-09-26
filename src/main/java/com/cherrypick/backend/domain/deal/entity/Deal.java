@@ -60,6 +60,8 @@ public class Deal {
     private Category categoryId;
 
     private String originalUrl;
+
+    @Column(length = 500)
     private String deepLink;
 
     // TODO : 필드명 수정 요함.
