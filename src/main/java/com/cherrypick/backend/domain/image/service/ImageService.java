@@ -1,19 +1,17 @@
 package com.cherrypick.backend.domain.image.service;
 
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
-import com.cherrypick.backend.domain.deal.entity.Deal;
-import com.cherrypick.backend.domain.deal.repository.DealRepository;
+import com.cherrypick.backend.domain.deal.domain.entity.Deal;
+import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.domain.image.dto.request.ImageUploadRequestDTO;
 import com.cherrypick.backend.domain.image.dto.response.ImageDeleteResponseDTO;
 import com.cherrypick.backend.domain.image.dto.response.ImageUploadResponseDTO;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
-import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.util.AuthUtil;
-import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.ImageErrorCode;
 import com.cherrypick.backend.global.s3.S3Uploader;

@@ -1,8 +1,8 @@
 package com.cherrypick.backend.domain.linkprice.service;
 
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
-import com.cherrypick.backend.domain.deal.entity.Deal;
-import com.cherrypick.backend.domain.deal.repository.DealRepository;
+import com.cherrypick.backend.domain.deal.domain.entity.Deal;
+import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;

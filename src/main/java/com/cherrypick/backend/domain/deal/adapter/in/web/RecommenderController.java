@@ -1,6 +1,6 @@
 package com.cherrypick.backend.domain.deal.adapter.in.web;
 
-import com.cherrypick.backend.domain.deal.service.RecommenderService;
+import com.cherrypick.backend.domain.deal.application.service.RecommenderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

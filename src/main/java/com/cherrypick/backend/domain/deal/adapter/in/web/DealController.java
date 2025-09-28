@@ -1,13 +1,13 @@
 package com.cherrypick.backend.domain.deal.adapter.in.web;
 
-import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
-import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
-import com.cherrypick.backend.domain.deal.dto.request.DealUpdateRequestDTO;
-import com.cherrypick.backend.domain.deal.dto.response.DealDetailResponseDTO;
-import com.cherrypick.backend.domain.deal.dto.response.DealResponseDTOs;
-import com.cherrypick.backend.domain.deal.dto.response.DealSearchPageResponseDTO;
-import com.cherrypick.backend.domain.deal.service.DealLogService;
-import com.cherrypick.backend.domain.deal.service.DealService;
+import com.cherrypick.backend.domain.deal.application.dto.request.DealCreateRequestDTO;
+import com.cherrypick.backend.domain.deal.application.dto.request.DealSearchRequestDTO;
+import com.cherrypick.backend.domain.deal.application.dto.request.DealUpdateRequestDTO;
+import com.cherrypick.backend.domain.deal.application.dto.response.DealDetailResponseDTO;
+import com.cherrypick.backend.domain.deal.application.dto.response.DealResponseDTOs;
+import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPageResponseDTO;
+import com.cherrypick.backend.domain.deal.application.service.DealLogService;
+import com.cherrypick.backend.domain.deal.application.service.DealService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;

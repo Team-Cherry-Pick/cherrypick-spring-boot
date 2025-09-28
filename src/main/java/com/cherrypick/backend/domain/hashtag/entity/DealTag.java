@@ -1,6 +1,6 @@
 package com.cherrypick.backend.domain.hashtag.entity;
 
-import com.cherrypick.backend.domain.deal.entity.Deal;
+import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
