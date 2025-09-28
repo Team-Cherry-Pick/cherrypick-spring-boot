@@ -6,8 +6,10 @@ import com.cherrypick.backend.domain.deal.application.dto.request.DealUpdateRequ
 import com.cherrypick.backend.domain.deal.application.dto.response.DealDetailResponseDTO;
 import com.cherrypick.backend.domain.deal.application.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPageResponseDTO;
+import com.cherrypick.backend.domain.deal.application.service.CreateDealUseCase;
 import com.cherrypick.backend.domain.deal.application.service.DealLogService;
 import com.cherrypick.backend.domain.deal.application.service.DealService;
+import com.cherrypick.backend.domain.deal.domain.service.DealCreateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +26,7 @@ public class DealController {
 
     private final DealService dealService;
     private final DealLogService dealLogService;
+    private final CreateDealUseCase createDealUseCase;
 
     // 게시글 생성
     @Operation(
@@ -35,7 +38,7 @@ public class DealController {
             @RequestParam(value = "version", defaultValue = "v1") String version,
             @RequestBody DealCreateRequestDTO dealCreateRequestDTO) {
 
-        DealResponseDTOs.Create response = dealService.createDeal(dealCreateRequestDTO);
+        DealResponseDTOs.Create response = createDealUseCase.createDeal(dealCreateRequestDTO);
 
         return ResponseEntity.ok(response);
     }

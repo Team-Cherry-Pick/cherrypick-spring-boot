@@ -76,10 +76,9 @@ public class DealService {
 
     // 게시글 생성
     @Transactional
-    public DealResponseDTOs.Create createDeal(DealCreateRequestDTO dto) {
+    public DealResponseDTOs.Create createDeal( DealCreateRequestDTO dto) {
 
         var userDetails = AuthUtil.getUserDetail();
-
         User user = userRepository.findById(userDetails.userId())
                 .orElseThrow(() -> new BaseException(GlobalErrorCode.UNAUTHORIZED));
 

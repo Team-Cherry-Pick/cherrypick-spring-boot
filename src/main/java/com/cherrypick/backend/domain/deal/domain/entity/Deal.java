@@ -1,8 +1,8 @@
 package com.cherrypick.backend.domain.deal.domain.entity;
 
 import com.cherrypick.backend.domain.category.entity.Category;
-import com.cherrypick.backend.domain.deal.domain.entity.vo.Price;
-import com.cherrypick.backend.domain.deal.domain.entity.vo.Shipping;
+import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
+import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
 import com.cherrypick.backend.domain.discount.entity.Discount;
 import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.user.entity.User;
@@ -20,7 +20,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -66,10 +65,10 @@ public class Deal {
     private Store store;
 
     @Embedded
-    private Price price;
+    private PriceVO price;
 
     @Embedded
-    private Shipping shipping;
+    private ShippingVO shipping;
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -123,6 +122,19 @@ public class Deal {
         return updatedHeat;
     }
 
-
+    /**
+     * 직접 입력된 할인방식들을 할인명 필드로 변환합니다.
+     * 할인방식들을 ','로 조인합니다.
+     *
+     * @param customDiscounts 직접 입력된 할인 방식 리스트
+     * @return 변환된 할인방식
+     */
+    public static String createDiscountName(List<String> customDiscounts)
+    {
+        if (!customDiscounts.isEmpty()) {
+            return String.join(", ", customDiscounts);
+        }
+        return null;
+    }
 
 }

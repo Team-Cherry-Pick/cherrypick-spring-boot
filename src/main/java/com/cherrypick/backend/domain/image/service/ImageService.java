@@ -124,6 +124,10 @@ public class ImageService {
     // 이미지를 특정 대상에 연결하는 공통 메소드
     @Transactional
     public void attachImage(Long refId, List<Long> imageIds, ImageType imageType) {
+        if(refId == null || imageIds == null || imageIds.isEmpty()) {
+            return;
+        }
+
         int index = 0;
         for (Long imageId : imageIds) {
             Image image = imageRepository.findById(imageId)
@@ -178,6 +182,6 @@ public class ImageService {
         return deleteImage(image.map(Image::getImageId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
     }
 
-    
+
 
 }

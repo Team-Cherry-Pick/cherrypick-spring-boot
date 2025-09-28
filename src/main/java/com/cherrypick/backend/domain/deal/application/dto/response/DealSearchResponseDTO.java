@@ -1,6 +1,6 @@
 package com.cherrypick.backend.domain.deal.application.dto.response;
 
-import com.cherrypick.backend.domain.deal.domain.entity.vo.Price;
+import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import lombok.*;
 
@@ -18,7 +18,7 @@ public class DealSearchResponseDTO {
     private String title;
     private String store;
     private List<String> infoTags;
-    private Price price;
+    private PriceVO price;
     private String nickname;
     private Long badgeId;
     private String createdAt;
