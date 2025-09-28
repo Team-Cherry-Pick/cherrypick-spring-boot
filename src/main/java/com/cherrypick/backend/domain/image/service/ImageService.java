@@ -84,7 +84,7 @@ public class ImageService {
         if (image.getImageType() == ImageType.DEAL) {
             if (image.getRefId() != null) {
                 Deal deal = dealRepository.findById(image.getRefId()).orElse(null);
-                if (deal != null && deal.getUserId().getUserId().equals(userDetails.userId())) {
+                if (deal != null && deal.getUser().getUserId().equals(userDetails.userId())) {
                     isOwner = true;
                 }
             }
@@ -178,25 +178,6 @@ public class ImageService {
         return deleteImage(image.map(Image::getImageId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
     }
 
-
-    // 크롤링용 매서드
-    public List<Long> saveImageUrlsForCrawling(List<String> imgUrls) {
-
-        List<Long> imageIds = new ArrayList<>();
-        int cnt = 0;
-        for(String imgUrl : imgUrls) {
-
-            var img = Image.builder()
-                    .imageIndex(cnt++)
-                    .imageUrl(imgUrl)
-                    .isTemp(true)
-                    .build();
-
-            imageIds.add(imageRepository.save(img).getImageId());
-        }
-
-        return imageIds;
-    }
-
+    
 
 }

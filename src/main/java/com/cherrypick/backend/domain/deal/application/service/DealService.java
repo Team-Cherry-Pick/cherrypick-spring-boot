@@ -126,12 +126,12 @@ public class DealService {
 
 
         Deal deal = Deal.builder()
-                .userId(user)
+                .user(user)
                 .title(dto.title())
-                .categoryId(category)
+                .category(category)
                 .originalUrl(dto.originalUrl())
                 .deepLink(deepLink)
-                .storeId(store)
+                .store(store)
                 .storeName(store == null ? dto.storeName() : null)
                 .price(dto.price())
                 .shipping(dto.shipping())
@@ -269,7 +269,7 @@ public class DealService {
         Map<Long, Category> categoryMap = new HashMap<>();
         if (!pageContent.isEmpty()) {
             List<Long> categoryIds = pageContent.stream()
-                    .map(deal -> deal.getCategoryId().getCategoryId())
+                    .map(deal -> deal.getCategory().getCategoryId())
                     .distinct()
                     .toList();
             categoryRepository.findAllById(categoryIds).forEach(category ->
@@ -280,7 +280,7 @@ public class DealService {
         Map<Long, Store> storeMap = new HashMap<>();
         if (!pageContent.isEmpty()) {
             List<Long> storeIdsFromDeals = pageContent.stream()
-                    .map(deal -> deal.getStoreId())
+                    .map(Deal::getStore)
                     .filter(store -> store != null)
                     .map(Store::getStoreId)
                     .distinct()
@@ -295,7 +295,7 @@ public class DealService {
         Map<Long, User> userMap = new HashMap<>();
         if (!pageContent.isEmpty()) {
             List<Long> userIds = pageContent.stream()
-                    .map(deal -> deal.getUserId().getUserId())
+                    .map(deal -> deal.getUser().getUserId())
                     .distinct()
                     .toList();
             userRepository.findAllById(userIds).forEach(user ->
@@ -311,8 +311,8 @@ public class DealService {
             long commentCount = commentCountMap.getOrDefault(dealId, 0L);
             Image image = imageMap.get(dealId);
 
-            User user = userMap.get(deal.getUserId().getUserId());
-            Store store = deal.getStoreId() != null ? storeMap.get(deal.getStoreId().getStoreId()) : null;
+            User user = userMap.get(deal.getUser().getUserId());
+            Store store = deal.getStore() != null ? storeMap.get(deal.getStore().getStoreId()) : null;
 
             return new DealSearchResponseDTO(
                     dealId,
@@ -357,7 +357,7 @@ public class DealService {
 
         // 카테고리 이름 부모→자식 순으로
         List<String> categoryNames = new ArrayList<>();
-        Long currentCategoryId = deal.getCategoryId() != null ? deal.getCategoryId().getCategoryId() : null;
+        Long currentCategoryId = deal.getCategory() != null ? deal.getCategory().getCategoryId() : null;
         Long finalCategoryId = currentCategoryId; // 최종 카테고리 아이디
 
         while (currentCategoryId != null) {
@@ -369,11 +369,11 @@ public class DealService {
 
         // 이미지 조회
         Optional<Image> userImageOpt = imageRepository.findByUserId(
-                deal.getUserId().getUserId()
+                deal.getUser().getUserId()
         );
 
 
-        User user = deal.getUserId();
+        User user = deal.getUser();
         Badge badge = user.getBadge();
         // User VO 생성
         UserVO userVo = new UserVO(
@@ -389,15 +389,15 @@ public class DealService {
         Long storeId = null;
         String storeName = null;
 
-        if (deal.getStoreId() != null) {
-            storeId = deal.getStoreId().getStoreId();
-            storeName = deal.getStoreId().getName();
+        if (deal.getStore() != null) {
+            storeId = deal.getStore().getStoreId();
+            storeName = deal.getStore().getName();
 
             storeVo = new com.cherrypick.backend.domain.store.vo.Store(
-                    deal.getStoreId().getStoreId(),
-                    deal.getStoreId().getName(),
-                    deal.getStoreId().getTextColor(),
-                    deal.getStoreId().getBackgroundColor()
+                    deal.getStore().getStoreId(),
+                    deal.getStore().getName(),
+                    deal.getStore().getTextColor(),
+                    deal.getStore().getBackgroundColor()
             );
         } else {
             storeName = deal.getStoreName();
@@ -485,7 +485,7 @@ public class DealService {
                 .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
 
         // 작성자 검증
-        if (!deal.getUserId().getUserId().equals(userDetails.userId())) {
+        if (!deal.getUser().getUserId().equals(userDetails.userId())) {
             throw new BaseException(GlobalErrorCode.FORBIDDEN);
         }
 
@@ -496,7 +496,7 @@ public class DealService {
         if (dto.categoryId() != null) {
             Category category = categoryRepository.findById(dto.categoryId())
                     .orElseThrow(() -> new BaseException(DealErrorCode.CATEGORY_NOT_FOUND));
-            deal.setCategoryId(category);
+            deal.setCategory(category);
         }
 
         if (dto.originalUrl() != null) {
@@ -523,10 +523,10 @@ public class DealService {
         if (dto.storeId() != null) {
             store = storeRepository.findById(dto.storeId())
                     .orElseThrow(() -> new BaseException(DealErrorCode.STORE_NOT_FOUND));
-            deal.setStoreId(store);
+            deal.setStore(store);
             deal.setStoreName(null); // storeId 있으면 storeName은 무시
         } else if (dto.storeName() != null) {
-            deal.setStoreId(null);
+            deal.setStore(null);
             deal.setStoreName(dto.storeName());
         }
 
@@ -608,7 +608,7 @@ public class DealService {
                 .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
 
         // 작성자 또는 관리자 검증
-        boolean isOwner = deal.getUserId().getUserId().equals(userDetails.userId());
+        boolean isOwner = deal.getUser().getUserId().equals(userDetails.userId());
         boolean isAdmin = userDetails.role() == Role.ADMIN;
 
         if (!isOwner && !isAdmin) {

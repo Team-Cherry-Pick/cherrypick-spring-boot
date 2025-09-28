@@ -45,28 +45,25 @@ public class Deal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long dealId;
 
-    // TODO : 필드명 수정 요함.
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id")
-    private User userId;
+    private User user;
 
     private String title;
 
-    // TODO : 필드명 수정 요함.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
-    private Category categoryId;
+    private Category category;
 
     private String originalUrl;
 
     @Column(length = 500)
     private String deepLink;
 
-    // TODO : 필드명 수정 요함.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")
-    private Store storeId;
+    private Store store;
 
     @Embedded
     private Price price;

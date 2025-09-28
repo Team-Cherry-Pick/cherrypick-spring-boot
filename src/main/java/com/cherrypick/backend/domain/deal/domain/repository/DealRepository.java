@@ -15,9 +15,9 @@ public interface DealRepository extends JpaRepository<Deal, Long> {
 
     @Query("""
 SELECT d FROM Deal d
-JOIN FETCH d.categoryId c
+JOIN FETCH d.category c
 LEFT JOIN FETCH d.discounts discount
-LEFT JOIN FETCH d.storeId store
+LEFT JOIN FETCH d.store store
 WHERE 
     d.isDelete = FALSE
     AND (:categoryIds IS NULL OR c.categoryId in :categoryIds)

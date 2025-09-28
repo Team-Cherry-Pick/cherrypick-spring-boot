@@ -32,7 +32,7 @@ public class DealLogService
         duplicationPreventionAdapter.preventDuplicate(RedisDuplicationPreventionAdapter.Behavior.PURCHASE, dealId, deviceId);
 
         var deal = dealRepository.findById(dealId).orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
-        var category = deal.getCategoryId();
+        var category = deal.getCategory();
         Long user = null;
         try{
             user = AuthUtil.getUserDetail().userId();
@@ -65,7 +65,7 @@ public class DealLogService
         duplicationPreventionAdapter.preventDuplicate(RedisDuplicationPreventionAdapter.Behavior.SHARE, dealId, deviceId);
 
         var deal = dealRepository.findById(dealId).orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
-        var category = deal.getCategoryId();
+        var category = deal.getCategory();
         Long user = null;
         try{
             user = AuthUtil.getUserDetail().userId();
