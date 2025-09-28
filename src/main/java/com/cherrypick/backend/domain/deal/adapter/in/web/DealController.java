@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.deal.controller;
+package com.cherrypick.backend.domain.deal.adapter.in.web;
 
 import com.cherrypick.backend.domain.deal.dto.request.DealCreateRequestDTO;
 import com.cherrypick.backend.domain.deal.dto.request.DealSearchRequestDTO;
