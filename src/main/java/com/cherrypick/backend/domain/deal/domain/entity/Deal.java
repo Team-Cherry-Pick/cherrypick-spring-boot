@@ -131,7 +131,7 @@ public class Deal {
      */
     public static String createDiscountName(List<String> customDiscounts)
     {
-        if (!customDiscounts.isEmpty()) {
+        if (customDiscounts != null && !customDiscounts.isEmpty()) {
             return String.join(", ", customDiscounts);
         }
         return null;
