@@ -4,7 +4,6 @@ import com.cherrypick.backend.domain.category.entity.Category;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.Price;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.Shipping;
 import com.cherrypick.backend.domain.discount.entity.Discount;
-import com.cherrypick.backend.domain.hashtag.entity.DealTag;
 import com.cherrypick.backend.domain.store.entity.Store;
 import com.cherrypick.backend.domain.user.entity.User;
 import jakarta.persistence.CascadeType;
@@ -95,9 +94,6 @@ public class Deal {
     private String storeName;
     private String discountName;
     private String discountDescription;
-
-    @OneToMany(mappedBy = "deal", orphanRemoval = true)
-    private List<DealTag> dealTags = new ArrayList<>();
 
     @Column(nullable = false)
     private double heat = 0.0;

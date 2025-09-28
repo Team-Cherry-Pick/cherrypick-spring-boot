@@ -1,6 +1,5 @@
 package com.cherrypick.backend.domain.vote.controller;
 
-import com.cherrypick.backend.domain.deal.application.service.RecommenderService;
 import com.cherrypick.backend.domain.vote.dto.request.VoteRequestDTO;
 import com.cherrypick.backend.domain.vote.dto.response.VoteResponseDTO;
 import com.cherrypick.backend.domain.vote.service.VoteService;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 public class VoteController {
 
     private final VoteService voteService;
-    private final RecommenderService recommenderService;
 
     @Operation(
             summary = "게시글 투표 API V1",
