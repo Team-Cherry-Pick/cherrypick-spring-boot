@@ -18,5 +18,6 @@ public class Store {
     private String backgroundColor;
     private String textColor;
     private String storeRank;
+    private boolean isBlind = false;
 
 }
