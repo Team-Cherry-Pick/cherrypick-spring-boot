@@ -1,9 +1,7 @@
 package com.cherrypick.backend.domain.vote.service;
 
-import com.cherrypick.backend.domain.deal.entity.Deal;
-import com.cherrypick.backend.domain.deal.repository.DealRepository;
-import com.cherrypick.backend.domain.deal.service.RecommenderService;
-import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
+import com.cherrypick.backend.domain.deal.domain.entity.Deal;
+import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.domain.vote.dto.request.VoteRequestDTO;
@@ -19,7 +17,6 @@ import com.cherrypick.backend.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -32,7 +29,6 @@ public class VoteService {
     private final VoteRepository voteRepository;
     private final DealRepository dealRepository;
     private final UserRepository userRepository;
-    private final RecommenderService recommenderService;
 
     @Transactional
     public VoteResponseDTO createVote(Long dealId, VoteRequestDTO request) {
