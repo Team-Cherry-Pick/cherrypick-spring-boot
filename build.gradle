@@ -67,6 +67,7 @@ dependencies {
 
     // 이미지 압축 & 리사이징 라이브러리
     implementation 'net.coobird:thumbnailator:0.4.14'
+    implementation 'org.sejda.imageio:webp-imageio:0.1.6'
 
     // Crawler
     implementation 'org.jsoup:jsoup:1.15.4'

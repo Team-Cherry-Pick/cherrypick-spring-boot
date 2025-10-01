@@ -1,7 +1,8 @@
-package com.cherrypick.backend.domain.linkprice.service;
+package com.cherrypick.backend.domain.deal.adapter.out;
 
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.deal.domain.entity.Deal;
+import com.cherrypick.backend.domain.deal.domain.port.DeepLinkConverter;
 import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
@@ -13,10 +14,11 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
-
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -25,16 +27,22 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-@Service
-@RequiredArgsConstructor
-public class LinkPriceService {
-
-    private final DealRepository dealRepository;
+@RequiredArgsConstructor @Component
+public class LinkPriceDeepLinkConverter implements DeepLinkConverter
+{
 
     @Value("${linkprice.affiliate-id}")
     private String aId;
 
+    /**
+     * URL을 받아 LinkPrice에서 딥링크로 변환합니다.
+     * 변환할 수 없는 링크라면 null을 반환합니다.
+     *
+     * @param originalUrl 변환될 URL 입니다.
+     * @return 변환된 할인명, 혹은 null을 반환합니다.
+     */
     public String createDeeplink(String originalUrl) {
+
         // 원본 URL 유효성 체크
         if (originalUrl == null || originalUrl.trim().isEmpty()) {
             throw new BaseException(LinkPriceErrorCode.INVALID_ORIGINAL_URL);
@@ -96,12 +104,15 @@ public class LinkPriceService {
             throw be; // 위에서 던진 것 그대로 전달
         } catch (Exception e) {
             throw new BaseException(LinkPriceErrorCode.LINKPRICE_API_EXCEPTION);
+
         } finally {
             if (connection != null) {
                 connection.disconnect();
             }
         }
     }
+/*
+// 굳이 링크프라이스 서비스에 위치할 필요 없음. (관심사 분리 원칙)
 
     // 리다이렉션 메소드
     public RedirectView redirectToDeeplink(@PathVariable Long dealId, HttpServletRequest request) {
@@ -148,4 +159,5 @@ public class LinkPriceService {
         redirectView.setUrl(redirectUrl);
         return redirectView;
     }
+   */
 }
