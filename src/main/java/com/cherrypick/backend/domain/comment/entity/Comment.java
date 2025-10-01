@@ -1,6 +1,6 @@
 package com.cherrypick.backend.domain.comment.entity;
 
-import com.cherrypick.backend.domain.deal.entity.Deal;
+import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.cherrypick.backend.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,12 +1,8 @@
 package com.cherrypick.backend.domain.vote.controller;
 
-import com.cherrypick.backend.domain.deal.dto.request.DealRequestDTOs;
-import com.cherrypick.backend.domain.deal.enums.UserBehaviorType;
-import com.cherrypick.backend.domain.deal.service.RecommenderService;
 import com.cherrypick.backend.domain.vote.dto.request.VoteRequestDTO;
 import com.cherrypick.backend.domain.vote.dto.response.VoteResponseDTO;
 import com.cherrypick.backend.domain.vote.service.VoteService;
-import com.cherrypick.backend.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 public class VoteController {
 
     private final VoteService voteService;
-    private final RecommenderService recommenderService;
 
     @Operation(
             summary = "게시글 투표 API V1",

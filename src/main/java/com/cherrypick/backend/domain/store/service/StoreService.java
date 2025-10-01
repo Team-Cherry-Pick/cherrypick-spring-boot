@@ -17,11 +17,10 @@ public class StoreService {
 
     public StoreResponseListDTO getStoreList()
     {
-
         var response = redisTemplate.opsForValue().get("cache:stores");
         if(response == null)
         {
-            var list = storeRepository.findAll();
+            var list = storeRepository.findAllVisible();
             response = new StoreResponseListDTO(
                     list.stream()
                             .map(StoreResponseListDTO.StoreResponseDTO::from)

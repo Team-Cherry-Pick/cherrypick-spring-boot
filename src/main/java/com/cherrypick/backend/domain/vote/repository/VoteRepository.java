@@ -1,6 +1,6 @@
 package com.cherrypick.backend.domain.vote.repository;
 
-import com.cherrypick.backend.domain.deal.entity.Deal;
+import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.vote.entity.Vote;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
