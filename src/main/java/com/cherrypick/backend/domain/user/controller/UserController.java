@@ -1,10 +1,14 @@
 package com.cherrypick.backend.domain.user.controller;
 
+import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.user.dto.response.UserDetailResponseDTO;
 import com.cherrypick.backend.domain.user.dto.request.UserRequestDTOs;
 import com.cherrypick.backend.domain.user.dto.response.UserResponseDTOs;
 import com.cherrypick.backend.domain.user.dto.request.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.service.BadgeService;
+import com.cherrypick.backend.domain.user.service.CommentedDealUsecase;
+import com.cherrypick.backend.domain.user.service.LikedDealUsecase;
+import com.cherrypick.backend.domain.user.service.MyDealUsecase;
 import com.cherrypick.backend.domain.user.service.UserService;
 import com.cherrypick.backend.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +27,9 @@ public class UserController {
 
     private final UserService userService;
     private final BadgeService badgeService;
+    private final MyDealUsecase myDealUsecase;
+    private final LikedDealUsecase likedDealUsecase;
+    private final CommentedDealUsecase commentedDealUsecase;
 
 
     @Operation(
@@ -112,6 +119,37 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "내가 올린 Deal 리스트 API V1",
+            description = "내가 올린 Deal 리스트를 불러오는 API 입니다."
+    )
+    @GetMapping("/deal/written")
+    public ResponseEntity<DealSearchPageResponseDTO> getMyDeals(@RequestParam(value = "version", defaultValue = "v1") String version)
+    {
+        var response = myDealUsecase.getMyDeals();
+        return ResponseEntity.ok(response);
+    }
 
+    @Operation(
+            summary = "내가 좋아요 한 Deal 리스트 API V1",
+            description = "내가 좋아요를 누른 Deal 리스트를 불러옵니다."
+    )
+    @GetMapping("/deal/liked")
+    public ResponseEntity<DealSearchPageResponseDTO> getMyLiked(@RequestParam(value = "version", defaultValue = "v1") String version)
+    {
+        var response = likedDealUsecase.getLikedDeal();
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "내가 댓글을 쓴 Deal 리스트 API V1",
+            description = "내가 댓글을 쓴 Deal 리스트를 불러옵니다."
+    )
+    @GetMapping("/deal/commented")
+    public ResponseEntity<DealSearchPageResponseDTO> getMyCommented(@RequestParam(value = "version", defaultValue = "v1") String version)
+    {
+        var response = commentedDealUsecase.getCommentedDeals();
+        return ResponseEntity.ok(response);
+    }
 
 }
