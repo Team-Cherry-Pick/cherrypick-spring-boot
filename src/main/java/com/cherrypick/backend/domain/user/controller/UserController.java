@@ -100,19 +100,18 @@ public class UserController {
     }
 
     @Operation(
-            summary = "베타테스터 권한 부여 API V1",
-            description = "해당 유저에게 베타테스터 권한을 부여합니다."
+            summary = "베타테스터 권한을 가진 사람의 목록 API V1",
+            description = "베타테스터 권한을 가진 사람들의 숫자입니다.."
     )
-    @PostMapping("/badge/beta-tester")
-    public ResponseEntity<UserResponseDTOs.BadgeEquipDTO> registerBetaTester(@RequestParam(value = "version", defaultValue = "v1") String version)
+    @GetMapping("/badge/beta-tester/count")
+    public ResponseEntity<?> betaTesterCount(@RequestParam(value = "version", defaultValue = "v1") String version)
     {
-        Long userId = AuthUtil.getUserDetail().userId();
         // 베타테스터 뱃지 ID는 2L
-        badgeService.registerBadge(userId, 2L);
-        var response = badgeService.equipBadge(userId, 2L);
+        var response = badgeService.getBadgeOwnerCount(2L);
 
         return ResponseEntity.ok(response);
     }
+
 
 
 }

@@ -13,4 +13,8 @@ public interface UserBadgeRepository extends JpaRepository<UserBadge, Long>
 {
     @Query("SELECT COUNT(ub) > 0 FROM UserBadge ub WHERE ub.user.userId = :userId AND ub.badge.badgeId = :badgeId")
     boolean existsByUserAndBadge(@Param("userId") Long userId, @Param("badgeId") Long badgeId);
+
+    @Query(value = "SELECT COUNT(*) FROM user_badge ub Where badge_id=:badgeId", nativeQuery = true)
+    Integer getBadgeOwnerCount(@Param("badgeId") Long badgeId);
+
 }
