@@ -76,4 +76,16 @@ WHERE
     @Query(value="SELECT * FROM deal where user_id=:userId", nativeQuery = true)
     List<Deal> findDealsByUserId(@Param("userId") Long userId);
 
+    /**
+     * 특정 사용자가 좋아요(추천)를 누른 모든 딜을 조회합니다.
+     *
+     * @param userId 조회할 사용자의 ID
+     * @return 해당 사용자가 좋아요를 누른 딜 목록 (빈 리스트 가능)
+     */
+    @Query(value = "SELECT DISTINCT d.* FROM deal d " +
+            "INNER JOIN vote v ON d.deal_id = v.deal_id " +
+            "WHERE v.user_id = :userId AND v.vote_type = 'TRUE'",
+            nativeQuery = true)
+    List<Deal> findLikedDealsByUserId(@Param("userId") Long userId);
+
 }
