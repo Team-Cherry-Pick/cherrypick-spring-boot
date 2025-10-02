@@ -12,6 +12,4 @@ public class UserResponseDTOs {
             Long badgeId,
             String badgeName
     ) {}
-
-
 }
