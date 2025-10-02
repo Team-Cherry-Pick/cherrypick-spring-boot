@@ -124,9 +124,12 @@ public class UserController {
             description = "내가 올린 Deal 리스트를 불러오는 API 입니다."
     )
     @GetMapping("/deal/written")
-    public ResponseEntity<DealSearchPageResponseDTO> getMyDeals(@RequestParam(value = "version", defaultValue = "v1") String version)
+    public ResponseEntity<DealSearchPageResponseDTO> getMyDeals(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "version", defaultValue = "v1") String version)
     {
-        var response = myDealUsecase.getMyDeals();
+        var response = myDealUsecase.getMyDeals(page, size);
         return ResponseEntity.ok(response);
     }
 
@@ -135,9 +138,12 @@ public class UserController {
             description = "내가 좋아요를 누른 Deal 리스트를 불러옵니다."
     )
     @GetMapping("/deal/liked")
-    public ResponseEntity<DealSearchPageResponseDTO> getMyLiked(@RequestParam(value = "version", defaultValue = "v1") String version)
+    public ResponseEntity<DealSearchPageResponseDTO> getMyLiked(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "version", defaultValue = "v1") String version)
     {
-        var response = likedDealUsecase.getLikedDeal();
+        var response = likedDealUsecase.getLikedDeal(page, size);
         return ResponseEntity.ok(response);
     }
 
@@ -146,9 +152,12 @@ public class UserController {
             description = "내가 댓글을 쓴 Deal 리스트를 불러옵니다."
     )
     @GetMapping("/deal/commented")
-    public ResponseEntity<DealSearchPageResponseDTO> getMyCommented(@RequestParam(value = "version", defaultValue = "v1") String version)
+    public ResponseEntity<DealSearchPageResponseDTO> getMyCommented(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "version", defaultValue = "v1") String version)
     {
-        var response = commentedDealUsecase.getCommentedDeals();
+        var response = commentedDealUsecase.getCommentedDeals(page, size);
         return ResponseEntity.ok(response);
     }
 
