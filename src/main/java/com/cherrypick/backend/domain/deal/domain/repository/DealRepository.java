@@ -88,4 +88,16 @@ WHERE
             nativeQuery = true)
     List<Deal> findLikedDealsByUserId(@Param("userId") Long userId);
 
+    /**
+     * 특정 사용자가 댓글을 작성한 모든 딜을 조회합니다.
+     *
+     * @param userId 조회할 사용자의 ID
+     * @return 해당 사용자가 댓글을 작성한 딜 목록 (중복 제거, 빈 리스트 가능)
+     */
+    @Query(value = "SELECT DISTINCT d.* FROM deal d " +
+            "INNER JOIN comment c ON d.deal_id = c.deal_id " +
+            "WHERE c.user_id = :userId",
+            nativeQuery = true)
+    List<Deal> findCommentedDealsByUserId(@Param("userId") Long userId);
+
 }

@@ -63,5 +63,20 @@ public class DealActivityService
         return deals;
     }
 
+    /**
+     * 특정 사용자가 댓글을 작성한 모든 딜을 조회합니다.
+     *
+     * <p>Comment 테이블과 조인하여 해당 사용자가 댓글을 단 딜을 반환합니다.
+     * 연관 데이터(카테고리, 스토어 등)는 지연 로딩되므로, 필요시 별도 처리가 필요합니다.
+     *
+     * @param userId 조회할 사용자의 ID
+     * @return 해당 사용자가 댓글을 작성한 딜 목록 (중복 제거, 빈 리스트 가능)
+     */
+    public List<Deal> getCommentedDealsByUserId(Long userId)
+    {
+        List<Deal> deals = dealRepository.findCommentedDealsByUserId(userId);
+        return deals;
+    }
+
 
 }

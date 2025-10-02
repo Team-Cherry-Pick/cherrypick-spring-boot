@@ -6,6 +6,7 @@ import com.cherrypick.backend.domain.user.dto.request.UserRequestDTOs;
 import com.cherrypick.backend.domain.user.dto.response.UserResponseDTOs;
 import com.cherrypick.backend.domain.user.dto.request.UserUpdateRequestDTO;
 import com.cherrypick.backend.domain.user.service.BadgeService;
+import com.cherrypick.backend.domain.user.service.CommentedDealUsecase;
 import com.cherrypick.backend.domain.user.service.LikedDealUsecase;
 import com.cherrypick.backend.domain.user.service.MyDealUsecase;
 import com.cherrypick.backend.domain.user.service.UserService;
@@ -28,6 +29,7 @@ public class UserController {
     private final BadgeService badgeService;
     private final MyDealUsecase myDealUsecase;
     private final LikedDealUsecase likedDealUsecase;
+    private final CommentedDealUsecase commentedDealUsecase;
 
 
     @Operation(
@@ -139,5 +141,15 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "내가 댓글을 쓴 Deal 리스트 API V1",
+            description = "내가 댓글을 쓴 Deal 리스트를 불러옵니다."
+    )
+    @GetMapping("/deal/commented")
+    public ResponseEntity<DealSearchPageResponseDTO> getMyCommented(@RequestParam(value = "version", defaultValue = "v1") String version)
+    {
+        var response = commentedDealUsecase.getCommentedDeals();
+        return ResponseEntity.ok(response);
+    }
 
 }
