@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.cherrypick.backend.global.exception.BaseException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service @RequiredArgsConstructor
 public class BadgeService
 {
@@ -83,5 +86,23 @@ public class BadgeService
                 badge.getDisplayName()
         );
     }
+
+    /**
+     * 특정 뱃지를 보유한 유저 수를 조회합니다.
+     *
+     * @param badgeId 조회할 뱃지의 아이디입니다.
+     * @return Map<String, Integer> (ownerCount: 뱃지 보유자 수)
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Integer> getBadgeOwnerCount(Long badgeId)
+    {
+        Integer ownerCount = userBadgeRepository.getBadgeOwnerCount(badgeId);
+
+        HashMap<String, Integer> map = new HashMap<>();
+        map.put("ownerCount", ownerCount);
+
+        return map;
+    }
+
 
 }
