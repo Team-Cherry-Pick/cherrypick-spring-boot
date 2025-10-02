@@ -14,7 +14,7 @@ public class CommentedDealUsecase
     private final DealEnrichmentService dealEnrichmentService;
 
     /**
-     * 현재 인증된 사용자가 댓글을 작성한 모든 딜을 조회합니다.
+     * 현재 인증된 사용자가 댓글을 작성한 딜을 페이징하여 조회합니다.
      *
      * <p>처리 흐름:
      * <ol>
@@ -23,14 +23,16 @@ public class CommentedDealUsecase
      *   <li>연관 데이터(카테고리, 스토어, 이미지, 통계) 포함한 응답 생성</li>
      * </ol>
      *
-     * @return 사용자가 댓글을 작성한 모든 딜의 검색 응답 DTO (페이징 없이 전체 반환)
+     * @param page 페이지 번호 (0부터 시작)
+     * @param size 페이지당 아이템 수
+     * @return 사용자가 댓글을 작성한 딜의 검색 응답 DTO (페이징 적용)
      * @throws com.cherrypick.backend.global.exception.BaseException 인증되지 않은 사용자인 경우
      */
-    public DealSearchPageResponseDTO getCommentedDeals()
+    public DealSearchPageResponseDTO getCommentedDeals(int page, int size)
     {
         var userId = AuthUtil.getUserDetail().userId();
         var deals = dealActivityService.getCommentedDealsByUserId(userId);
 
-        return dealEnrichmentService.loadRelations(deals, 0, deals.size());
+        return dealEnrichmentService.loadRelations(deals, page, size);
     }
 }
