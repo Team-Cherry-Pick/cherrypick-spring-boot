@@ -73,4 +73,7 @@ WHERE
     @Query("UPDATE Deal d SET d.heat = d.heat + :amount WHERE d.dealId = :dealId")
     int updateHeat(@Param("dealId") Long dealId, @Param("amount") Double amount);
 
+    @Query(value="SELECT * FROM deal where user_id=:userId", nativeQuery = true)
+    List<Deal> findDealsByUserId(@Param("userId") Long userId);
+
 }

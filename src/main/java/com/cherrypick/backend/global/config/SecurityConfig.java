@@ -99,6 +99,7 @@ public class SecurityConfig {
                         // 유저
                         .requestMatchers(HttpMethod.GET,"/api/user").authenticated()                         // 인증 유저 정보 조회 부분은 인증 유저만 가능.
                         .requestMatchers(HttpMethod.GET, "/api/user/**").permitAll()                          // 닉네임 유효성 판단 , 타겟 유저 정보 조회는 모두 가능
+                        .requestMatchers(HttpMethod.GET, "/api/user/deal").authenticated()
                         .requestMatchers("/api/user").authenticated()                                        // 삭제 / 수정은 인증 유저만 가능
                         .requestMatchers(HttpMethod.POST,"/api/user/badge/**").authenticated()               // 뱃지 관련 사항은 인증 유저만
 
