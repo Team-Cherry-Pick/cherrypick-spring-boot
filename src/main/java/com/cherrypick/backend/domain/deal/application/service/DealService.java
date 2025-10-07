@@ -667,8 +667,8 @@ public class DealService {
     // 할인률 계산 함수
     private double getDiscountRate(Deal deal) {
         if (deal.getPrice() == null) return 0.0;
-        Double regular = deal.getPrice().regularPrice();
-        Double discounted = deal.getPrice().discountedPrice();
+        Double regular = deal.getPrice().getRegularPrice();
+        Double discounted = deal.getPrice().getDiscountedPrice();
         if (regular == null || discounted == null || regular <= 0) return 0.0;
 
         return (regular - discounted) / regular;
