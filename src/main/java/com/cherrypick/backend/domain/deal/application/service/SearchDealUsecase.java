@@ -7,6 +7,8 @@ import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.domain.deal.domain.service.DealEnrichmentService;
 import com.cherrypick.backend.domain.deal.domain.service.DealValidationService;
 import com.cherrypick.backend.domain.deal.domain.service.search.DealFilterService;
+import com.cherrypick.backend.domain.deal.domain.service.search.DealSortService;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +26,7 @@ public class SearchDealUsecase {
 
     private final DealValidationService validationService;
     private final DealFilterService filterService;
+    private final DealSortService sortService;
     private final DealEnrichmentService enrichmentService;
     private final DealRepository dealRepository;
 
@@ -35,15 +38,15 @@ public class SearchDealUsecase {
         // 2단계: 필터 조립
         List<BooleanExpression> filters = buildFilters(dto);
 
-        // 3단계: 검색 실행
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
-        List<Deal> deals = dealRepository.searchWithFilters(filters, pageable);
+        // 3단계: 정렬 조립
+        List<OrderSpecifier<?>> orders = sortService.createOrderSpecifiers(dto.getSortType());
 
-        // TODO: 4단계 - 정렬 (인메모리 정렬이 필요한 경우)
+        // 4단계: 검색 실행 (DB 필터링 + 정렬 + 페이징)
+        Pageable pageable = PageRequest.of(page, size);
+        List<Deal> deals = dealRepository.searchWithFilters(filters, orders, pageable);
 
-        // TODO: 5단계 - DTO 변환
-        var response = enrichmentService.loadRelations(deals, 0, 20);
-
+        // 5단계: DTO 변환
+        var response = enrichmentService.loadRelations(deals, page, size);
 
         return response;
     }

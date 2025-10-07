@@ -2,6 +2,7 @@ package com.cherrypick.backend.domain.deal.domain.repository;
 
 import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.cherrypick.backend.domain.deal.domain.entity.QDeal;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -22,7 +23,11 @@ public class DealRepositoryImpl implements DealRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Deal> searchWithFilters(List<BooleanExpression> filters, Pageable pageable) {
+    public List<Deal> searchWithFilters(
+            List<BooleanExpression> filters,
+            List<OrderSpecifier<?>> orders,
+            Pageable pageable
+    ) {
         QDeal deal = QDeal.deal;
 
         return queryFactory
@@ -32,6 +37,7 @@ public class DealRepositoryImpl implements DealRepositoryCustom {
                 .leftJoin(deal.discounts).fetchJoin()
                 .leftJoin(deal.store).fetchJoin()
                 .where(filters.toArray(new Predicate[0]))
+                .orderBy(orders.toArray(new OrderSpecifier[0]))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
