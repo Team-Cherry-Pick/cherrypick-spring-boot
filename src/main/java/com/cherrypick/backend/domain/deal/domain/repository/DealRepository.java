@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface DealRepository extends JpaRepository<Deal, Long> {
+public interface DealRepository extends JpaRepository<Deal, Long>, DealRepositoryCustom {
 
     @Query("""
 SELECT d FROM Deal d
