@@ -13,7 +13,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -43,10 +43,10 @@ public class SearchDealUsecase {
 
         // 4단계: 검색 실행 (DB 필터링 + 정렬 + 페이징)
         Pageable pageable = PageRequest.of(page, size);
-        List<Deal> deals = dealRepository.searchWithFilters(filters, orders, pageable);
+        Slice<Deal> dealSlice = dealRepository.searchWithFilters(filters, orders, pageable);
 
         // 5단계: DTO 변환
-        var response = enrichmentService.loadRelations(deals, page, size);
+        var response = enrichmentService.loadRelations(dealSlice.getContent(), dealSlice.hasNext());
 
         return response;
     }
@@ -73,9 +73,6 @@ public class SearchDealUsecase {
      */
     private List<BooleanExpression> buildFilters(DealSearchRequestDTO dto) {
         List<BooleanExpression> filters = new ArrayList<>();
-
-        // 기본 필터
-        filters.add(filterService.createDeleteFilter());
 
         // 검색 조건 필터
         filters.add(filterService.createCategoryFilter(dto.getCategoryId()));

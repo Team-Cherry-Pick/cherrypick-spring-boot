@@ -4,6 +4,7 @@ import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 import java.util.List;
 
@@ -13,14 +14,14 @@ import java.util.List;
 public interface DealRepositoryCustom {
 
     /**
-     * QueryDSL을 사용한 동적 검색
+     * QueryDSL을 사용한 동적 검색 (Slice 반환)
      *
      * @param filters BooleanExpression 필터 리스트
      * @param orders OrderSpecifier 정렬 리스트
      * @param pageable 페이징 정보
-     * @return 검색된 Deal 리스트
+     * @return Slice (hasNext 포함)
      */
-    List<Deal> searchWithFilters(
+    Slice<Deal> searchWithFilters(
             List<BooleanExpression> filters,
             List<OrderSpecifier<?>> orders,
             Pageable pageable
