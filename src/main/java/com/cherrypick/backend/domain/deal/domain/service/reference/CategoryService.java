@@ -1,8 +1,8 @@
-package com.cherrypick.backend.domain.deal.domain.service;
+package com.cherrypick.backend.domain.deal.domain.service.reference;
 
 import com.cherrypick.backend.domain.deal.application.dto.response.CategoryListDTO;
 import com.cherrypick.backend.domain.deal.domain.entity.Category;
-import com.cherrypick.backend.domain.deal.domain.repository.CategoryRepository;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;

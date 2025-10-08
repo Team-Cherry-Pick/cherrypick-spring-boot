@@ -1,7 +1,7 @@
-package com.cherrypick.backend.domain.deal.domain.service;
+package com.cherrypick.backend.domain.deal.domain.service.reference;
 
 import com.cherrypick.backend.domain.deal.application.dto.response.StoreResponseListDTO;
-import com.cherrypick.backend.domain.deal.domain.repository.StoreRepository;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;

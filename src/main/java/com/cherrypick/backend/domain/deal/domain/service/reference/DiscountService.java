@@ -1,7 +1,7 @@
-package com.cherrypick.backend.domain.deal.domain.service;
+package com.cherrypick.backend.domain.deal.domain.service.reference;
 
 import com.cherrypick.backend.domain.deal.application.dto.response.DiscountResponseListDTO;
-import com.cherrypick.backend.domain.deal.domain.repository.DiscountRepository;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.DiscountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;

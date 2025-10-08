@@ -1,8 +1,8 @@
 package com.cherrypick.backend.domain.deal.application.service;
 
-import com.cherrypick.backend.domain.deal.domain.repository.CategoryRepository;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.CategoryRepository;
 import com.cherrypick.backend.domain.deal.domain.entity.Category;
-import com.cherrypick.backend.domain.deal.domain.service.CategoryService;
+import com.cherrypick.backend.domain.deal.domain.service.reference.CategoryService;
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.application.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.application.dto.response.DealDetailResponseDTO;
@@ -13,7 +13,7 @@ import com.cherrypick.backend.domain.deal.domain.enums.TimeRangeType;
 import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.domain.deal.util.InfoTagGenerator;
 import com.cherrypick.backend.domain.deal.domain.entity.Discount;
-import com.cherrypick.backend.domain.deal.domain.repository.DiscountRepository;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.DiscountRepository;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
@@ -21,7 +21,7 @@ import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.linkprice.service.LinkPriceService;
 import com.cherrypick.backend.domain.deal.domain.entity.Store;
-import com.cherrypick.backend.domain.deal.domain.repository.StoreRepository;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.StoreRepository;
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter;
 import static com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter.Behavior;
