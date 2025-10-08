@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.category.entity;
+package com.cherrypick.backend.domain.deal.domain.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

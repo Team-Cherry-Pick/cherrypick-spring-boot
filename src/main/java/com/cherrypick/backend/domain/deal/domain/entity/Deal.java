@@ -1,6 +1,5 @@
 package com.cherrypick.backend.domain.deal.domain.entity;
 
-import com.cherrypick.backend.domain.category.entity.Category;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
 import com.cherrypick.backend.domain.discount.entity.Discount;

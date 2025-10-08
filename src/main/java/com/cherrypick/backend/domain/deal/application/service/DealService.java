@@ -1,8 +1,8 @@
 package com.cherrypick.backend.domain.deal.application.service;
 
-import com.cherrypick.backend.domain.category.repository.CategoryRepository;
-import com.cherrypick.backend.domain.category.entity.Category;
-import com.cherrypick.backend.domain.category.service.CategoryService;
+import com.cherrypick.backend.domain.deal.domain.repository.CategoryRepository;
+import com.cherrypick.backend.domain.deal.domain.entity.Category;
+import com.cherrypick.backend.domain.deal.domain.service.CategoryService;
 import com.cherrypick.backend.domain.comment.repository.CommentRepository;
 import com.cherrypick.backend.domain.deal.application.dto.request.DealUpdateRequestDTO;
 import com.cherrypick.backend.domain.deal.application.dto.response.DealDetailResponseDTO;

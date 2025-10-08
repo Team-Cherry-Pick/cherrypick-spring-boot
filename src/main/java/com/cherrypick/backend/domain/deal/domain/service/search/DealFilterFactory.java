@@ -1,6 +1,6 @@
 package com.cherrypick.backend.domain.deal.domain.service.search;
 
-import com.cherrypick.backend.domain.category.service.CategoryService;
+import com.cherrypick.backend.domain.deal.domain.service.CategoryService;
 import com.cherrypick.backend.domain.comment.entity.QComment;
 import com.cherrypick.backend.domain.deal.domain.entity.QDeal;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.Filter;

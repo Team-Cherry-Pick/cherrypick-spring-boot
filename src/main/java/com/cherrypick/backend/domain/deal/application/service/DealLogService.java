@@ -1,6 +1,6 @@
 package com.cherrypick.backend.domain.deal.application.service;
 
-import com.cherrypick.backend.domain.category.repository.CategoryRepository;
+import com.cherrypick.backend.domain.deal.domain.repository.CategoryRepository;
 import com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter;
 import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.global.exception.BaseException;

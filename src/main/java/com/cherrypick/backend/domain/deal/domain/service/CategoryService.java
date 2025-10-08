@@ -1,15 +1,13 @@
-package com.cherrypick.backend.domain.category.service;
+package com.cherrypick.backend.domain.deal.domain.service;
 
-import com.cherrypick.backend.domain.category.dto.response.CategoryListDTO;
-import com.cherrypick.backend.domain.category.entity.Category;
-import com.cherrypick.backend.domain.category.repository.CategoryRepository;
+import com.cherrypick.backend.domain.deal.application.dto.response.CategoryListDTO;
+import com.cherrypick.backend.domain.deal.domain.entity.Category;
+import com.cherrypick.backend.domain.deal.domain.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
