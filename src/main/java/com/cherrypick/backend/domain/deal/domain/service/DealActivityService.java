@@ -30,7 +30,7 @@ public class DealActivityService
     {
         BooleanExpression filter = filterFactory.createAuthorFilter(userId);
         var orders = sortFactory.createOrderSpecifiers(SortType.LATEST);
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        Pageable pageable = PageRequest.of(0, 1000000);
 
         return dealRepository.searchWithFilters(
                 List.of(filter),
@@ -49,7 +49,7 @@ public class DealActivityService
     {
         BooleanExpression filter = filterFactory.createLikedByUserFilter(userId);
         var orders = sortFactory.createOrderSpecifiers(SortType.LATEST);
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        Pageable pageable = PageRequest.of(0, 1000000);
 
         return dealRepository.searchWithFilters(
                 List.of(filter),
@@ -68,7 +68,7 @@ public class DealActivityService
     {
         BooleanExpression filter = filterFactory.createCommentedByUserFilter(userId);
         var orders = sortFactory.createOrderSpecifiers(SortType.LATEST);
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        Pageable pageable = PageRequest.of(0, 1000000);
 
         return dealRepository.searchWithFilters(
                 List.of(filter),
