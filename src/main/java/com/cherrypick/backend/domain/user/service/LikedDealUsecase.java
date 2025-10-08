@@ -3,7 +3,7 @@ package com.cherrypick.backend.domain.user.service;
 import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.domain.deal.domain.service.DealActivityService;
-import com.cherrypick.backend.domain.deal.domain.service.DealEnrichmentService;
+import com.cherrypick.backend.domain.deal.domain.service.DealSearchResponseFactory;
 import com.cherrypick.backend.global.util.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ public class LikedDealUsecase
 {
 
     private final DealActivityService dealActivityService;
-    private final DealEnrichmentService dealEnrichmentService;
+    private final DealSearchResponseFactory responseFactory;
 
     /**
      * 현재 인증된 사용자가 좋아요(추천)를 누른 딜을 페이징하여 조회합니다.
@@ -35,7 +35,7 @@ public class LikedDealUsecase
         var userId = AuthUtil.getUserDetail().userId();
         var deals = dealActivityService.getLikedDealsByUserId(userId);
 
-        return dealEnrichmentService.loadRelations(deals, page, size);
+        return responseFactory.loadRelations(deals, false);
     }
 
 
