@@ -22,7 +22,7 @@ public class DealSearchResponseDTO {
     private String nickname;
     private Long badgeId;
     private String createdAt;
-    private int heat;
+    private Double heat;
     private int totalLikes;
     private int totalComments;
     private boolean isSoldout;

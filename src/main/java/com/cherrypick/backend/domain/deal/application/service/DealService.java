@@ -211,6 +211,9 @@ public class DealService {
         List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty()) ? null : dto.getDiscountIds();
         List<Long> storeIds = (dto.getStoreIds() == null || dto.getStoreIds().isEmpty()) ? null : dto.getStoreIds();
 
+        List<Long> categoryList = null;
+        if(dto.getCategoryId() != null) categoryList = categoryService.getCategoryWithChildren(dto.getCategoryId());
+
         Sort sort;
         switch (dto.getSortType()) {
             case PRICE_HIGH -> sort = Sort.by(Sort.Direction.DESC, "price.discountedPrice");
@@ -218,9 +221,6 @@ public class DealService {
             case LATEST -> sort = Sort.by(Sort.Direction.DESC, "createdAt");
             default -> sort = Sort.unsorted();
         }
-
-        List<Long> categoryList = null;
-        if(dto.getCategoryId() != null) categoryList = categoryService.getCategoryWithChildren(dto.getCategoryId());
 
         List<Deal> allFilteredDeals = dealRepository.searchDealsWithPaging(
                 categoryList,
@@ -324,7 +324,7 @@ public class DealService {
                     user != null ? user.getNickname() : null,
                     user != null ? user.getBadge().getBadgeId() : null,
                     deal.getCreatedAt().toString(),
-                    (int) deal.getHeat(),
+                    deal.getHeat(),
                     (int) likeCount,
                     (int) commentCount,
                     deal.isSoldOut()
@@ -667,8 +667,8 @@ public class DealService {
     // 할인률 계산 함수
     private double getDiscountRate(Deal deal) {
         if (deal.getPrice() == null) return 0.0;
-        Double regular = deal.getPrice().regularPrice();
-        Double discounted = deal.getPrice().discountedPrice();
+        Double regular = deal.getPrice().getRegularPrice();
+        Double discounted = deal.getPrice().getDiscountedPrice();
         if (regular == null || discounted == null || regular <= 0) return 0.0;
 
         return (regular - discounted) / regular;
