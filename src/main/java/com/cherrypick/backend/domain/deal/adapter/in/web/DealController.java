@@ -9,6 +9,7 @@ import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPag
 import com.cherrypick.backend.domain.deal.application.service.CreateDealUseCase;
 import com.cherrypick.backend.domain.deal.application.service.DealLogService;
 import com.cherrypick.backend.domain.deal.application.service.DealService;
+import com.cherrypick.backend.domain.deal.application.service.SearchDealUsecase;
 import com.cherrypick.backend.domain.deal.domain.service.DealCreateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +28,7 @@ public class DealController {
     private final DealService dealService;
     private final DealLogService dealLogService;
     private final CreateDealUseCase createDealUseCase;
+    private final SearchDealUsecase searchDealUsecase;
 
     // 게시글 생성
     @Operation(
@@ -59,7 +61,7 @@ public class DealController {
             request = new DealSearchRequestDTO();
         }
 
-        DealSearchPageResponseDTO response = dealService.searchDeals(request, page, size);
+        DealSearchPageResponseDTO response = searchDealUsecase.searchDeals(request, page, size);
         return ResponseEntity.ok(response);
     }
 
