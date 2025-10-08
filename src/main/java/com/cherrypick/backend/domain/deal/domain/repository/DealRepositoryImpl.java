@@ -13,6 +13,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * DealRepositoryCustom 구현체
@@ -63,9 +64,6 @@ public class DealRepositoryImpl implements DealRepositoryCustom {
     ) {
         QDeal deal = QDeal.deal;
 
-        // 기본 필터 추가: 삭제되지 않은 딜만 조회
-        filters.add(deal.isDelete.isFalse());
-
         // ===== 쿼리 실행 =====
         // size+1 조회: hasNext 판별을 위해 요청한 size보다 1개 더 조회
         // 예: size=20 요청 → limit=21로 조회
@@ -81,7 +79,10 @@ public class DealRepositoryImpl implements DealRepositoryCustom {
                         // List<BooleanExpression>을 Predicate[] 배열로 변환
                         // QueryDSL의 where()는 가변인자(Predicate...)를 받음
                         // null인 조건은 자동으로 무시됨
-                        filters.toArray(new Predicate[0])
+                        Stream.concat(
+                                filters.stream(),
+                                Stream.of(deal.isDelete.eq(false))
+                        ).toArray(Predicate[]::new)
                 )
                 .orderBy(
                         // List<OrderSpecifier<?>>를 배열로 변환
