@@ -13,7 +13,6 @@ import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPag
 import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchResponseDTO;
 import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.cherrypick.backend.domain.deal.domain.enums.PriceType;
-import com.cherrypick.backend.domain.deal.domain.enums.ShippingType;
 import com.cherrypick.backend.domain.deal.domain.enums.SortType;
 import com.cherrypick.backend.domain.deal.domain.enums.TimeRangeType;
 import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
@@ -75,264 +74,6 @@ public class DealService {
     private final CategoryService categoryService;
     private final RedisDuplicationPreventionAdapter duplicationPreventionAdapter;
 
-    // 게시글 생성
-    @Transactional
-    public DealResponseDTOs.Create createDeal( DealCreateRequestDTO dto) {
-
-        var userDetails = AuthUtil.getUserDetail();
-        User user = userRepository.findById(userDetails.userId())
-                .orElseThrow(() -> new BaseException(GlobalErrorCode.UNAUTHORIZED));
-
-        Category category = categoryRepository.findById(dto.categoryId())
-                .orElseThrow(() -> new BaseException(DealErrorCode.CATEGORY_NOT_FOUND));
-
-        Store store = null;
-        if (dto.storeId() != null) {
-            store = storeRepository.findById(dto.storeId())
-                    .orElseThrow(() -> new BaseException(DealErrorCode.STORE_NOT_FOUND));
-        }
-
-        List<Discount> discounts = new ArrayList<>();
-
-        String discountName = null;
-
-        if (dto.discountIds() != null && !dto.discountIds().isEmpty()) {
-            List<Discount> foundDiscounts = discountRepository.findAllById(dto.discountIds());
-            if (foundDiscounts.size() != dto.discountIds().size()) {
-                throw new BaseException(DealErrorCode.DISCOUNT_NOT_FOUND);
-            }
-            discounts.addAll(foundDiscounts);
-        }
-
-        if (dto.discountNames() != null && !dto.discountNames().isEmpty()) {
-            // discountNames "카드, 쿠폰" 형식으로 한 컬럼에 저장
-            discountName = String.join(", ", dto.discountNames());
-        }
-
-        if (!isValidUrl(dto.originalUrl())) {
-            throw new BaseException(LinkPriceErrorCode.INVALID_ORIGINAL_URL);
-        }
-
-        // 딥링크 변환
-        String deepLink = null;
-        try {
-            deepLink = linkPriceService.createDeeplink(dto.originalUrl());
-        } catch (BaseException e) {
-            if (e.getErrorCode() != LinkPriceErrorCode.LINKPRICE_API_RESULT_FAIL) {
-                throw e;
-            }
-            // LINKPRICE_API_RESULT_FAIL인 경우는 딥링크 null로 저장 후 생성
-        }
-
-
-        Deal deal = Deal.builder()
-                .user(user)
-                .title(dto.title())
-                .category(category)
-                .originalUrl(dto.originalUrl())
-                .deepLink(deepLink)
-                .store(store)
-                .storeName(store == null ? dto.storeName() : null)
-                .price(dto.price())
-                .shipping(dto.shipping())
-                .content(dto.content())
-                .discounts(discounts)
-                .discountName(discountName)
-                .discountDescription(dto.discountDescription())
-                .isSoldOut(false)
-                .build();
-
-        Deal saved = dealRepository.save(deal);
-
-        // 이미지랑 매핑
-        if (dto.imageIds() != null && !dto.imageIds().isEmpty()) {
-            imageService.attachImage(saved.getDealId(), dto.imageIds(), ImageType.DEAL);
-        }
-
-        return new DealResponseDTOs.Create(saved.getDealId(), "핫딜 게시글 생성 성공");
-    }
-
-    // 게시글 전체조회 (검색)
-    public DealSearchPageResponseDTO searchDeals(DealSearchRequestDTO dto, int page, int size) {
-        // 카테고리 유효성
-        if (dto.getCategoryId() != null && !categoryRepository.existsById(dto.getCategoryId())) {
-            throw new BaseException(DealErrorCode.CATEGORY_NOT_FOUND);
-        }
-
-        // 할인 ID 유효성 및 존재 여부
-        if (dto.getDiscountIds() != null && !dto.getDiscountIds().isEmpty()) {
-            for (Long discountId : dto.getDiscountIds()) {
-                if (discountId == null || discountId <= 0) {
-                    throw new BaseException(DealErrorCode.INVALID_DISCOUNT_INFORMATION);
-                }
-            }
-            List<Long> foundDiscountIds = discountRepository.findAllById(dto.getDiscountIds())
-                    .stream()
-                    .map(Discount::getDiscountId)
-                    .toList();
-            if (foundDiscountIds.size() != dto.getDiscountIds().size()) {
-                throw new BaseException(DealErrorCode.DISCOUNT_NOT_FOUND);
-            }
-        }
-
-        // 스토어 ID 존재 여부
-        if (dto.getStoreIds() != null && !dto.getStoreIds().isEmpty()) {
-            List<Long> foundStoreIds = storeRepository.findAllById(dto.getStoreIds())
-                    .stream()
-                    .map(Store::getStoreId)
-                    .toList();
-            if (foundStoreIds.size() != dto.getStoreIds().size()) {
-                throw new BaseException(DealErrorCode.STORE_NOT_FOUND);
-            }
-        }
-
-        LocalDateTime startDate = resolveStartDate(dto.getTimeRange());
-        LocalDateTime endDate = LocalDateTime.now();
-
-        Double minPrice = null;
-        Double maxPrice = null;
-        List<PriceType> priceTypes = new ArrayList<>();
-
-        if (dto.getPriceFilter() != null) {
-            PriceType type = dto.getPriceFilter().priceType();
-            minPrice = dto.getPriceFilter().minPrice();
-            maxPrice = dto.getPriceFilter().maxPrice();
-            if ((minPrice != null || maxPrice != null) && type == null) {
-                throw new BaseException(DealErrorCode.INVALID_PRICE_TYPE);
-            }
-            if (type != null) priceTypes.add(type);
-        }
-
-        boolean viewSoldOut = dto.getFilters() != null && dto.getFilters().viewSoldOut();
-        boolean freeShipping = dto.getFilters() != null && dto.getFilters().freeShipping();
-        boolean globalShipping = dto.getFilters() != null && dto.getFilters().globalShipping();
-        boolean variousPrice = dto.getVariousPrice() != null ? dto.getVariousPrice() : true;
-
-        List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty()) ? null : dto.getDiscountIds();
-        List<Long> storeIds = (dto.getStoreIds() == null || dto.getStoreIds().isEmpty()) ? null : dto.getStoreIds();
-
-        List<Long> categoryList = null;
-        if(dto.getCategoryId() != null) categoryList = categoryService.getCategoryWithChildren(dto.getCategoryId());
-
-        Sort sort;
-        switch (dto.getSortType()) {
-            case PRICE_HIGH -> sort = Sort.by(Sort.Direction.DESC, "price.discountedPrice");
-            case PRICE_LOW -> sort = Sort.by(Sort.Direction.ASC, "price.discountedPrice");
-            case LATEST -> sort = Sort.by(Sort.Direction.DESC, "createdAt");
-            default -> sort = Sort.unsorted();
-        }
-
-        List<Deal> allFilteredDeals = dealRepository.searchDealsWithPaging(
-                categoryList,
-                dto.getKeyword(),
-                viewSoldOut,
-                freeShipping,
-                globalShipping,
-                startDate,
-                endDate,
-                minPrice,
-                maxPrice,
-                priceTypes.isEmpty() ? null : priceTypes,
-                variousPrice,
-                discountIds,
-                storeIds,
-                PageRequest.of(0, Integer.MAX_VALUE, sort)
-        );
-
-        List<Long> allDealIds = allFilteredDeals.stream().map(Deal::getDealId).toList();
-
-        // 조회수 가져오는 부분
-        Map<Long, Long> viewCountMap = allFilteredDeals.stream()
-                .collect(Collectors.toMap(
-                        Deal::getDealId,
-                        deal -> deal.getTotalViews() != null ? deal.getTotalViews() : 0L
-                ));
-
-        Map<Long, Long> likeCountMap = voteRepository.countByDealIdsAndVoteTypeGrouped(allDealIds, VoteType.TRUE);
-        Map<Long, Long> commentCountMap = commentRepository.countByDealIdsGrouped(allDealIds);
-
-        if (dto.getSortType() == SortType.POPULARITY
-                || dto.getSortType() == SortType.VIEWS
-                || dto.getSortType() == SortType.DISCOUNT_RATE) {
-            allFilteredDeals = sortDeals(allFilteredDeals, dto.getSortType(), viewCountMap, likeCountMap);
-        }
-
-        // 정렬 후 페이징 적용
-        int fromIndex = page * size;
-        int toIndex = Math.min(fromIndex + size, allFilteredDeals.size());
-        List<Deal> pageContent = fromIndex >= allFilteredDeals.size() ? List.of() : allFilteredDeals.subList(fromIndex, toIndex);
-        boolean hasNext = toIndex < allFilteredDeals.size();
-
-        List<Long> pageDealIds = pageContent.stream().map(Deal::getDealId).toList();
-
-        // 카테고리 정보 조회 (N+1 방지)
-        Map<Long, Category> categoryMap = new HashMap<>();
-        if (!pageContent.isEmpty()) {
-            List<Long> categoryIds = pageContent.stream()
-                    .map(deal -> deal.getCategory().getCategoryId())
-                    .distinct()
-                    .toList();
-            categoryRepository.findAllById(categoryIds).forEach(category ->
-                    categoryMap.put(category.getCategoryId(), category));
-        }
-
-        // 스토어 정보 조회 (N+1 방지)
-        Map<Long, Store> storeMap = new HashMap<>();
-        if (!pageContent.isEmpty()) {
-            List<Long> storeIdsFromDeals = pageContent.stream()
-                    .map(Deal::getStore)
-                    .filter(store -> store != null)
-                    .map(Store::getStoreId)
-                    .distinct()
-                    .toList();
-            if (!storeIdsFromDeals.isEmpty()) {
-                storeRepository.findAllById(storeIdsFromDeals).forEach(store ->
-                        storeMap.put(store.getStoreId(), store));
-            }
-        }
-
-        // 사용자 정보 조회 (N+1 방지)
-        Map<Long, User> userMap = new HashMap<>();
-        if (!pageContent.isEmpty()) {
-            List<Long> userIds = pageContent.stream()
-                    .map(deal -> deal.getUser().getUserId())
-                    .distinct()
-                    .toList();
-            userRepository.findAllById(userIds).forEach(user ->
-                    userMap.put(user.getUserId(), user));
-        }
-
-        Map<Long, Image> imageMap = imageRepository.findTopImagesByDealIds(pageDealIds, ImageType.DEAL).stream()
-                .collect(Collectors.toMap(Image::getRefId, img -> img, (a, b) -> a));
-
-        List<DealSearchResponseDTO> responseList = pageContent.stream().map(deal -> {
-            Long dealId = deal.getDealId();
-            long likeCount = likeCountMap.getOrDefault(dealId, 0L);
-            long commentCount = commentCountMap.getOrDefault(dealId, 0L);
-            Image image = imageMap.get(dealId);
-
-            User user = userMap.get(deal.getUser().getUserId());
-            Store store = deal.getStore() != null ? storeMap.get(deal.getStore().getStoreId()) : null;
-
-            return new DealSearchResponseDTO(
-                    dealId,
-                    image != null ? new ImageUrl(image.getImageId(), image.getImageUrl(), image.getImageIndex()) : null,
-                    deal.getTitle(),
-                    store != null ? store.getName() : deal.getStoreName(),
-                    InfoTagGenerator.getInfoTags(deal),
-                    deal.getPrice(),
-                    user != null ? user.getNickname() : null,
-                    user != null ? user.getBadge().getBadgeId() : null,
-                    deal.getCreatedAt().toString(),
-                    deal.getHeat(),
-                    (int) likeCount,
-                    (int) commentCount,
-                    deal.isSoldOut()
-            );
-        }).toList();
-
-        return new DealSearchPageResponseDTO(responseList, hasNext);
-    }
 
     // 게시글 상세조회
     @Transactional()
@@ -385,7 +126,7 @@ public class DealService {
         );
 
         // Store VO 생성
-        com.cherrypick.backend.domain.store.vo.Store storeVo;
+        DealDetailResponseDTO.StoreVO storeVo;
         Long storeId = null;
         String storeName = null;
 
@@ -393,7 +134,7 @@ public class DealService {
             storeId = deal.getStore().getStoreId();
             storeName = deal.getStore().getName();
 
-            storeVo = new com.cherrypick.backend.domain.store.vo.Store(
+            storeVo = new DealDetailResponseDTO.StoreVO(
                     deal.getStore().getStoreId(),
                     deal.getStore().getName(),
                     deal.getStore().getTextColor(),
@@ -402,7 +143,7 @@ public class DealService {
         } else {
             storeName = deal.getStoreName();
 
-            storeVo = new com.cherrypick.backend.domain.store.vo.Store(
+            storeVo = new DealDetailResponseDTO.StoreVO(
                     null,
                     deal.getStoreName(),
                     null,

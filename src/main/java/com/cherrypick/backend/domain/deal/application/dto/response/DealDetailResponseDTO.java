@@ -4,7 +4,6 @@ import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.user.vo.UserVO;
-import com.cherrypick.backend.domain.store.vo.Store;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
 
 import java.util.List;
@@ -14,7 +13,7 @@ public record DealDetailResponseDTO (
         Long dealId,
         List<ImageUrl> imageUrls,
         UserVO user,
-        Store store,
+        StoreVO store,
         List<String> categorys,
         String title,
         List<String> infoTags,
@@ -37,4 +36,13 @@ public record DealDetailResponseDTO (
         String discountName
 
 ) {
+
+    public record StoreVO(
+            Long storeId,
+            String storeName,
+            String textColor,
+            String backgroundColor
+    ) {
+    }
+
 }
