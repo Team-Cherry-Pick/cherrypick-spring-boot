@@ -1,9 +1,8 @@
-package com.cherrypick.backend.domain.store.controller;
+package com.cherrypick.backend.domain.deal.adapter.in.web;
 
-import com.cherrypick.backend.domain.store.dto.StoreResponseListDTO;
-import com.cherrypick.backend.domain.store.service.StoreService;
+import com.cherrypick.backend.domain.deal.application.dto.response.StoreResponseListDTO;
+import com.cherrypick.backend.domain.deal.domain.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -10,8 +10,8 @@ import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.domain.deal.util.ValidUrlUtil;
 import com.cherrypick.backend.domain.discount.entity.Discount;
 import com.cherrypick.backend.domain.discount.repository.DiscountRepository;
-import com.cherrypick.backend.domain.store.entity.Store;
-import com.cherrypick.backend.domain.store.repository.StoreRepository;
+import com.cherrypick.backend.domain.deal.domain.entity.Store;
+import com.cherrypick.backend.domain.deal.domain.repository.StoreRepository;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -156,7 +156,4 @@ public class DealCreateService
 
         return discounts;
     }
-
-
-
 }

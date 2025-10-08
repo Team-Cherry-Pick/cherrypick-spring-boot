@@ -1,6 +1,6 @@
-package com.cherrypick.backend.domain.store.repository;
+package com.cherrypick.backend.domain.deal.domain.repository;
 
-import com.cherrypick.backend.domain.store.entity.Store;
+import com.cherrypick.backend.domain.deal.domain.entity.Store;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
