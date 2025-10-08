@@ -2,7 +2,7 @@ package com.cherrypick.backend.domain.user.service;
 
 import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.domain.service.DealActivityService;
-import com.cherrypick.backend.domain.deal.domain.service.DealEnrichmentService;
+import com.cherrypick.backend.domain.deal.domain.service.DealSearchResponseFactory;
 import com.cherrypick.backend.global.util.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class CommentedDealUsecase
 {
     private final DealActivityService dealActivityService;
-    private final DealEnrichmentService dealEnrichmentService;
+    private final DealSearchResponseFactory responseFactory;
 
     /**
      * 현재 인증된 사용자가 댓글을 작성한 딜을 페이징하여 조회합니다.
@@ -33,6 +33,6 @@ public class CommentedDealUsecase
         var userId = AuthUtil.getUserDetail().userId();
         var deals = dealActivityService.getCommentedDealsByUserId(userId);
 
-        return dealEnrichmentService.loadRelations(deals, page, size);
+        return responseFactory.loadRelations(deals, false);
     }
 }

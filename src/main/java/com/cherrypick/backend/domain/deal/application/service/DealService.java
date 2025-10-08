@@ -211,6 +211,9 @@ public class DealService {
         List<Long> discountIds = (dto.getDiscountIds() == null || dto.getDiscountIds().isEmpty()) ? null : dto.getDiscountIds();
         List<Long> storeIds = (dto.getStoreIds() == null || dto.getStoreIds().isEmpty()) ? null : dto.getStoreIds();
 
+        List<Long> categoryList = null;
+        if(dto.getCategoryId() != null) categoryList = categoryService.getCategoryWithChildren(dto.getCategoryId());
+
         Sort sort;
         switch (dto.getSortType()) {
             case PRICE_HIGH -> sort = Sort.by(Sort.Direction.DESC, "price.discountedPrice");
@@ -218,9 +221,6 @@ public class DealService {
             case LATEST -> sort = Sort.by(Sort.Direction.DESC, "createdAt");
             default -> sort = Sort.unsorted();
         }
-
-        List<Long> categoryList = null;
-        if(dto.getCategoryId() != null) categoryList = categoryService.getCategoryWithChildren(dto.getCategoryId());
 
         List<Deal> allFilteredDeals = dealRepository.searchDealsWithPaging(
                 categoryList,
