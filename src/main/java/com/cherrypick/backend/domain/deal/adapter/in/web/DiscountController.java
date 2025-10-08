@@ -1,7 +1,7 @@
-package com.cherrypick.backend.domain.discount.cotroller;
+package com.cherrypick.backend.domain.deal.adapter.in.web;
 
-import com.cherrypick.backend.domain.discount.dto.DiscountResponseListDTO;
-import com.cherrypick.backend.domain.discount.service.DiscountService;
+import com.cherrypick.backend.domain.deal.application.dto.response.DiscountResponseListDTO;
+import com.cherrypick.backend.domain.deal.domain.service.DiscountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

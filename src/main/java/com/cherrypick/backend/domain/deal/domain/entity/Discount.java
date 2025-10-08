@@ -1,6 +1,5 @@
-package com.cherrypick.backend.domain.discount.entity;
+package com.cherrypick.backend.domain.deal.domain.entity;
 
-import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -2,7 +2,6 @@ package com.cherrypick.backend.domain.deal.domain.entity;
 
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
-import com.cherrypick.backend.domain.discount.entity.Discount;
 import com.cherrypick.backend.domain.user.entity.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

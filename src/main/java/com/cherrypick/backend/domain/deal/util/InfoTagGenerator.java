@@ -2,7 +2,7 @@ package com.cherrypick.backend.domain.deal.util;
 
 import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.cherrypick.backend.domain.deal.domain.enums.ShippingType;
-import com.cherrypick.backend.domain.discount.entity.Discount;
+import com.cherrypick.backend.domain.deal.domain.entity.Discount;
 
 import java.util.ArrayList;
 import java.util.Arrays;
