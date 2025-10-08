@@ -12,7 +12,7 @@ import java.util.List;
  * 딜 검색 결과 정렬을 처리하는 서비스
  */
 @Service
-public class DealSortService {
+public class DealSortFactory {
 
     /**
      * SortType을 QueryDSL OrderSpecifier로 변환

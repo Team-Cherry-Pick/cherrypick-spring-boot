@@ -4,10 +4,10 @@ import com.cherrypick.backend.domain.deal.application.dto.request.DealSearchRequ
 import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
-import com.cherrypick.backend.domain.deal.domain.service.DealEnrichmentService;
+import com.cherrypick.backend.domain.deal.domain.service.DealSearchResponseFactory;
 import com.cherrypick.backend.domain.deal.domain.service.DealValidationService;
-import com.cherrypick.backend.domain.deal.domain.service.search.DealFilterService;
-import com.cherrypick.backend.domain.deal.domain.service.search.DealSortService;
+import com.cherrypick.backend.domain.deal.domain.service.search.DealFilterFactory;
+import com.cherrypick.backend.domain.deal.domain.service.search.DealSortFactory;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +25,9 @@ import java.util.Objects;
 public class SearchDealUsecase {
 
     private final DealValidationService validationService;
-    private final DealFilterService filterService;
-    private final DealSortService sortService;
-    private final DealEnrichmentService enrichmentService;
+    private final DealFilterFactory filterFactory;
+    private final DealSortFactory sortFactory;
+    private final DealSearchResponseFactory responseFactory;
     private final DealRepository dealRepository;
 
     public DealSearchPageResponseDTO searchDeals(DealSearchRequestDTO dto, int page, int size) {
@@ -39,14 +39,14 @@ public class SearchDealUsecase {
         List<BooleanExpression> filters = buildFilters(dto);
 
         // 3단계: 정렬 조립
-        List<OrderSpecifier<?>> orders = sortService.createOrderSpecifiers(dto.getSortType());
+        List<OrderSpecifier<?>> orders = sortFactory.createOrderSpecifiers(dto.getSortType());
 
         // 4단계: 검색 실행 (DB 필터링 + 정렬 + 페이징)
         Pageable pageable = PageRequest.of(page, size);
         Slice<Deal> dealSlice = dealRepository.searchWithFilters(filters, orders, pageable);
 
         // 5단계: DTO 변환
-        var response = enrichmentService.loadRelations(dealSlice.getContent(), dealSlice.hasNext());
+        var response = responseFactory.loadRelations(dealSlice.getContent(), dealSlice.hasNext());
 
         return response;
     }
@@ -75,21 +75,21 @@ public class SearchDealUsecase {
         List<BooleanExpression> filters = new ArrayList<>();
 
         // 검색 조건 필터
-        filters.add(filterService.createCategoryFilter(dto.getCategoryId()));
-        filters.add(filterService.createKeywordFilter(dto.getKeyword()));
+        filters.add(filterFactory.createCategoryFilter(dto.getCategoryId()));
+        filters.add(filterFactory.createKeywordFilter(dto.getKeyword()));
 
         // 일반 필터 (품절, 배송)
-        filters.add(filterService.createSoldOutFilter(dto.getFilters()));
-        filters.add(filterService.createFreeShippingFilter(dto.getFilters()));
-        filters.add(filterService.createGlobalShippingFilter(dto.getFilters()));
+        filters.add(filterFactory.createSoldOutFilter(dto.getFilters()));
+        filters.add(filterFactory.createFreeShippingFilter(dto.getFilters()));
+        filters.add(filterFactory.createGlobalShippingFilter(dto.getFilters()));
 
         // 날짜/가격 필터
-        filters.add(filterService.createDateRangeFilter(dto.getTimeRange()));
-        filters.add(filterService.createPriceFilter(dto.getPriceFilter(), dto.getVariousPrice()));
+        filters.add(filterFactory.createDateRangeFilter(dto.getTimeRange()));
+        filters.add(filterFactory.createPriceFilter(dto.getPriceFilter(), dto.getVariousPrice()));
 
         // 할인/스토어 필터
-        filters.add(filterService.createDiscountFilter(dto.getDiscountIds()));
-        filters.add(filterService.createStoreFilter(dto.getStoreIds()));
+        filters.add(filterFactory.createDiscountFilter(dto.getDiscountIds()));
+        filters.add(filterFactory.createStoreFilter(dto.getStoreIds()));
 
         // null 제거 후 반환
         return filters.stream()

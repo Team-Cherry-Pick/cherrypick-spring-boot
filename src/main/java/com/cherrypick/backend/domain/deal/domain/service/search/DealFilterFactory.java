@@ -1,13 +1,17 @@
 package com.cherrypick.backend.domain.deal.domain.service.search;
 
 import com.cherrypick.backend.domain.category.service.CategoryService;
+import com.cherrypick.backend.domain.comment.entity.QComment;
 import com.cherrypick.backend.domain.deal.domain.entity.QDeal;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.Filter;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceFilter;
 import com.cherrypick.backend.domain.deal.domain.enums.PriceType;
 import com.cherrypick.backend.domain.deal.domain.enums.ShippingType;
 import com.cherrypick.backend.domain.deal.domain.enums.TimeRangeType;
+import com.cherrypick.backend.domain.vote.entity.QVote;
+import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,17 +24,9 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class DealFilterService {
+public class DealFilterFactory {
 
     private final CategoryService categoryService;
-
-    /**
-     * 삭제되지 않은 딜만 조회 (기본 필터)
-     */
-    public BooleanExpression createDeleteFilter() {
-        QDeal deal = QDeal.deal;
-        return deal.isDelete.isFalse();
-    }
 
     /**
      * 카테고리 필터 (하위 카테고리 포함)
@@ -197,6 +193,55 @@ public class DealFilterService {
 
         QDeal deal = QDeal.deal;
         return deal.store.storeId.in(storeIds);
+    }
+
+    /**
+     * 작성자 필터 (특정 사용자가 작성한 딜)
+     */
+    public BooleanExpression createAuthorFilter(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+
+        QDeal deal = QDeal.deal;
+        return deal.user.userId.eq(userId);
+    }
+
+    /**
+     * 좋아요 필터 (특정 사용자가 좋아요를 누른 딜)
+     */
+    public BooleanExpression createLikedByUserFilter(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+
+        QDeal deal = QDeal.deal;
+        QVote vote = QVote.vote;
+
+        return JPAExpressions
+                .selectFrom(vote)
+                .where(vote.dealId.eq(deal)
+                        .and(vote.userId.userId.eq(userId))
+                        .and(vote.voteType.eq(VoteType.TRUE)))
+                .exists();
+    }
+
+    /**
+     * 댓글 필터 (특정 사용자가 댓글을 작성한 딜)
+     */
+    public BooleanExpression createCommentedByUserFilter(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+
+        QDeal deal = QDeal.deal;
+        QComment comment = QComment.comment;
+
+        return JPAExpressions
+                .selectFrom(comment)
+                .where(comment.dealId.eq(deal)
+                        .and(comment.userId.userId.eq(userId)))
+                .exists();
     }
 
     /**
