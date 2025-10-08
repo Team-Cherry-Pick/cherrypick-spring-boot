@@ -324,7 +324,7 @@ public class DealService {
                     user != null ? user.getNickname() : null,
                     user != null ? user.getBadge().getBadgeId() : null,
                     deal.getCreatedAt().toString(),
-                    (int) deal.getHeat(),
+                    deal.getHeat(),
                     (int) likeCount,
                     (int) commentCount,
                     deal.isSoldOut()
