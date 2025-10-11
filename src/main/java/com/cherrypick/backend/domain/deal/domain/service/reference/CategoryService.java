@@ -3,6 +3,8 @@ package com.cherrypick.backend.domain.deal.domain.service.reference;
 import com.cherrypick.backend.domain.deal.application.dto.response.CategoryListDTO;
 import com.cherrypick.backend.domain.deal.domain.entity.Category;
 import com.cherrypick.backend.domain.deal.domain.repository.reference.CategoryRepository;
+import com.cherrypick.backend.global.exception.BaseException;
+import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -71,7 +73,7 @@ public class CategoryService {
         List<Category> children = allCategories.stream()
                 .filter(c -> Optional.ofNullable(c.getParentId()).orElse(0L).equals(parentId))
                 .toList();
-        
+
         for (Category child : children) {
             result.add(child.getCategoryId());
             // 재귀 호출로 하위 카테고리들도 추가
@@ -79,6 +81,21 @@ public class CategoryService {
         }
     }
 
+    // 특정 카테고리의 계층 구조를 부모→자식 순으로 조회
+    public List<String> getCategoryHierarchy(Long categoryId) {
+        if(categoryId == null) return List.of();
 
+        List<String> categoryNames = new ArrayList<>();
+        Long currentCategoryId = categoryId;
+
+        while (currentCategoryId != null) {
+            Category category = categoryRepository.findById(currentCategoryId)
+                    .orElseThrow(() -> new BaseException(DealErrorCode.CATEGORY_NOT_FOUND));
+            categoryNames.add(0, category.getName());
+            currentCategoryId = category.getParentId();
+        }
+
+        return categoryNames;
+    }
 
 }

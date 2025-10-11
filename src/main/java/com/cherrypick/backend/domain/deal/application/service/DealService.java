@@ -30,7 +30,7 @@ import com.cherrypick.backend.domain.user.entity.Badge;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
-import com.cherrypick.backend.domain.user.vo.UserVO;
+import com.cherrypick.backend.domain.user.vo.AuthorDTO;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.cherrypick.backend.domain.vote.repository.VoteRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -66,144 +66,6 @@ public class DealService {
     private final CategoryService categoryService;
     private final RedisDuplicationPreventionAdapter duplicationPreventionAdapter;
 
-
-    // 게시글 상세조회
-    @Transactional()
-    public DealDetailResponseDTO getDealDetail(Long dealId, String deviceId) {
-
-        // Deal이 존재하는지 확인
-        Deal deal = dealRepository.findById(dealId)
-                .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
-
-        // 로그인 사용자 ID 추출
-        final Long loginUserId = AuthUtil.isAuthenticated() ? AuthUtil.getUserDetail().userId() : null;
-        VoteType voteType = VoteType.NONE;
-        if (loginUserId != null) {
-            var user = userRepository.findById(loginUserId).orElse(null);
-            if (user != null) {
-                var voteOpt = voteRepository.findByUserIdAndDealId(user, deal);
-                if (voteOpt.isPresent()) {
-                    voteType = voteOpt.get().getVoteType();
-                }
-            }
-        }
-
-        // 카테고리 이름 부모→자식 순으로
-        List<String> categoryNames = new ArrayList<>();
-        Long currentCategoryId = deal.getCategory() != null ? deal.getCategory().getCategoryId() : null;
-        Long finalCategoryId = currentCategoryId; // 최종 카테고리 아이디
-
-        while (currentCategoryId != null) {
-            Category category = categoryRepository.findById(currentCategoryId)
-                    .orElseThrow(() -> new BaseException(DealErrorCode.CATEGORY_NOT_FOUND));
-            categoryNames.add(0, category.getName());
-            currentCategoryId = category.getParentId();
-        }
-
-        // 이미지 조회
-        Optional<Image> userImageOpt = imageRepository.findByUserId(
-                deal.getUser().getUserId()
-        );
-
-
-        User user = deal.getUser();
-        Badge badge = user.getBadge();
-        // User VO 생성
-        UserVO userVo = new UserVO(
-                user.getUserId(),
-                user.getNickname(),
-                userImageOpt.map(Image::getImageUrl).orElse(null),
-                badge.getBadgeId(),
-                badge.getDisplayName()
-        );
-
-        // Store VO 생성
-        DealDetailResponseDTO.StoreVO storeVo;
-        Long storeId = null;
-        String storeName = null;
-
-        if (deal.getStore() != null) {
-            storeId = deal.getStore().getStoreId();
-            storeName = deal.getStore().getName();
-
-            storeVo = new DealDetailResponseDTO.StoreVO(
-                    deal.getStore().getStoreId(),
-                    deal.getStore().getName(),
-                    deal.getStore().getTextColor(),
-                    deal.getStore().getBackgroundColor()
-            );
-        } else {
-            storeName = deal.getStoreName();
-
-            storeVo = new DealDetailResponseDTO.StoreVO(
-                    null,
-                    deal.getStoreName(),
-                    null,
-                    null
-            );
-        }
-
-        // 인포 태그 생성
-        List<String> infoTags = InfoTagGenerator.getInfoTags(deal);
-
-        // 중복 조회 방지 및 조회수/온도 증가
-        int totalViews = deal.getTotalViews() != null ? deal.getTotalViews().intValue() : 0;
-
-        // 이미 조회한 적이 없다면 조회수와 온도 증가
-        if (!duplicationPreventionAdapter.isDuplicate(Behavior.VIEW, dealId, deviceId)) {
-            dealRepository.incrementViewCount(dealId);
-            dealRepository.updateHeat(dealId, +0.1);
-            duplicationPreventionAdapter.preventDuplicate(Behavior.VIEW, dealId, deviceId);
-        }
-
-        // 매트릭스 조회 (조회수, 좋아요 수, 싫어요 수, 댓글 수)
-        long[] metrics = getDealMetrics(deal);
-
-        List<Image> images = imageRepository.findByRefIdAndImageTypeOrderByImageIndexAsc(deal.getDealId(), ImageType.DEAL);
-
-        List<ImageUrl> imageUrls = images.stream()
-                .map(image -> new ImageUrl(
-                        image.getImageId(),
-                        image.getImageUrl(),
-                        image.getImageIndex()
-                ))
-                .toList();
-
-        // 할인 정보 처리
-        List<Long> discountIds = new ArrayList<>();
-        if (deal.getDiscounts() != null && !deal.getDiscounts().isEmpty()) {
-            discountIds = deal.getDiscounts().stream()
-                    .map(Discount::getDiscountId)
-                    .toList();
-        }
-
-        return new DealDetailResponseDTO(
-                deal.getDealId(),
-                imageUrls,
-                userVo,
-                storeVo,
-                categoryNames,
-                deal.getTitle(),
-                infoTags,
-                deal.getShipping(),
-                deal.getPrice(),
-                deal.getContent(),
-                deal.getDiscountDescription(),
-                (int) deal.getHeat(),
-                totalViews,
-                (int) metrics[0], // likeCount
-                (int) metrics[1], // dislikeCount
-                (int) metrics[2], // commentCount
-                deal.getOriginalUrl(),
-                deal.getDeepLink(),
-                deal.isSoldOut(),
-                voteType,
-                finalCategoryId,
-                storeId,
-                discountIds,
-                deal.getDiscountName()
-        );
-    }
 
     // 게시글 수정
     @Transactional
@@ -359,16 +221,6 @@ public class DealService {
 
         return new DealResponseDTOs.Delete("핫딜 게시글 삭제 성공");
     }
-
-    // 핫딜 투표, 댓글수 조회
-    private long[] getDealMetrics(Deal deal) {
-        long likeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.TRUE);
-        long dislikeCount = voteRepository.countByDealIdAndVoteType(deal, VoteType.FALSE);
-        long commentCount = commentRepository.countByDealId_DealIdAndIsDeleteFalse(deal.getDealId());
-
-        return new long[]{likeCount, dislikeCount, commentCount};
-    }
-
 
     // 정렬 함수
     private List<Deal> sortDeals(List<Deal> deals, SortType sortType, Map<Long, Long> viewCountMap, Map<Long, Long> likeCountMap) {

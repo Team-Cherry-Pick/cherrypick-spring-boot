@@ -19,7 +19,7 @@ import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.user.entity.Badge;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.domain.user.entity.User;
-import com.cherrypick.backend.domain.user.vo.UserVO;
+import com.cherrypick.backend.domain.user.vo.AuthorDTO;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.CommentErrorCode;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
@@ -149,7 +149,7 @@ public class CommentService {
                     Badge badge = user.getBadge();
                     return new BestCommentResponseDTO(
                             comment.getCommentId(),
-                            new UserVO(
+                            new AuthorDTO(
                                     user.getUserId(),
                                     user.getNickname(),
                                     imageOpt.map(Image::getImageUrl).orElse(null),
@@ -255,7 +255,7 @@ public class CommentService {
         return new CommentListResponseDTO(
                 comment.getCommentId(),
                 comment.getParentId(),
-                new UserVO(
+                new AuthorDTO(
                         user.getUserId(),
                         user.getNickname(),
                         imageOpt.map(Image::getImageUrl).orElse(null),
@@ -290,7 +290,7 @@ public class CommentService {
         return new CommentListResponseDTO(
                 comment.getCommentId(),
                 comment.getParentId(),
-                new UserVO(
+                new AuthorDTO(
                         user.getUserId(),
                         user.getNickname(),
                         imageUrl,

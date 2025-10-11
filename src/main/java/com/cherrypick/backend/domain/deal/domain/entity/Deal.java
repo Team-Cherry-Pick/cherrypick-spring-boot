@@ -1,22 +1,11 @@
 package com.cherrypick.backend.domain.deal.domain.entity;
 
+import com.cherrypick.backend.domain.comment.entity.Comment;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
 import com.cherrypick.backend.domain.user.entity.User;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
+import com.cherrypick.backend.domain.vote.entity.Vote;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -81,6 +70,14 @@ public class Deal {
             )
     )
     private List<Discount> discounts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dealId", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Vote> votes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dealId", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
 
     private boolean isSoldOut;
 
