@@ -1,17 +1,17 @@
 package com.cherrypick.backend.domain.deal.domain.service;
 
-import com.cherrypick.backend.domain.category.entity.Category;
-import com.cherrypick.backend.domain.category.repository.CategoryRepository;
+import com.cherrypick.backend.domain.deal.domain.entity.Category;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.CategoryRepository;
 import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
 import com.cherrypick.backend.domain.deal.domain.port.DeepLinkConverter;
 import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.domain.deal.util.ValidUrlUtil;
-import com.cherrypick.backend.domain.discount.entity.Discount;
-import com.cherrypick.backend.domain.discount.repository.DiscountRepository;
-import com.cherrypick.backend.domain.store.entity.Store;
-import com.cherrypick.backend.domain.store.repository.StoreRepository;
+import com.cherrypick.backend.domain.deal.domain.entity.Discount;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.DiscountRepository;
+import com.cherrypick.backend.domain.deal.domain.entity.Store;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.StoreRepository;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
@@ -156,7 +156,4 @@ public class DealCreateService
 
         return discounts;
     }
-
-
-
 }

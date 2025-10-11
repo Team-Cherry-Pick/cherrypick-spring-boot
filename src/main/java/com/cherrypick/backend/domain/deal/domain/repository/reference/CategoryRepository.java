@@ -1,6 +1,6 @@
-package com.cherrypick.backend.domain.category.repository;
+package com.cherrypick.backend.domain.deal.domain.repository.reference;
 
-import com.cherrypick.backend.domain.category.entity.Category;
+import com.cherrypick.backend.domain.deal.domain.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,11 +1,14 @@
 package com.cherrypick.backend.domain.user.service;
 
 
+import com.cherrypick.backend.domain.image.entity.Image;
+import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.image.service.ImageService;
 import com.cherrypick.backend.domain.user.dto.response.UserDetailResponseDTO;
 import com.cherrypick.backend.domain.user.dto.request.UserRequestDTOs;
 import com.cherrypick.backend.domain.user.dto.response.UserResponseDTOs;
 import com.cherrypick.backend.domain.user.dto.request.UserUpdateRequestDTO;
+import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Gender;
 import com.cherrypick.backend.domain.user.enums.UserStatus;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
@@ -27,6 +30,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final ImageService imageService;
     private final LogService logService;
+    private final ImageRepository imageRepository;
 
 
     // 유저 업데이트
@@ -51,19 +55,20 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserDetailResponseDTO getUserDetail()
+    public UserDetailResponseDTO getUserDetailUsecase()
     {
         Long userId = AuthUtil.getUserDetail().userId();
-        return getUserDetail(userId);
+        User user = getUserInfo(userId);
+        Image profileImage = imageService.getImageByUserId(userId);
+        return UserDetailResponseDTO.from(user, profileImage);
     }
 
     @Transactional(readOnly = true)
-    public UserDetailResponseDTO getUserDetail(Long userId)
+    public User getUserInfo(Long userId)
     {
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
-        var profileImage = imageService.getImageByUserId(userId);
 
-        return UserDetailResponseDTO.from(user, profileImage);
+        return user;
     }
 
     @Transactional(readOnly = true)
@@ -131,8 +136,6 @@ public class UserService {
         return new UserResponseDTOs.DeleteResponseDTO(userId, "magic hot super delete success");
 
     }
-
-
 
 
 }

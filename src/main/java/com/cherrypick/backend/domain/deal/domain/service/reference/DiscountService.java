@@ -1,10 +1,15 @@
-package com.cherrypick.backend.domain.discount.service;
+package com.cherrypick.backend.domain.deal.domain.service.reference;
 
-import com.cherrypick.backend.domain.discount.dto.DiscountResponseListDTO;
-import com.cherrypick.backend.domain.discount.repository.DiscountRepository;
+import com.cherrypick.backend.domain.deal.application.dto.response.DiscountResponseListDTO;
+import com.cherrypick.backend.domain.deal.domain.entity.Deal;
+import com.cherrypick.backend.domain.deal.domain.entity.Discount;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.DiscountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service @RequiredArgsConstructor @Log4j2
 public class DiscountService {
@@ -19,6 +24,5 @@ public class DiscountService {
                 .toList()
         );
     }
-
 
 }
