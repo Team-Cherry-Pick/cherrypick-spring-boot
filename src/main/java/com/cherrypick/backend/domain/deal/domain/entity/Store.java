@@ -1,4 +1,4 @@
-package com.cherrypick.backend.domain.store.entity;
+package com.cherrypick.backend.domain.deal.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

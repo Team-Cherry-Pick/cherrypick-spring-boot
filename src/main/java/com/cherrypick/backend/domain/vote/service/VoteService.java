@@ -112,4 +112,26 @@ public class VoteService {
     private double clampScore(double score) {
         return Math.max(-1000.0, Math.min(1000.0, score));
     }
+
+    /**
+     * 특정 사용자의 딜에 대한 투표 상태 조회
+     *
+     * @param deal 딜 엔티티
+     * @param userId 사용자 ID (null 가능)
+     * @return 사용자의 투표 타입 (로그인하지 않았거나 투표하지 않은 경우 VoteType.NONE)
+     */
+    public VoteType getUserVote(Deal deal, Long userId) {
+        if (userId == null) {
+            return VoteType.NONE;
+        }
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return VoteType.NONE;
+        }
+
+        return voteRepository.findByUserIdAndDealId(user, deal)
+                .map(Vote::getVoteType)
+                .orElse(VoteType.NONE);
+    }
 }

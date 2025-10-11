@@ -1,7 +1,7 @@
-package com.cherrypick.backend.domain.category.controller;
+package com.cherrypick.backend.domain.deal.adapter.in.web.reference;
 
-import com.cherrypick.backend.domain.category.dto.response.CategoryListDTO;
-import com.cherrypick.backend.domain.category.service.CategoryService;
+import com.cherrypick.backend.domain.deal.application.dto.response.CategoryListDTO;
+import com.cherrypick.backend.domain.deal.domain.service.reference.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

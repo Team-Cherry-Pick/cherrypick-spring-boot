@@ -182,6 +182,24 @@ public class ImageService {
         return deleteImage(image.map(Image::getImageId).orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND)));
     }
 
+    /**
+     * 딜의 이미지 목록 조회
+     *
+     * @param dealId 딜 ID
+     * @return 이미지 URL 목록 (인덱스 순서대로)
+     */
+    public List<com.cherrypick.backend.domain.image.vo.ImageUrl> getImages(Long dealId) {
+        List<Image> images = imageRepository.findByRefIdAndImageTypeOrderByImageIndexAsc(dealId, ImageType.DEAL);
+
+        return images.stream()
+                .map(image -> new com.cherrypick.backend.domain.image.vo.ImageUrl(
+                        image.getImageId(),
+                        image.getImageUrl(),
+                        image.getImageIndex()
+                ))
+                .toList();
+    }
+
 
 
 }

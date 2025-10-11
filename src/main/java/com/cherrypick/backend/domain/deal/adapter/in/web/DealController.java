@@ -7,6 +7,7 @@ import com.cherrypick.backend.domain.deal.application.dto.response.DealDetailRes
 import com.cherrypick.backend.domain.deal.application.dto.response.DealResponseDTOs;
 import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.application.service.CreateDealUseCase;
+import com.cherrypick.backend.domain.deal.application.service.DealDetailUsecase;
 import com.cherrypick.backend.domain.deal.application.service.DealLogService;
 import com.cherrypick.backend.domain.deal.application.service.DealService;
 import com.cherrypick.backend.domain.deal.application.service.SearchDealUsecase;
@@ -29,6 +30,7 @@ public class DealController {
     private final DealLogService dealLogService;
     private final CreateDealUseCase createDealUseCase;
     private final SearchDealUsecase searchDealUsecase;
+    private final DealDetailUsecase dealDetailUsecase;
 
     // 게시글 생성
     @Operation(
@@ -77,7 +79,7 @@ public class DealController {
             HttpServletRequest request) {
 
         String deviceId = request.getHeader("Device-Id");
-        return ResponseEntity.ok(dealService.getDealDetail(dealId, deviceId));
+        return ResponseEntity.ok(dealDetailUsecase.getDealDetail(dealId, deviceId));
     }
 
     // 게시물 수정

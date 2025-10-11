@@ -76,24 +76,9 @@ public class UserController {
     @GetMapping("")
     public ResponseEntity<UserDetailResponseDTO> getUserDetail(@RequestParam(value = "version", defaultValue = "v1") String version)
     {
-        return ResponseEntity.ok(userService.getUserDetail());
+        return ResponseEntity.ok(userService.getUserDetailUsecase());
     }
 
-
-    @Operation(
-            summary = "타겟 유저 정보 상제 조회 API V1",
-            description = "해당 유저의 상세 정보를 조회합니다."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "유저 정보 조회 성공"),
-            @ApiResponse(responseCode = "500", description = "서버 오류")
-    })
-    @GetMapping("/{user_id}")
-    public ResponseEntity<UserDetailResponseDTO> getUserDetail(@PathVariable("user_id") Long user_id,
-                                                               @RequestParam(value = "version", defaultValue = "v1") String version) {
-
-        return ResponseEntity.ok(userService.getUserDetail(user_id));
-    }
 
     @Operation(
             summary = "유저 삭제 API V1",

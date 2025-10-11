@@ -1,6 +1,6 @@
 package com.cherrypick.backend.domain.comment.dto.response;
 
-import com.cherrypick.backend.domain.user.vo.UserVO;
+import com.cherrypick.backend.domain.user.vo.AuthorDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 public record CommentListResponseDTO(
         Long commentId,
         Long parentId,
-        UserVO user,
+        AuthorDTO user,
         String content,
         int totalLikes,
         int totalReplys,

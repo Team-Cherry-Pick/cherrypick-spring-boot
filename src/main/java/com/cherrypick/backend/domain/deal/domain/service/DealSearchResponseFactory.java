@@ -9,7 +9,7 @@ import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
-import com.cherrypick.backend.domain.store.entity.Store;
+import com.cherrypick.backend.domain.deal.domain.entity.Store;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
 import com.cherrypick.backend.domain.vote.repository.VoteRepository;
