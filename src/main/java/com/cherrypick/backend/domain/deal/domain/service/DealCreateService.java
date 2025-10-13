@@ -1,10 +1,10 @@
 package com.cherrypick.backend.domain.deal.domain.service;
 
 import com.cherrypick.backend.domain.deal.domain.entity.Category;
+import com.cherrypick.backend.domain.deal.domain.enums.ShippingType;
 import com.cherrypick.backend.domain.deal.domain.repository.reference.CategoryRepository;
 import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
-import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
 import com.cherrypick.backend.domain.deal.domain.port.DeepLinkConverter;
 import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.domain.deal.util.ValidUrlUtil;
@@ -57,7 +57,7 @@ public class DealCreateService
      * @param storeId 딜의 스토어 ID (null 가능)
      * @param storeName 딜의 스토어명 (storeId가 null일 때 사용)
      * @param price 가격 정보 (정가, 할인가, 통화 등)
-     * @param shipping 배송 정보 (배송비, 배송 타입 등)
+     * @param shippingType 배송 타입
      * @param content 딜 상세 내용
      * @param discountIds 적용할 할인 ID 목록 (null 가능)
      * @param discountNames 커스텀 할인명 목록 (null 가능)
@@ -72,7 +72,7 @@ public class DealCreateService
                            Long storeId,
                            String storeName,
                            PriceVO price,
-                           ShippingVO shipping,
+                           ShippingType shippingType,
                            String content,
                            List<Long> discountIds,
                            List<String> discountNames,
@@ -119,7 +119,7 @@ public class DealCreateService
                 .store(store)
                 .storeName(store == null ? storeName : null)
                 .price(price)
-                .shipping(shipping)
+                .shippingType(shippingType)
                 .content(content)
                 .discounts(discounts)
                 .discountName(discountName)

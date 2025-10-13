@@ -2,7 +2,7 @@ package com.cherrypick.backend.domain.deal.domain.entity;
 
 import com.cherrypick.backend.domain.comment.entity.Comment;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
-import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
+import com.cherrypick.backend.domain.deal.domain.enums.ShippingType;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.vote.entity.Vote;
 import jakarta.persistence.*;
@@ -53,8 +53,8 @@ public class Deal {
     @Embedded
     private PriceVO price;
 
-    @Embedded
-    private ShippingVO shipping;
+    @Enumerated(EnumType.STRING)
+    private ShippingType shippingType;
 
     @Column(columnDefinition = "TEXT")
     private String content;

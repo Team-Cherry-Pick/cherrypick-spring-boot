@@ -1,7 +1,7 @@
 package com.cherrypick.backend.domain.deal.application.dto.response;
 
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
-import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
+import com.cherrypick.backend.domain.deal.domain.enums.ShippingType;
 import com.cherrypick.backend.domain.image.vo.ImageUrl;
 import com.cherrypick.backend.domain.user.vo.AuthorDTO;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
@@ -17,7 +17,7 @@ public record DealDetailResponseDTO (
         List<String> categorys,
         String title,
         List<String> infoTags,
-        ShippingVO shipping,
+        ShippingType shippingType,
         PriceVO price,
         String content,
         String discountDescription,

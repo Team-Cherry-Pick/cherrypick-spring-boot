@@ -1,8 +1,8 @@
 package com.cherrypick.backend.domain.deal.application.dto.request;
 
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
-import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
 
+import com.cherrypick.backend.domain.deal.domain.enums.ShippingType;
 import lombok.Builder;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public record DealCreateRequestDTO(
         Long storeId,
         String storeName, // storeId가 null일 때만 사용
         PriceVO price,
-        ShippingVO shipping,
+        ShippingType shippingType,
         String content,
         List<Long> discountIds,
         List<String> discountNames,
