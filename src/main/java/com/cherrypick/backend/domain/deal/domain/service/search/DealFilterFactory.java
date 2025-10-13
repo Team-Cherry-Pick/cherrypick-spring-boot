@@ -73,7 +73,7 @@ public class DealFilterFactory {
         QDeal deal = QDeal.deal;
         boolean freeShipping = filters != null && filters.freeShipping();
 
-        return freeShipping ? deal.shipping.shippingType.eq(ShippingType.FREE) : null;
+        return freeShipping ? deal.shippingType.eq(ShippingType.FREE) : null;
     }
 
     /**

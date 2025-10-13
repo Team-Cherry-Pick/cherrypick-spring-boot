@@ -92,7 +92,7 @@ public class DealDetailUsecase {
                 categoryNames,
                 deal.getTitle(),
                 infoTags,
-                deal.getShipping(),
+                deal.getShippingType(),
                 deal.getPrice(),
                 deal.getContent(),
                 deal.getDiscountDescription(),

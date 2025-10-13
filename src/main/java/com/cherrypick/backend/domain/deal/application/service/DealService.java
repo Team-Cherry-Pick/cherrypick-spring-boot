@@ -129,8 +129,8 @@ public class DealService {
             deal.setPrice(dto.price());
         }
 
-        if (dto.shipping() != null) {
-            deal.setShipping(dto.shipping());
+        if (dto.shippingType() != null) {
+            deal.setShippingType(dto.shippingType());
         }
 
         if (dto.content() != null) {

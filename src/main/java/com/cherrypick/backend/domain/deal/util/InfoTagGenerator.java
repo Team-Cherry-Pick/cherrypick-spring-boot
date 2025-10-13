@@ -15,7 +15,7 @@ public class InfoTagGenerator
         List<String> infoTags = new ArrayList<>();
 
         // 배송 타입이 FREE이면 #무료배송 추가
-        if (deal.getShipping() != null && deal.getShipping().getShippingType() == ShippingType.FREE) {
+        if (deal.getShippingType() == ShippingType.FREE) {
             infoTags.add("무료배송");
         }
 

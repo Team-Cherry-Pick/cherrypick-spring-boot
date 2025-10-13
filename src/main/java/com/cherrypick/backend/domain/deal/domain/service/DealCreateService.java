@@ -1,10 +1,10 @@
 package com.cherrypick.backend.domain.deal.domain.service;
 
 import com.cherrypick.backend.domain.deal.domain.entity.Category;
+import com.cherrypick.backend.domain.deal.domain.enums.ShippingType;
 import com.cherrypick.backend.domain.deal.domain.repository.reference.CategoryRepository;
 import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceVO;
-import com.cherrypick.backend.domain.deal.domain.entity.vo.ShippingVO;
 import com.cherrypick.backend.domain.deal.domain.port.DeepLinkConverter;
 import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.domain.deal.util.ValidUrlUtil;
@@ -72,7 +72,7 @@ public class DealCreateService
                            Long storeId,
                            String storeName,
                            PriceVO price,
-                           ShippingVO shipping,
+                           ShippingType shipping,
                            String content,
                            List<Long> discountIds,
                            List<String> discountNames,
@@ -119,7 +119,7 @@ public class DealCreateService
                 .store(store)
                 .storeName(store == null ? storeName : null)
                 .price(price)
-                .shipping(shipping)
+                .shippingType(shipping)
                 .content(content)
                 .discounts(discounts)
                 .discountName(discountName)
