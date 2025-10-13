@@ -34,15 +34,6 @@ public class DealSortFactory {
             case PRICE_LOW -> orders.add(deal.price.discountedPrice.asc());
             case POPULARITY -> orders.add(deal.heat.desc());
             case VIEWS -> orders.add(deal.totalViews.desc());
-            case DISCOUNT_RATE -> {
-                // 할인율 계산: (정가 - 할인가) / 정가 * 100
-                // regularPrice가 0인 경우 제외 필요
-                var discountRate = deal.price.regularPrice
-                        .subtract(deal.price.discountedPrice)
-                        .divide(deal.price.regularPrice)
-                        .multiply(100);
-                orders.add(discountRate.desc());
-            }
         }
 
         // 동일 값에 대한 보조 정렬: createdAt desc
