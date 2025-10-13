@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 public class PriceVO {
     @Enumerated(EnumType.STRING)
     private PriceType priceType;
-    private double regularPrice;
     private double discountedPrice;
 }
 

@@ -237,10 +237,6 @@ public class DealService {
                         .thenComparing(Deal::getCreatedAt, Comparator.reverseOrder());
                 break;
 
-            case DISCOUNT_RATE:
-                comparator = Comparator.comparingDouble(this::getDiscountRate).reversed()
-                        .thenComparing(Deal::getCreatedAt, Comparator.reverseOrder());
-                break;
 
             default:
                 return deals;
@@ -249,15 +245,6 @@ public class DealService {
         return deals.stream().sorted(comparator).toList();
     }
 
-    // 할인률 계산 함수
-    private double getDiscountRate(Deal deal) {
-        if (deal.getPrice() == null) return 0.0;
-        Double regular = deal.getPrice().getRegularPrice();
-        Double discounted = deal.getPrice().getDiscountedPrice();
-        if (regular == null || discounted == null || regular <= 0) return 0.0;
-
-        return (regular - discounted) / regular;
-    }
 
     // 시간 범위 정렬
     private LocalDateTime resolveStartDate(TimeRangeType timeRangeType) {
