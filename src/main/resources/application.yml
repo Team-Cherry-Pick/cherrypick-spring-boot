@@ -26,13 +26,8 @@ spring:
       minimum-idle: 2
 
   jpa:
-    properties:
-      #show-sql: true # 배포 시 주석처리
-      hibernate:
-        #format_sql: true
-        #use_sql_comments: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
 
 
   data:
@@ -44,6 +39,10 @@ spring:
           max-active: 10
           max-idle: 5
           min-idle: 1
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
 
   security:
     oauth2:

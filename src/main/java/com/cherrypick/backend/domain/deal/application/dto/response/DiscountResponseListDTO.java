@@ -1,6 +1,6 @@
-package com.cherrypick.backend.domain.discount.dto;
+package com.cherrypick.backend.domain.deal.application.dto.response;
 
-import com.cherrypick.backend.domain.discount.entity.Discount;
+import com.cherrypick.backend.domain.deal.domain.entity.Discount;
 import lombok.Builder;
 
 import java.util.List;

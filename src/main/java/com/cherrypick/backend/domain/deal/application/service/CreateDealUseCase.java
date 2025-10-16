@@ -48,7 +48,7 @@ public class CreateDealUseCase {
                 dto.storeId(),
                 dto.storeName(),
                 dto.price(),
-                dto.shipping(),
+                dto.shippingType(),
                 dto.content(),
                 dto.discountIds(),
                 dto.discountNames(),

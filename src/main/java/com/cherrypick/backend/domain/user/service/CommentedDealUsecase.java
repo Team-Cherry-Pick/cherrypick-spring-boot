@@ -1,16 +1,27 @@
 package com.cherrypick.backend.domain.user.service;
 
 import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPageResponseDTO;
-import com.cherrypick.backend.domain.deal.domain.service.DealActivityService;
+import com.cherrypick.backend.domain.deal.domain.entity.Deal;
+import com.cherrypick.backend.domain.deal.domain.enums.SortType;
+import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
 import com.cherrypick.backend.domain.deal.domain.service.DealSearchResponseFactory;
+import com.cherrypick.backend.domain.deal.domain.service.search.DealFilterFactory;
+import com.cherrypick.backend.domain.deal.domain.service.search.DealSortFactory;
 import com.cherrypick.backend.global.util.AuthUtil;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service @RequiredArgsConstructor
 public class CommentedDealUsecase
 {
-    private final DealActivityService dealActivityService;
+    private final DealRepository dealRepository;
+    private final DealFilterFactory filterFactory;
+    private final DealSortFactory sortFactory;
     private final DealSearchResponseFactory responseFactory;
 
     /**
@@ -19,7 +30,7 @@ public class CommentedDealUsecase
      * <p>처리 흐름:
      * <ol>
      *   <li>인증된 사용자 ID 추출</li>
-     *   <li>해당 사용자가 댓글을 작성한 딜 목록 조회</li>
+     *   <li>해당 사용자가 댓글을 작성한 딜 목록 조회 (QueryDSL, 최신순)</li>
      *   <li>연관 데이터(카테고리, 스토어, 이미지, 통계) 포함한 응답 생성</li>
      * </ol>
      *
@@ -31,7 +42,18 @@ public class CommentedDealUsecase
     public DealSearchPageResponseDTO getCommentedDeals(int page, int size)
     {
         var userId = AuthUtil.getUserDetail().userId();
-        var deals = dealActivityService.getCommentedDealsByUserId(userId);
+
+        // 필터 및 정렬 생성
+        BooleanExpression filter = filterFactory.createCommentedByUserFilter(userId);
+        var orders = sortFactory.createOrderSpecifiers(SortType.LATEST);
+        Pageable pageable = PageRequest.of(0, 1000000);
+
+        // 딜 조회
+        List<Deal> deals = dealRepository.searchWithFilters(
+                List.of(filter),
+                orders,
+                pageable
+        ).getContent();
 
         return responseFactory.loadRelations(deals, false);
     }

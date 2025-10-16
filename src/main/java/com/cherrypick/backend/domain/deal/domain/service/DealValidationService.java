@@ -1,12 +1,14 @@
 package com.cherrypick.backend.domain.deal.domain.service;
 
-import com.cherrypick.backend.domain.category.entity.Category;
-import com.cherrypick.backend.domain.category.repository.CategoryRepository;
+import com.cherrypick.backend.domain.deal.domain.entity.Category;
+import com.cherrypick.backend.domain.deal.domain.entity.Deal;
+import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.CategoryRepository;
 import com.cherrypick.backend.domain.deal.domain.entity.vo.PriceFilter;
-import com.cherrypick.backend.domain.discount.entity.Discount;
-import com.cherrypick.backend.domain.discount.repository.DiscountRepository;
-import com.cherrypick.backend.domain.store.entity.Store;
-import com.cherrypick.backend.domain.store.repository.StoreRepository;
+import com.cherrypick.backend.domain.deal.domain.entity.Discount;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.DiscountRepository;
+import com.cherrypick.backend.domain.deal.domain.entity.Store;
+import com.cherrypick.backend.domain.deal.domain.repository.reference.StoreRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +29,28 @@ public class DealValidationService {
     private final CategoryRepository categoryRepository;
     private final DiscountRepository discountRepository;
     private final StoreRepository storeRepository;
+    private final DealRepository dealRepository;
+
+    /**
+     * 딜 존재 여부 검증 및 조회
+     *
+     * @param dealId 딜 ID
+     * @return 조회된 딜 엔티티
+     * @throws BaseException 딜이 존재하지 않는 경우 (DEAL_NOT_FOUND)
+     */
+    public Deal getValidatedDeal(Long dealId){
+
+        Deal deal = dealRepository.findById(dealId)
+                .orElseThrow(() -> new BaseException(DealErrorCode.DEAL_NOT_FOUND));
+
+        return deal;
+    }
 
     /**
      * 카테고리 존재 여부 검증
+     *
+     * @param categoryId 카테고리 ID (null 가능)
+     * @throws BaseException 카테고리가 존재하지 않는 경우 (CATEGORY_NOT_FOUND)
      */
     public void validateCategoryExists(Long categoryId) {
         if (categoryId != null && !categoryRepository.existsById(categoryId)) {
@@ -39,6 +60,10 @@ public class DealValidationService {
 
     /**
      * 할인 ID 목록의 존재 여부 검증
+     * - 먼저 ID 형식을 검증한 후 DB 존재 여부를 확인
+     *
+     * @param discountIds 할인 ID 목록 (null 또는 empty 가능)
+     * @throws BaseException 할인 ID 형식이 잘못되었거나 존재하지 않는 경우 (INVALID_DISCOUNT_INFORMATION, DISCOUNT_NOT_FOUND)
      */
     public void validateDiscountIdsExist(List<Long> discountIds) {
         if (discountIds == null || discountIds.isEmpty()) {
@@ -61,6 +86,9 @@ public class DealValidationService {
 
     /**
      * 스토어 ID 목록의 존재 여부 검증
+     *
+     * @param storeIds 스토어 ID 목록 (null 또는 empty 가능)
+     * @throws BaseException 스토어가 존재하지 않는 경우 (STORE_NOT_FOUND)
      */
     public void validateStoreIdsExist(List<Long> storeIds) {
         if (storeIds == null || storeIds.isEmpty()) {
@@ -79,6 +107,10 @@ public class DealValidationService {
 
     /**
      * 카테고리 조회 및 검증
+     *
+     * @param categoryId 카테고리 ID
+     * @return 조회된 카테고리 엔티티
+     * @throws BaseException 카테고리가 존재하지 않는 경우 (CATEGORY_NOT_FOUND)
      */
     public Category getValidatedCategory(Long categoryId) {
         return categoryRepository.findById(categoryId)
@@ -87,6 +119,10 @@ public class DealValidationService {
 
     /**
      * 할인 목록 조회 및 검증
+     *
+     * @param discountIds 할인 ID 목록 (null 또는 empty 가능)
+     * @return 조회된 할인 엔티티 목록 (입력이 null/empty인 경우 빈 리스트 반환)
+     * @throws BaseException 할인이 존재하지 않는 경우 (DISCOUNT_NOT_FOUND)
      */
     public List<Discount> getValidatedDiscounts(List<Long> discountIds) {
         if (discountIds == null || discountIds.isEmpty()) {
@@ -104,6 +140,10 @@ public class DealValidationService {
 
     /**
      * 스토어 조회 및 검증
+     *
+     * @param storeId 스토어 ID (null 가능)
+     * @return 조회된 스토어 엔티티 (storeId가 null인 경우 null 반환)
+     * @throws BaseException 스토어가 존재하지 않는 경우 (STORE_NOT_FOUND)
      */
     public Store getValidatedStore(Long storeId) {
         if (storeId == null) {
@@ -117,6 +157,9 @@ public class DealValidationService {
     /**
      * 가격 필터 유효성 검증
      * - minPrice 또는 maxPrice가 있으면 priceType이 필수
+     *
+     * @param priceFilter 가격 필터 (null 가능)
+     * @throws BaseException 가격 범위는 있으나 가격 타입이 없는 경우 (INVALID_PRICE_TYPE)
      */
     public void validatePriceFilter(PriceFilter priceFilter) {
         if (priceFilter == null) {
@@ -131,6 +174,9 @@ public class DealValidationService {
 
     /**
      * 할인 ID 형식 검증 (null 또는 양수가 아닌 값 체크)
+     *
+     * @param discountIds 할인 ID 목록 (null 또는 empty 가능)
+     * @throws BaseException 할인 ID가 null이거나 0 이하인 경우 (INVALID_DISCOUNT_INFORMATION)
      */
     public void validateDiscountIds(List<Long> discountIds) {
         if (discountIds == null || discountIds.isEmpty()) {
