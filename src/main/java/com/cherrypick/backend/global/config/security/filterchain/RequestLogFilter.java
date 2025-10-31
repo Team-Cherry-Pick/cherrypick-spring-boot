@@ -1,7 +1,7 @@
 package com.cherrypick.backend.global.config.security.filterchain;
 
 import com.cherrypick.backend.global.util.AuthUtil;
-import com.cherrypick.backend.global.util.LogService;
+import com.cherrypick.backend.global.log.domain.LogService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.IOException;
 

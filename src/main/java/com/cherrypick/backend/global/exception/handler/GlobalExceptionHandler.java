@@ -2,7 +2,7 @@ package com.cherrypick.backend.global.exception.handler;
 
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.dto.response.ErrorResponseDTO;
-import com.cherrypick.backend.global.util.LogService;
+import com.cherrypick.backend.global.log.domain.LogService;
 import com.cherrypick.backend.global.util.SlackNotifier;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
