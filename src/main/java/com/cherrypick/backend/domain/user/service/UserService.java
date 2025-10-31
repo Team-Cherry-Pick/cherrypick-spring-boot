@@ -29,8 +29,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ImageService imageService;
-    private final LogService logService;
-    private final ImageRepository imageRepository;
+    private final UserLogService logService;
 
 
     // 유저 업데이트
