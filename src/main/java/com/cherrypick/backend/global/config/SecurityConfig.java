@@ -1,18 +1,15 @@
 package com.cherrypick.backend.global.config;
 
 import com.cherrypick.backend.domain.auth.infra.jwt.AccessTokenProvider;
-import com.cherrypick.backend.global.config.security.CustomAuthorizationRequestResolver;
+import com.cherrypick.backend.global.security.CustomAuthorizationRequestResolver;
 import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
-import com.cherrypick.backend.global.config.security.OAuth2SuccessHandler;
-import com.cherrypick.backend.global.config.security.filterchain.CorsDebugFilter;
-import com.cherrypick.backend.global.config.security.filterchain.FilterChainExceptionHandler;
-import com.cherrypick.backend.global.config.security.filterchain.JWTFilter;
-import com.cherrypick.backend.global.config.security.filterchain.RequestLogFilter;
-import com.cherrypick.backend.global.config.security.filterchain.UriPatterMatchingFilterChain;
-import com.cherrypick.backend.global.util.JwtUtil;
-import com.cherrypick.backend.global.util.LogService;
+import com.cherrypick.backend.global.security.OAuth2SuccessHandler;
+import com.cherrypick.backend.global.security.SecurityLogService;
+import com.cherrypick.backend.global.security.filterchain.FilterChainExceptionHandler;
+import com.cherrypick.backend.global.security.filterchain.JWTFilter;
+import com.cherrypick.backend.global.security.filterchain.RequestLogFilter;
+import com.cherrypick.backend.global.security.filterchain.UriPatterMatchingFilterChain;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -71,7 +68,7 @@ public class SecurityConfig {
 
 
     @Bean
-    protected SecurityFilterChain filterChain(HttpSecurity http, LogService logService) throws Exception {
+    protected SecurityFilterChain filterChain(HttpSecurity http, SecurityLogService logService) throws Exception {
 
         //경로별 인가 작업
         http
@@ -107,6 +104,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/login/oauth2/code/**", "/api/auth/register-completion").anonymous()      // 회원가입은 미인증 유저만 가능
                         .requestMatchers("/api/auth/refresh", "/api/auth/logout").permitAll()              // 액세스 토큰이 만료된 상태에서도 재발급은 받을 수 있어야함.
+                        .requestMatchers("/api/log").permitAll()
                         // 테스트 코드
                         .requestMatchers("/api/test/**").permitAll()
 

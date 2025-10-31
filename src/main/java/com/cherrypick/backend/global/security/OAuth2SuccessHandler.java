@@ -1,21 +1,14 @@
-package com.cherrypick.backend.global.config.security;
+package com.cherrypick.backend.global.security;
 
 import com.cherrypick.backend.domain.auth.application.AuthService;
 import com.cherrypick.backend.domain.auth.domain.vo.UserEnv;
-import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.auth.presentation.dto.OAuth2UserDTO;
-import com.cherrypick.backend.domain.auth.presentation.dto.UserEnvDTO;
-import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
-import com.cherrypick.backend.global.util.JwtUtil;
-import com.cherrypick.backend.global.util.LogService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cherrypick.backend.global.log.domain.LogService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -26,7 +19,7 @@ import java.util.Base64;
 @Component @Slf4j @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final LogService logService;
+    private final SecurityLogService logService;
     private final AuthService authService;
 
     @Override

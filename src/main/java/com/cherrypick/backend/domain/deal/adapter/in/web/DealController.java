@@ -8,10 +8,9 @@ import com.cherrypick.backend.domain.deal.application.dto.response.DealResponseD
 import com.cherrypick.backend.domain.deal.application.dto.response.DealSearchPageResponseDTO;
 import com.cherrypick.backend.domain.deal.application.service.CreateDealUseCase;
 import com.cherrypick.backend.domain.deal.application.service.DealDetailUsecase;
-import com.cherrypick.backend.domain.deal.application.service.DealLogService;
+import com.cherrypick.backend.domain.deal.application.service.DealLogUsecase;
 import com.cherrypick.backend.domain.deal.application.service.DealService;
 import com.cherrypick.backend.domain.deal.application.service.SearchDealUsecase;
-import com.cherrypick.backend.domain.deal.domain.service.DealCreateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class DealController {
 
     private final DealService dealService;
-    private final DealLogService dealLogService;
+    private final DealLogUsecase dealLogService;
     private final CreateDealUseCase createDealUseCase;
     private final SearchDealUsecase searchDealUsecase;
     private final DealDetailUsecase dealDetailUsecase;
