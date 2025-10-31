@@ -57,4 +57,24 @@ public class LogService {
         logAppender.appendInfo("OPENAI_LOG", map);
     }
 
+    /**
+     * 웹 클라이언트에서 전송한 커스텀 로그를 기록합니다.
+     * <p>
+     * 프론트엔드에서 발생한 사용자 행동, 이벤트, 오류 등을 추적하기 위한 로그를 기록합니다.
+     * 로그 데이터는 자유로운 형식의 Map으로 전달받아 유연한 로깅이 가능합니다.
+     * </p>
+     * <p>
+     * <strong>주의:</strong> 민감정보(비밀번호, 토큰 등)는 클라이언트에서 제외하고 전송해야 합니다.
+     * </p>
+     *
+     * @param logType 로그 타입 (예: "BUTTON_CLICK", "PAGE_VIEW", "ERROR")
+     * @param map 로그 데이터 (키-값 쌍의 자유 형식)
+     */
+    public void webCustomLog(String logType, HashMap<String, Object> map)
+    {
+        HashMap<String, Object> prefixedMap = new HashMap<>();
+
+        logAppender.appendInfo(logType, prefixedMap);
+    }
+
 }
