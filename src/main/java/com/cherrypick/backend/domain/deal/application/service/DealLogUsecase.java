@@ -1,8 +1,9 @@
 package com.cherrypick.backend.domain.deal.application.service;
 
-import com.cherrypick.backend.domain.deal.domain.repository.reference.CategoryRepository;
 import com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPreventionAdapter;
+import com.cherrypick.backend.domain.deal.domain.entity.Deal;
 import com.cherrypick.backend.domain.deal.domain.repository.DealRepository;
+import com.cherrypick.backend.domain.deal.domain.service.DealLogService;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.DealErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
@@ -14,11 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service @RequiredArgsConstructor
-public class DealLogService
+public class DealLogUsecase
 {
     private final DealRepository dealRepository;
-    private final CategoryRepository categoryRepository;
-    private final LogService logService;
+    private final DealLogService logService;
     private final RedisDuplicationPreventionAdapter duplicationPreventionAdapter;
 
     @Transactional

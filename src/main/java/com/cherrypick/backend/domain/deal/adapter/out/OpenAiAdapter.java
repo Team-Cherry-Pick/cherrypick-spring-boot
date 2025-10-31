@@ -63,6 +63,7 @@ public class OpenAiAdapter {
         headers.set("Content-Type", "application/json");
         headers.set("Authorization", "Bearer " + openAiApiKey);
 
+
         org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(requestBody, headers);
 
         try {
