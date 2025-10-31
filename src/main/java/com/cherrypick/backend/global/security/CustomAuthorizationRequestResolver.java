@@ -1,4 +1,4 @@
-package com.cherrypick.backend.global.config.security;
+package com.cherrypick.backend.global.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

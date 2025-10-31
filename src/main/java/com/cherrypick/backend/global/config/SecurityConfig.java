@@ -1,13 +1,13 @@
 package com.cherrypick.backend.global.config;
 
 import com.cherrypick.backend.domain.auth.infra.jwt.AccessTokenProvider;
-import com.cherrypick.backend.global.config.security.CustomAuthorizationRequestResolver;
+import com.cherrypick.backend.global.security.CustomAuthorizationRequestResolver;
 import com.cherrypick.backend.domain.auth.application.Oauth2ClientService;
-import com.cherrypick.backend.global.config.security.OAuth2SuccessHandler;
-import com.cherrypick.backend.global.config.security.filterchain.FilterChainExceptionHandler;
-import com.cherrypick.backend.global.config.security.filterchain.JWTFilter;
-import com.cherrypick.backend.global.config.security.filterchain.RequestLogFilter;
-import com.cherrypick.backend.global.config.security.filterchain.UriPatterMatchingFilterChain;
+import com.cherrypick.backend.global.security.OAuth2SuccessHandler;
+import com.cherrypick.backend.global.security.filterchain.FilterChainExceptionHandler;
+import com.cherrypick.backend.global.security.filterchain.JWTFilter;
+import com.cherrypick.backend.global.security.filterchain.RequestLogFilter;
+import com.cherrypick.backend.global.security.filterchain.UriPatterMatchingFilterChain;
 import com.cherrypick.backend.global.log.domain.LogService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Qualifier;

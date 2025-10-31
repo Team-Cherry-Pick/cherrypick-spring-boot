@@ -1,4 +1,4 @@
-package com.cherrypick.backend.global.config.security;
+package com.cherrypick.backend.global.security;
 
 import com.cherrypick.backend.domain.auth.application.AuthService;
 import com.cherrypick.backend.domain.auth.domain.vo.UserEnv;
@@ -19,7 +19,7 @@ import java.util.Base64;
 @Component @Slf4j @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final LogService logService;
+    private final SecurityLogService logService;
     private final AuthService authService;
 
     @Override

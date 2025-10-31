@@ -1,4 +1,4 @@
-package com.cherrypick.backend.global.config.security.filterchain;
+package com.cherrypick.backend.global.security.filterchain;
 
 import com.cherrypick.backend.domain.auth.infra.jwt.AccessTokenProvider;
 import com.cherrypick.backend.global.util.JwtUtil;
