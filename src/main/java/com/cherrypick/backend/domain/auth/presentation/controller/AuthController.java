@@ -4,6 +4,7 @@ import com.cherrypick.backend.domain.auth.application.AuthService;
 import com.cherrypick.backend.domain.auth.presentation.dto.AuthRequestDTOs;
 import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
+import com.cherrypick.backend.domain.user.service.UserRegisterUsecase;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
@@ -28,6 +29,7 @@ import java.util.Optional;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserRegisterUsecase userRegistUsecase;
 
     @Operation(
             summary = "로그아웃(refreshToken 파기)",
@@ -100,7 +102,7 @@ public class AuthController {
 
         registerDTO.validate();
 
-        var tokens = authService.userRegisterComplete(registerDTO);
+        var tokens = userRegistUsecase.userRegisterComplete(registerDTO);
         response.addHeader("Set-Cookie", tokens.refreshTokenCookie());
 
         return ResponseEntity.ok(new AuthResponseDTOs.AccessToken(tokens.accessToken()));

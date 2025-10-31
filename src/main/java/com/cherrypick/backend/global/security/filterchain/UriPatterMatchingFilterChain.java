@@ -1,4 +1,4 @@
-package com.cherrypick.backend.global.config.security.filterchain;
+package com.cherrypick.backend.global.security.filterchain;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

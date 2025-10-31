@@ -1,10 +1,9 @@
 package com.cherrypick.backend.domain.deal.adapter.out;
 
-import com.cherrypick.backend.global.util.LogService;
+import com.cherrypick.backend.global.log.domain.LogService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component @RequiredArgsConstructor
 public class OpenAiAdapter {
@@ -64,6 +62,7 @@ public class OpenAiAdapter {
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.set("Content-Type", "application/json");
         headers.set("Authorization", "Bearer " + openAiApiKey);
+
 
         org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(requestBody, headers);
 

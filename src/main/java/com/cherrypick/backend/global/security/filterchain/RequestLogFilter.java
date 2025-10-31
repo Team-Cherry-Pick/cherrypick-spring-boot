@@ -1,7 +1,8 @@
-package com.cherrypick.backend.global.config.security.filterchain;
+package com.cherrypick.backend.global.security.filterchain;
 
+import com.cherrypick.backend.global.security.SecurityLogService;
 import com.cherrypick.backend.global.util.AuthUtil;
-import com.cherrypick.backend.global.util.LogService;
+import com.cherrypick.backend.global.log.domain.LogService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,14 +10,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.IOException;
 
 @Slf4j @RequiredArgsConstructor
 public class RequestLogFilter extends OncePerRequestFilter {
 
-    private final LogService logService;
+    private final SecurityLogService logService;
 
     /// 엑세스 로그를 남기는 필터
     /// duration : 응답 시간

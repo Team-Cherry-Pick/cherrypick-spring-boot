@@ -12,7 +12,7 @@ import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import com.cherrypick.backend.global.util.AuthUtil;
-import com.cherrypick.backend.global.util.LogService;
+import com.cherrypick.backend.global.log.domain.LogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
