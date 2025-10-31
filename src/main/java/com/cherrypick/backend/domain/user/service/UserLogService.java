@@ -24,11 +24,11 @@ public class UserLogService {
      */
     public void userDeleteLog(Long userId, String name, String email, String oauthId, String message) {
         HashMap<String, Object> map = new HashMap<>();
-        map.put("deluser_msg", Optional.ofNullable(message).orElse("unknown"));
-        map.put("deluser_id", Optional.ofNullable(userId).orElse(-1L));
-        map.put("deluser_name", Optional.ofNullable(name).orElse("unknown"));
-        map.put("deluser_oauthid", Optional.ofNullable(oauthId).orElse("unknown"));
-        map.put("deluser_email", Optional.ofNullable(email).orElse("unknown"));
+        map.put("message", Optional.ofNullable(message).orElse("unknown"));
+        map.put("userId", Optional.ofNullable(userId).orElse(-1L));
+        map.put("userName", Optional.ofNullable(name).orElse("unknown"));
+        map.put("oauthId", Optional.ofNullable(oauthId).orElse("unknown"));
+        map.put("email", Optional.ofNullable(email).orElse("unknown"));
 
         logAppender.appendInfo("USER_DELETE_LOG", map);
     }
@@ -47,11 +47,11 @@ public class UserLogService {
      */
     public void userRegisterLog(Long userId, String name, String email, String oauthId, String message) {
         HashMap<String, Object> map = new HashMap<>();
-        map.put("reguser_msg", Optional.ofNullable(message).orElse("unknown"));
-        map.put("reguser_id", Optional.ofNullable(userId).orElse(-1L));
-        map.put("reguser_name", Optional.ofNullable(name).orElse("unknown"));
-        map.put("reguser_oauthid", Optional.ofNullable(oauthId).orElse("unknown"));
-        map.put("reguser_email", Optional.ofNullable(email).orElse("unknown"));
+        map.put("message", Optional.ofNullable(message).orElse("unknown"));
+        map.put("userId", Optional.ofNullable(userId).orElse(-1L));
+        map.put("userName", Optional.ofNullable(name).orElse("unknown"));
+        map.put("oauthId", Optional.ofNullable(oauthId).orElse("unknown"));
+        map.put("email", Optional.ofNullable(email).orElse("unknown"));
 
         logAppender.appendInfo("USER_REGISTER_LOG", map);
     }

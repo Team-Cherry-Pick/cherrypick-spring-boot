@@ -31,7 +31,7 @@ public class LogService {
     public void init() {
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("start_msg", "Starting Server Application");
+        map.put("message", "Starting Server Application");
         logAppender.appendInfo("SERVER_START_LOG", map);
 
     }
@@ -50,9 +50,9 @@ public class LogService {
     public void openAiLog(Integer promptTokens, Integer completionTokens, Integer totalTokens)
     {
         HashMap<String, Object> map = new HashMap<>();
-        map.put("prompt_tokens", Optional.ofNullable(promptTokens).orElse(-1) );
-        map.put("completion_tokens", Optional.ofNullable(completionTokens).orElse(-1));
-        map.put("total_tokens", Optional.ofNullable(totalTokens).orElse(-1));
+        map.put("promptTokens", Optional.ofNullable(promptTokens).orElse(-1) );
+        map.put("completionTokens", Optional.ofNullable(completionTokens).orElse(-1));
+        map.put("totalTokens", Optional.ofNullable(totalTokens).orElse(-1));
 
         logAppender.appendInfo("OPENAI_LOG", map);
     }

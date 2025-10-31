@@ -47,9 +47,9 @@ public class ExceptionLogService {
         var stackTraceString = stackTraceList.stream().map(StackTraceElement::toString).collect(Collectors.joining("\n")) ;
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("error_msg", String.valueOf(msg));
-        map.put("error_status", String.valueOf(status));
-        map.put("error_trace", stackTraceString);
+        map.put("message", String.valueOf(msg));
+        map.put("httpStatus", String.valueOf(status));
+        map.put("stackTrace", stackTraceString);
 
         logAppender.appendError("ERROR_LOG", map);
 
@@ -87,9 +87,9 @@ public class ExceptionLogService {
         var stackTraceString = stackTraceList.stream().map(StackTraceElement::toString).collect(Collectors.joining("\n")) ;
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("exception_msg", String.valueOf(msg));
-        map.put("exception_status", String.valueOf(status));
-        map.put("exception_trace", stackTraceString);
+        map.put("message", String.valueOf(msg));
+        map.put("httpStatus", String.valueOf(status));
+        map.put("stackTrace", stackTraceString);
 
         logAppender.appendError("EXCEPTION_LOG", map);
 

@@ -31,14 +31,14 @@ public class SecurityLogService
     public void accessLog(Long durationTime, String uriPattern, Long userId, String deviceId,  String method, String clientIp, String url, String queryString) {
 
         HashMap<String, Object> map = new HashMap<>();
-        map.put("access_duration", Optional.ofNullable(durationTime).orElse(-1L));
-        map.put("access_uriPattern", Optional.ofNullable(uriPattern).orElse("unknown"));
-        map.put("access_userId", Optional.ofNullable(userId).orElse(-1L));
-        map.put("access_deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
-        map.put("access_method", Optional.ofNullable(method).orElse("unknown"));
-        map.put("access_clientIp", Optional.ofNullable(clientIp).orElse("unknown"));
-        map.put("access_queryString", Optional.ofNullable(queryString).orElse("unknown"));
-        map.put("access_url", Optional.ofNullable(url).orElse("unknown"));
+        map.put("duration", Optional.ofNullable(durationTime).orElse(-1L));
+        map.put("uriPattern", Optional.ofNullable(uriPattern).orElse("unknown"));
+        map.put("userId", Optional.ofNullable(userId).orElse(-1L));
+        map.put("deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
+        map.put("method", Optional.ofNullable(method).orElse("unknown"));
+        map.put("clientIp", Optional.ofNullable(clientIp).orElse("unknown"));
+        map.put("queryString", Optional.ofNullable(queryString).orElse("unknown"));
+        map.put("url", Optional.ofNullable(url).orElse("unknown"));
 
         logAppender.appendInfo("ACCESS_LOG", map);
 
@@ -61,13 +61,13 @@ public class SecurityLogService
     public void loginLog(Boolean isNewUser, String provider, Long userId, String deviceId, String os, String browser, String version)
     {
         HashMap<String, Object> map = new HashMap<>();
-        map.put("login_isNewUser", Optional.ofNullable(isNewUser).orElse(false));
-        map.put("login_provider", Optional.ofNullable(provider).orElse("unknown"));
-        map.put("login_userId", Optional.ofNullable(userId).orElse(-1L));
-        map.put("login_deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
-        map.put("login_os", Optional.ofNullable(os).orElse("unknown"));
-        map.put("login_browser", Optional.ofNullable(browser).orElse("unknown"));
-        map.put("login_version", Optional.ofNullable(version).orElse("unknown"));
+        map.put("isNewUser", Optional.ofNullable(isNewUser).orElse(false));
+        map.put("provider", Optional.ofNullable(provider).orElse("unknown"));
+        map.put("userId", Optional.ofNullable(userId).orElse(-1L));
+        map.put("deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
+        map.put("os", Optional.ofNullable(os).orElse("unknown"));
+        map.put("browser", Optional.ofNullable(browser).orElse("unknown"));
+        map.put("clientVersion", Optional.ofNullable(version).orElse("unknown"));
 
         logAppender.appendInfo("LOGIN_LOG", map);
 

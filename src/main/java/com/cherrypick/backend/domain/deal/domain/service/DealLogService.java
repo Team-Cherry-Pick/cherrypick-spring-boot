@@ -34,12 +34,12 @@ public class DealLogService
                                  String categoryName)
     {
         HashMap<String, Object> map = new HashMap<>();
-        map.put("purchaseclick_userId", Optional.ofNullable(userId).orElse(-1L));
-        map.put("purchaseclick_deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
-        map.put("purchaseclick_dealId", Optional.ofNullable(dealId).orElse(-1L));
-        map.put("purchaseclick_dealTitle", Optional.ofNullable(dealTitle).orElse("unknown"));
-        map.put("purchaseclick_categoryId", Optional.ofNullable(categoryId).orElse(-1L));
-        map.put("purchaseclick_categoryName", Optional.ofNullable(categoryName).orElse("unknown"));
+        map.put("userId", Optional.ofNullable(userId).orElse(-1L));
+        map.put("deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
+        map.put("dealId", Optional.ofNullable(dealId).orElse(-1L));
+        map.put("dealTitle", Optional.ofNullable(dealTitle).orElse("unknown"));
+        map.put("categoryId", Optional.ofNullable(categoryId).orElse(-1L));
+        map.put("categoryName", Optional.ofNullable(categoryName).orElse("unknown"));
 
         logAppender.appendInfo("PURCHASE_CLICK_LOG", map);
     }
@@ -65,12 +65,12 @@ public class DealLogService
                               String categoryName)
     {
         HashMap<String, Object> map = new HashMap<>();
-        map.put("shareclick_userId", Optional.ofNullable(userId).orElse(-1L));
-        map.put("shareclick_deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
-        map.put("shareclick_dealId", Optional.ofNullable(dealId).orElse(-1L));
-        map.put("shareclick_dealTitle", Optional.ofNullable(dealTitle).orElse("unknown"));
-        map.put("shareclick_categoryId", Optional.ofNullable(categoryId).orElse(-1L));
-        map.put("shareclick_categoryName", Optional.ofNullable(categoryName).orElse("unknown"));
+        map.put("userId", Optional.ofNullable(userId).orElse(-1L));
+        map.put("deviceId", Optional.ofNullable(deviceId).orElse("unknown"));
+        map.put("dealId", Optional.ofNullable(dealId).orElse(-1L));
+        map.put("dealTitle", Optional.ofNullable(dealTitle).orElse("unknown"));
+        map.put("categoryId", Optional.ofNullable(categoryId).orElse(-1L));
+        map.put("categoryName", Optional.ofNullable(categoryName).orElse("unknown"));
 
         logAppender.appendInfo("SHARE_CLICK_LOG", map);
     }
