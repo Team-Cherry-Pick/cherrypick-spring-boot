@@ -1,6 +1,7 @@
 package com.cherrypick.backend.global.exception.handler;
 
 import com.cherrypick.backend.global.exception.BaseException;
+import com.cherrypick.backend.global.exception.ExceptionLogService;
 import com.cherrypick.backend.global.exception.dto.response.ErrorResponseDTO;
 import com.cherrypick.backend.global.log.domain.LogService;
 import com.cherrypick.backend.global.util.SlackNotifier;
@@ -22,14 +23,14 @@ import static org.springframework.http.ResponseEntity.status;
 public class GlobalExceptionHandler {
 
     private final SlackNotifier slackNotifier;
-    private final LogService logService;
+    private final ExceptionLogService logService;
 
     // BaseException 핸들링 (ErrorCode 발생)
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ErrorResponseDTO> handleBaseException(BaseException ex, HttpServletRequest request) {
         String fullPath = request.getMethod() + " " + request.getRequestURI();
         ErrorResponseDTO errorResponse = new ErrorResponseDTO(ex.getErrorCode(), fullPath);
-        logService.errorLog(ex.getErrorCode().getStatus(), ex.getMessage(), ex.getStackTrace());
+        logService.exceptionLog(ex.getErrorCode().getStatus(), ex.getMessage(), ex.getStackTrace());
         return status(ex.getErrorCode().getStatus()).body(errorResponse);
     }
 
