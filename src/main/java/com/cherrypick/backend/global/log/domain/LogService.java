@@ -72,9 +72,8 @@ public class LogService {
      */
     public void webCustomLog(String logType, HashMap<String, Object> map)
     {
-        HashMap<String, Object> prefixedMap = new HashMap<>();
 
-        logAppender.appendInfo(logType, prefixedMap);
+        logAppender.appendInfo(logType, map);
     }
 
 }
