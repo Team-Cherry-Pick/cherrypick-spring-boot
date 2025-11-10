@@ -1,7 +1,6 @@
 package com.cherrypick.backend.domain.auth.infra.jwt;
 
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
-import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.global.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -11,7 +10,10 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class AccessTokenProvider
@@ -44,35 +46,44 @@ public class AccessTokenProvider
         }
     }
 
-    // 엑세스 토큰 생성
-    // TODO : 다중 권한 구조로 전환 필요
-    public String createToken(Long userId, Role role, String nickname) {
+    /**
+     * 액세스 토큰 생성 (다중 권한 지원)
+     * @param roles 역할 집합 (예: Set.of("ADMIN", "CLIENT"))
+     */
+    public String createToken(Long userId, Set<String> roles, String nickname) {
+        // roles를 comma-separated string으로 저장
+        String rolesStr = String.join(",", roles);
 
         return Jwts.builder()
                 .claim("userId", userId)
                 .claim("nickname", nickname)
-                .claim("role", role.toString())
+                .claim("roles", rolesStr)  // "ADMIN,CLIENT" 형태
                 .claim("type", "access")
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessValidPeriod * 1000))
                 .signWith(accessSecretKey)
                 .compact();
-
     }
 
-    // 엑세스 토큰에서 데이터를 추출
+    /**
+     * 액세스 토큰에서 인증 정보 추출 (다중 권한 지원)
+     */
     public AuthenticatedUser getAuthenticatedUser(String accessToken) {
-        // TODO : 다중 권한 구조로 전환 필요
         accessToken = JwtUtil.removeBearer(accessToken);
 
-        var userId = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("userId", Long.class);;
-        var roles = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("role", String.class);
+        var userId = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("userId", Long.class);
+        var rolesStr = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("roles", String.class);
         var nickName = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("nickname", String.class);
+
+        // "ADMIN,CLIENT" 문자열을 Set<String>으로 변환
+        Set<String> roles = Arrays.stream(rolesStr.split(","))
+                .map(String::trim)
+                .collect(Collectors.toSet());
 
         return AuthenticatedUser.builder()
                 .userId(userId)
                 .nickname(nickName)
-                .role(Role.valueOf(roles))
+                .roles(roles)
                 .build();
     }
 

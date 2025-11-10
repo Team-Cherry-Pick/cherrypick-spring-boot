@@ -1,17 +1,14 @@
 package com.cherrypick.backend.global.util;
 
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
-import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.List;
+import java.util.Set;
 
 @Slf4j
 public class AuthUtil
@@ -45,30 +42,26 @@ public class AuthUtil
         return (AuthenticatedUser) principal;
     }
 
-    // 유저의 권한을 전환.
-    // TODO : 다중 권한 구조로 바꿔야함.
-    public static void changeAuthority(Role role) {
-
+    /**
+     * 유저의 권한을 변경 (다중 권한 지원)
+     * @param roles 새로운 역할 집합 (예: Set.of("ADMIN", "CLIENT"))
+     */
+    public static void changeAuthority(Set<String> roles) {
         Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
-        // 기존의 저장된 유저 정보
-        AuthenticatedUser principal = (AuthenticatedUser)currentAuth.getPrincipal();
-
-
-        List<GrantedAuthority> updatedAuthorities = List.of(
-                new SimpleGrantedAuthority(role.name()) // 바꿀 권한
-        );
+        AuthenticatedUser principal = (AuthenticatedUser) currentAuth.getPrincipal();
 
         // 새로운 유저 정보
         var newPrincipal = AuthenticatedUser.builder()
                 .userId(principal.userId())
                 .nickname(principal.nickname())
-                .role(role)
+                .roles(roles)
                 .build();
 
+        // AuthenticatedUser.getAuthorities()가 자동으로 GrantedAuthority 생성
         Authentication newAuth = new UsernamePasswordAuthenticationToken(
-                newPrincipal,                        // 변경된 Role을 가진 DTO
+                newPrincipal,
                 currentAuth.getCredentials(),
-                updatedAuthorities                   // 갱신된 권한 목록
+                newPrincipal.getAuthorities()  // AuthenticatedUser가 제공하는 authorities 사용
         );
 
         SecurityContextHolder.getContext().setAuthentication(newAuth);

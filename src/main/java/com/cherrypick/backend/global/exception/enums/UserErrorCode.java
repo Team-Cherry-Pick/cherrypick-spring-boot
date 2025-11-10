@@ -33,6 +33,7 @@ public enum UserErrorCode implements BaseErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다."),
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "리프레시 토큰이 없습니다."),
     UNDEFINED_OAUTH_PROVIDER(HttpStatus.NOT_FOUND, "잘못된 소셜 로그인 제공자입니다."),
+    ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 권한입니다."),
     ;
 
     private final HttpStatus status;

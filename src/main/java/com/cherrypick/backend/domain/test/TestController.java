@@ -144,7 +144,7 @@ public class TestController
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
-        var accessToken = accessTokenProvider.createToken(userId, user.getRole(), user.getNickname());
+        var accessToken = accessTokenProvider.createToken(userId, user.getRoleNames(), user.getNickname());
         var refreshToken = refreshTokenProvider.createToken(userId, deviceId);
 
         // 저장

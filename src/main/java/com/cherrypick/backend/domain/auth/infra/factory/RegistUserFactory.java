@@ -6,7 +6,6 @@ import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
 import com.cherrypick.backend.domain.user.entity.User;
 import com.cherrypick.backend.domain.user.enums.Gender;
-import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.enums.UserStatus;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
@@ -29,7 +28,7 @@ public class RegistUserFactory {
                     .gender(Gender.valueOf(dto.gender()))
                     .birthday(LocalDate.parse(dto.birthday()))
                     .status(UserStatus.ACTIVE)
-                    .role(Role.CLIENT)
+                    // roles는 호출하는 곳에서 설정
                     .build();
         }
         else
