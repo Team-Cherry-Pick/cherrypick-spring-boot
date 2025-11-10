@@ -80,6 +80,8 @@ public class AccessTokenProvider
                 .map(String::trim)
                 .collect(Collectors.toSet());
 
+        System.out.println(roles);
+
         return AuthenticatedUser.builder()
                 .userId(userId)
                 .nickname(nickName)
