@@ -3,6 +3,7 @@ package com.cherrypick.backend.domain.auth.infra.jwt;
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.global.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -71,16 +72,21 @@ public class AccessTokenProvider
     public AuthenticatedUser getAuthenticatedUser(String accessToken) {
         accessToken = JwtUtil.removeBearer(accessToken);
 
-        var userId = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("userId", Long.class);
-        var rolesStr = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("roles", String.class);
-        var nickName = Jwts.parser().verifyWith(accessSecretKey).build().parseSignedClaims(accessToken).getPayload().get("nickname", String.class);
+        Claims claims = Jwts.parser()
+                .verifyWith(accessSecretKey)
+                .build()
+                .parseSignedClaims(accessToken)
+                .getPayload();
+
+        Long userId = claims.get("userId", Long.class);
+        // 기존 유저들의 토큰은 role 이었음.
+        String rolesStr = claims.get("roles", String.class) == null ? claims.get("role", String.class) : claims.get("roles", String.class);
+        String nickName = claims.get("nickname", String.class);
 
         // "ADMIN,CLIENT" 문자열을 Set<String>으로 변환
         Set<String> roles = Arrays.stream(rolesStr.split(","))
                 .map(String::trim)
                 .collect(Collectors.toSet());
-
-        System.out.println(roles);
 
         return AuthenticatedUser.builder()
                 .userId(userId)
@@ -88,6 +94,4 @@ public class AccessTokenProvider
                 .roles(roles)
                 .build();
     }
-
-
 }
