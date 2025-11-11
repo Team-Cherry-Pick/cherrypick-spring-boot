@@ -39,93 +39,6 @@ public class TestController
     private final RefreshCookieFactory refreshCookieFactory;
     private final OpenAiAdapter openAiAdapter;
 
-    String HTML = """
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="UTF-8">
-              <title>카카오 로그인</title>
-            </head>
-            <body>
-            
-              <input type="text" id="redirectInput" placeholder="/mypage" />
-              <button onclick="redirectToKakao()">카카오 로그인</button>
-            
-              <script>
-                function getClientInfo() {
-                  const ua = navigator.userAgent;
-                  let os = "Unknown";
-                  let browser = "Unknown";
-                  let version = "Unknown";
-            
-                  // OS 추출
-                  if (/windows nt/i.test(ua)) os = "Windows";
-                  else if (/macintosh|mac os x/i.test(ua)) os = "macOS";
-                  else if (/android/i.test(ua)) os = "Android";
-                  else if (/iphone|ipad|ipod/i.test(ua)) os = "iOS";
-                  else if (/linux/i.test(ua)) os = "Linux";
-            
-                  // 브라우저 및 버전 추출
-                  if (/chrome\\/(\\d+)/i.test(ua) && !/edg/i.test(ua)) {
-                    browser = "Chrome";
-                    version = ua.match(/chrome\\/([\\d.]+)/i)[1];
-                  } else if (/safari/i.test(ua) && !/chrome/i.test(ua)) {
-                    browser = "Safari";
-                    version = ua.match(/version\\/([\\d.]+)/i)?.[1] || "Unknown";
-                  } else if (/firefox/i.test(ua)) {
-                    browser = "Firefox";
-                    version = ua.match(/firefox\\/([\\d.]+)/i)[1];
-                  } else if (/edg/i.test(ua)) {
-                    browser = "Edge";
-                    version = ua.match(/edg\\/([\\d.]+)/i)[1];
-                  }
-            
-                  return { os, browser, version };
-                }
-            
-                function redirectToKakao() {
-                
-                  const input = document.getElementById("redirectInput").value.trim();
-                  const safeRedirect = input.startsWith("/") ? input : "/";
-                  const encodedRedirect = encodeURIComponent(safeRedirect);
-            
-                  const { os, browser, version } = getClientInfo();
-                  const encodedOs = encodeURIComponent(os);
-                  const encodedBrowser = encodeURIComponent(browser);
-                  const encodedVersion = encodeURIComponent(version);
-            
-                  var url =  `http://localhost:8080/oauth2/authorization/kakao`        +
-                              `?redirect=${encodedRedirect}` +
-                              `&os=${encodedOs}` +
-                              `&browser=${encodedBrowser}` +
-                              `&deviceId=local-cached-device-uuid` +
-                              `&version=${encodedVersion}`;
-            
-                  window.location.href = url;
-                  alert(url);
-                }
-              </script>
-            
-            </body>
-            </html>
-            """;
-
-    @Operation(
-            summary = "OAuth2.0 카카오 로그인 테스트를 위한 페이지. ** 실 서비스에서는 사용하지 않습니다. **",
-            description = "스웨거에서 사용하지 말고, /test 페이지를 URL창에 입력해 테스트를 해주십시오."
-    )
-    @GetMapping("/auth/login")
-    public String index() {
-        return HTML;
-    }
-
-    @PostMapping("/comment/dummy")
-    public String createDummyComment(){
-        commentService.dummyDataSetting();
-        return "success";
-    }
-
-
     @Operation(
             summary = "테스트를 위한 JWT 생성 API. ** 실 서비스에서는 사용하지 않습니다. **",
             description = "userId를 넣어 해당 유저의 엑세스 토큰을 발급합니다."
@@ -184,5 +97,42 @@ public class TestController
 
         return ResponseEntity.ok(response);
     }
+
+    @Operation(
+            summary = "런타임 에러 발생 테스트. ** 실 서비스에서는 사용하지 않습니다. **",
+            description = "에러 처리 로직을 테스트하기 위해 의도적으로 런타임 에러를 발생시킵니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "500", description = "서버 오류 (의도된 에러)")
+    })
+    @GetMapping("/error/runtime")
+    public ResponseEntity<String> throwRuntimeError(
+            @Parameter(description = "에러 타입: npe(NullPointerException), divide(ArithmeticException), index(ArrayIndexOutOfBoundsException), illegal(IllegalArgumentException), runtime(RuntimeException)")
+            @RequestParam(defaultValue = "runtime") String type
+    ) {
+        log.warn("🔥 의도적인 런타임 에러 발생 요청 - type: {}", type);
+
+        switch (type.toLowerCase()) {
+            case "npe":
+                String nullStr = null;
+                return ResponseEntity.ok(nullStr.length() + ""); // NullPointerException
+
+            case "divide":
+                int result = 100 / 0; // ArithmeticException
+                return ResponseEntity.ok(String.valueOf(result));
+
+            case "index":
+                int[] arr = {1, 2, 3};
+                return ResponseEntity.ok(String.valueOf(arr[10])); // ArrayIndexOutOfBoundsException
+
+            case "illegal":
+                throw new IllegalArgumentException("의도적으로 발생시킨 IllegalArgumentException 입니다.");
+
+            case "runtime":
+            default:
+                throw new RuntimeException("의도적으로 발생시킨 RuntimeException 입니다. 에러 처리 테스트용입니다.");
+        }
+    }
+
 
 }
