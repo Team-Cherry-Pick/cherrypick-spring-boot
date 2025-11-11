@@ -57,7 +57,7 @@ public class AuthService {
         var user = userRepository.findById(userId).orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
         // [5] 엑세스 토큰과 리프레시 토큰을 발급.
-        var accessToken = accessTokenProvider.createToken(userId, user.getRole(), user.getNickname());
+        var accessToken = accessTokenProvider.createToken(userId, user.getRoleNames(), user.getNickname());
         var refreshToken = refreshTokenProvider.createToken(userId, deviceId);
 
         // [6] 리프레시 토큰은 저장.
@@ -76,7 +76,7 @@ public class AuthService {
         var deviceId = userEnv.deviceId();
 
         // [1] 액세스 / 리프레시 토큰 생성
-        String accessToken = accessTokenProvider.createToken(userId, oauthDto.role(), oauthDto.nickname());
+        String accessToken = accessTokenProvider.createToken(userId, oauthDto.roles(), oauthDto.nickname());
         String refreshToken = refreshTokenProvider.createToken(userId, deviceId);
 
         // [2] 리프레시 토큰 저장

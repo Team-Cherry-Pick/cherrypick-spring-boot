@@ -10,6 +10,7 @@ import com.cherrypick.backend.domain.auth.presentation.dto.AuthResponseDTOs;
 import com.cherrypick.backend.domain.auth.presentation.dto.RegisterDTO;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.service.ImageService;
+import com.cherrypick.backend.domain.user.repository.RoleRepository;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.UserErrorCode;
@@ -30,6 +31,7 @@ public class UserRegisterUsecase {
     private final BadgeService badgeService;
     private final ImageService imageService;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final RefreshCookieFactory refreshCookieFactory;
     private final UserLogService logService;
 
@@ -50,6 +52,11 @@ public class UserRegisterUsecase {
         // [2] 저장할 유저 객체 생성, 현재 kakao만 지원.
         var user = RegistUserFactory.extractUser(registerToken.oauthId(), registerToken.provider(), dto);
 
+        // [2-1] CLIENT 권한 설정
+        var clientRole = roleRepository.findByName("CLIENT")
+                .orElseThrow(() -> new BaseException(UserErrorCode.ROLE_NOT_FOUND));
+        user.getRoles().add(clientRole);
+
         // [3] 신규 유저를 저장
         var savedUser = userRepository.save(user);
 
@@ -57,7 +64,7 @@ public class UserRegisterUsecase {
         if(dto.imageId() >= 0) imageService.attachImage(savedUser.getUserId(), List.of(dto.imageId()), ImageType.USER);
 
         // [5] 엑세스 토큰과 리프레시 토큰을 생성
-        String accessToken = accessTokenProvider.createToken(savedUser.getUserId(), savedUser.getRole(), savedUser.getNickname());
+        String accessToken = accessTokenProvider.createToken(savedUser.getUserId(), savedUser.getRoleNames(), savedUser.getNickname());
         String refreshToken = refreshTokenProvider.createToken(savedUser.getUserId(), registerToken.userEnv().deviceId());
 
         // [6] Refresh 토큰과 유저 환경을 저장

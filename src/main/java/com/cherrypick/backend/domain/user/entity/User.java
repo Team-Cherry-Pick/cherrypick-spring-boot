@@ -1,7 +1,6 @@
 package com.cherrypick.backend.domain.user.entity;
 
 import com.cherrypick.backend.domain.user.enums.Gender;
-import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,9 +11,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter @AllArgsConstructor @Builder
@@ -37,9 +35,18 @@ public class User {
     private String provider;          // 업체명 ex) kakao
     @Enumerated(EnumType.STRING)
     private UserStatus status;        // 소프트 딜리트 (삭제 상태면
-    // TODO : 다중 권한 구조로 전환 필요
-    @Enumerated(EnumType.STRING)
-    private Role role;
+
+    /**
+     * 사용자 권한 목록 (다중 권한 지원)
+     */
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "user_role",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "badge_id")
@@ -71,8 +78,17 @@ public class User {
                 .gender(null)           // 이후에 등록됨
                 .provider("kakao")
                 .status(UserStatus.ACTIVE)
-                .role(Role.CLIENT)
                 .build();
+    }
+
+    /**
+     * 역할 이름 목록 반환
+     * @return ["ADMIN", "CLIENT"] 형태
+     */
+    public Set<String> getRoleNames() {
+        return roles.stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
     }
 
 }

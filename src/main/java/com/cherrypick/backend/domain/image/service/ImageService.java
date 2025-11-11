@@ -9,7 +9,6 @@ import com.cherrypick.backend.domain.image.dto.response.ImageUploadResponseDTO;
 import com.cherrypick.backend.domain.image.entity.Image;
 import com.cherrypick.backend.domain.image.enums.ImageType;
 import com.cherrypick.backend.domain.image.repository.ImageRepository;
-import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.util.AuthUtil;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
@@ -78,7 +77,7 @@ public class ImageService {
                 .orElseThrow(() -> new BaseException(ImageErrorCode.IMAGE_NOT_FOUND));
 
         // 권한 체크
-        boolean isAdmin = userDetails.role() == Role.ADMIN;
+        boolean isAdmin = userDetails.hasRole("ADMIN");
         boolean isOwner = false;
 
         if (image.getImageType() == ImageType.DEAL) {

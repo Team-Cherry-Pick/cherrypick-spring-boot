@@ -28,7 +28,6 @@ import static com.cherrypick.backend.domain.deal.adapter.out.RedisDuplicationPre
 
 import com.cherrypick.backend.domain.user.entity.Badge;
 import com.cherrypick.backend.domain.user.entity.User;
-import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.domain.user.repository.UserRepository;
 import com.cherrypick.backend.domain.user.vo.AuthorDTO;
 import com.cherrypick.backend.domain.vote.enums.VoteType;
@@ -204,7 +203,7 @@ public class DealService {
 
         // 작성자 또는 관리자 검증
         boolean isOwner = deal.getUser().getUserId().equals(userDetails.userId());
-        boolean isAdmin = userDetails.role() == Role.ADMIN;
+        boolean isAdmin = userDetails.hasRole("ADMIN");
 
         if (!isOwner && !isAdmin) {
             throw new BaseException(GlobalErrorCode.FORBIDDEN);
