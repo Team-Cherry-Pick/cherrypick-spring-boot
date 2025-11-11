@@ -3,7 +3,6 @@ package com.cherrypick.backend.domain.linkprice.service;
 import com.cherrypick.backend.domain.auth.domain.vo.AuthenticatedUser;
 import com.cherrypick.backend.domain.linkprice.dto.request.LinkPriceRequest;
 import com.cherrypick.backend.domain.linkprice.dto.response.LinkPriceResponse;
-import com.cherrypick.backend.domain.user.enums.Role;
 import com.cherrypick.backend.global.exception.BaseException;
 import com.cherrypick.backend.global.exception.enums.GlobalErrorCode;
 import com.cherrypick.backend.global.exception.enums.LinkPriceErrorCode;
